@@ -5,7 +5,6 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 // In-memory idempotency store (good enough for single-instance; swap for Redis in production)
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      event = Stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch {
       return NextResponse.json({ error: "Signature verification failed" }, { status: 400 });
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
@@ -47,6 +47,25 @@ function formatStatus(status: string) {
 }
 
 export default function OrderConfirmedPage() {
+  return (
+    <Suspense fallback={<OrderConfirmedFallback />}>
+      <OrderConfirmedContent />
+    </Suspense>
+  );
+}
+
+function OrderConfirmedFallback() {
+  return (
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <CustomerTopBar />
+      <main className="flex flex-1 items-center justify-center px-6 py-20">
+        <p className="text-sm text-slate-500">Loading order…</p>
+      </main>
+    </div>
+  );
+}
+
+function OrderConfirmedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useCustomerAuth();

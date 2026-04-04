@@ -2,12 +2,36 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<SignupFallback />}>
+      <SignupPageContent />
+    </Suspense>
+  );
+}
+
+function SignupFallback() {
+  return (
+    <div className="min-h-screen bg-white text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc]">
+      <div className="px-4 md:px-6">
+        <LandingHeader />
+      </div>
+      <main className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-12">
+        <p className="text-sm font-medium text-[#3e0074]/70">Loading…</p>
+      </main>
+      <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
+        <LandingFooter />
+      </div>
+    </div>
+  );
+}
+
+function SignupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialProfileParam = searchParams.get("profile");
