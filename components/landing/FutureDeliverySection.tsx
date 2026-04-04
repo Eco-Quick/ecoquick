@@ -1,6 +1,6 @@
 export function FutureDeliverySection() {
   return (
-    <section id="delivery" className="mt-20 border-t border-zinc-400 pt-12">
+    <section id="delivery" className="mt-20 border-t border-zinc-400 pt-12 dark:border-zinc-700">
       <div className="flex items-end justify-between gap-6">
         <div className="space-y-2">
           <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
@@ -66,13 +66,13 @@ export function FutureDeliverySection() {
         ].map((card) => (
           <div
             key={card.title}
-            className="rounded-none border border-zinc-200 bg-white p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+            className="group rounded-none border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3f0075]/20 hover:shadow-lg dark:border-zinc-700 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-accent group-hover:text-white">
                 {card.icon}
               </div>
-              <h3 className="text-sm font-extrabold uppercase tracking-[0.18em] text-zinc-900">
+              <h3 className="text-sm font-extrabold uppercase tracking-[0.18em] text-zinc-900 dark:text-zinc-100">
                 {card.title}
               </h3>
             </div>
@@ -91,8 +91,11 @@ export function FutureDeliverySection() {
             { top: "500K+", bottom: "Happy customers" },
             { top: "24/7", bottom: "Availability" },
           ].map((m) => (
-            <div key={m.top} className="text-center">
-              <p className="text-3xl font-extrabold tracking-tight md:text-4xl">
+            <div
+              key={m.top}
+              className="stat-hover-line group cursor-default text-center transition-transform duration-200 hover:-translate-y-1"
+            >
+              <p className="text-3xl font-extrabold tracking-tight transition-colors duration-200 group-hover:text-accent md:text-4xl">
                 {m.top}
               </p>
               <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">

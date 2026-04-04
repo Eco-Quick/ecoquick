@@ -13,7 +13,7 @@ export function LandingFooter() {
           </p>
           <div className="space-y-1 text-sm text-zinc-600">
             <p>Kingston upon Thames, London</p>
-            <p>hello@ecoquick.delivery</p>
+            <a href="mailto:hello@ecoquick.delivery" className="hover:text-zinc-900 transition-colors">hello@ecoquick.delivery</a>
           </div>
         </div>
 
@@ -73,13 +73,13 @@ export function LandingFooter() {
           © {new Date().getFullYear()} EcoQuick
         </p>
         <div className="flex items-center gap-5 font-semibold uppercase tracking-[0.22em]">
-          <a className="hover:text-zinc-900" href="#contact">
+          <a className="hover:text-zinc-900" href="https://instagram.com/ecoquickdelivery" target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
-          <a className="hover:text-zinc-900" href="#contact">
+          <a className="hover:text-zinc-900" href="https://twitter.com/ecoquickdelivery" target="_blank" rel="noopener noreferrer">
             Twitter
           </a>
-          <a className="hover:text-zinc-900" href="#contact">
+          <a className="hover:text-zinc-900" href="mailto:hello@ecoquick.delivery">
             Email
           </a>
         </div>

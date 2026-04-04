@@ -274,7 +274,7 @@ export default function AboutPage() {
                     Book your first delivery
                   </Link>
                   <Link
-                    href="/signup"
+                    href="/signup?profile=driver"
                     className="sharp-corners flex-1 border border-[#3e0074] px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-[#3e0074] transition-all hover:bg-[#3e0074] hover:text-white"
                   >
                     Become an eco driver

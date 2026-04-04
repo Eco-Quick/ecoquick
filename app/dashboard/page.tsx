@@ -1,13 +1,49 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { CustomerMobileNav } from "@/components/layout/CustomerMobileNav";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { createClient } from "@/lib/supabase/client";
+
+type Stats = {
+  active: number;
+  co2kg: number;
+  totalSpent: number;
+  completed: number;
+};
 
 export default function CustomerDashboardPage() {
   const router = useRouter();
-  const [customerName, setCustomerName] = useState<string | null>(null);
+  const user = useCustomerAuth();
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase
+      .from("delivery_orders")
+      .select("status, weight, total_price")
+      .eq("customer_id", user.id)
+      .then(({ data }) => {
+        if (!data) return;
+        const active = data.filter((o) =>
+          ["pending", "in_transit"].includes(o.status ?? "")
+        ).length;
+        const delivered = data.filter((o) => o.status === "delivered");
+        const co2kg = parseFloat(
+          delivered
+            .reduce((sum, o) => sum + (o.weight ?? 0) * 0.15, 0)
+            .toFixed(1)
+        );
+        const totalSpent = parseFloat(
+          data.reduce((sum, o) => sum + (o.total_price ?? 0), 0).toFixed(2)
+        );
+        const completed = delivered.length;
+        setStats({ active, co2kg, totalSpent, completed });
+      });
+  }, [user]);
 
   const scrollToId = (id: string) => {
     if (typeof window === "undefined") return;
@@ -17,24 +53,10 @@ export default function CustomerDashboardPage() {
     }
   };
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedName = window.sessionStorage.getItem("ecoquickCustomerName");
-
-    if (!storedName) {
-      router.replace("/login");
-      return;
-    }
-
-    setCustomerName(storedName);
-  }, [router]);
-
-  if (!customerName) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="page-fade min-h-screen overflow-x-hidden dashboard-grid-bg text-primary">
+    <div className="page-fade min-h-screen overflow-x-hidden dashboard-grid-bg text-primary dark:text-[#c084fc]">
       <CustomerTopBar />
 
       <main className="mx-auto min-h-screen max-w-6xl pb-16 lg:pb-20">
@@ -43,17 +65,17 @@ export default function CustomerDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/40">
               Customer dashboard
             </p>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-[#151018] sm:text-3xl">
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-[#151018] dark:text-[#ede9f8] sm:text-3xl">
               Welcome back,{" "}
-              <span>{customerName}</span>
+              <span>{user.name}</span>
             </h1>
-            <p className="mt-2 text-sm font-normal text-[#5a5a5a]">
+            <p className="mt-2 text-sm font-normal text-[#5a5a5a] dark:text-zinc-400">
               Create a new EcoQuick delivery or review your recent activity.
             </p>
 
             <div className="mt-6 inline-flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <button
-                className="inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
+                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
                 onClick={() => router.push("/book/type")}
               >
                 <span className="material-symbols-outlined text-base text-accent">
@@ -62,7 +84,7 @@ export default function CustomerDashboardPage() {
                 New delivery
               </button>
               <button
-                className="inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
+                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
                 onClick={() => router.push("/orders")}
               >
                 <span className="material-symbols-outlined text-base text-accent">
@@ -77,15 +99,15 @@ export default function CustomerDashboardPage() {
             <div className="pointer-events-none absolute right-[-120px] top-[-80px] hidden h-56 w-56 rounded-full border border-primary/20 sm:block lg:border-primary/30" />
             <div className="pointer-events-none absolute right-[-40px] bottom-[-80px] h-40 w-40 rounded-full border border-primary/20 sm:block lg:border-primary/30" />
             <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
-              <h2 className="text-lg font-semibold tracking-tight text-[#151018] sm:text-xl">
+              <h2 className="text-lg font-semibold tracking-tight text-[#151018] dark:text-[#ede9f8] sm:text-xl">
                 Ready for your next delivery?
               </h2>
-              <p className="text-sm font-normal leading-relaxed text-[#5a5a5a]">
+              <p className="text-sm font-normal leading-relaxed text-[#5a5a5a] dark:text-zinc-400">
                 Keep your parcels moving with fast, low-emission deliveries
                 across the city — optimized for time and carbon impact.
               </p>
               <button
-                className="btn-pill-primary inline-flex items-center justify-center px-10 py-3 text-[11px] font-semibold uppercase tracking-[0.24em]"
+                className="btn-pill-primary btn-press inline-flex items-center justify-center px-10 py-3 text-[11px] font-semibold uppercase tracking-[0.24em]"
                 onClick={() => router.push("/book/type")}
               >
                 Book now
@@ -107,22 +129,22 @@ export default function CustomerDashboardPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {/* Card 1 - light */}
-              <div className="flex flex-col justify-between rounded-lg border border-primary/10 bg-white p-4">
+              <div className="card-hover flex flex-col justify-between rounded-lg border border-primary/10 bg-white p-4 dark:bg-[#161027]">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/50">
                     Active deliveries
                   </span>
                   <span className="material-symbols-outlined text-base text-accent">
-                  inventory_2
-                </span>
+                    inventory_2
+                  </span>
                 </div>
-                <p className="mt-4 text-3xl font-semibold tracking-tight text-[#151018]">
-                  24
+                <p className="mt-4 text-3xl font-semibold tracking-tight text-[#151018] dark:text-[#ede9f8]">
+                  {stats ? stats.active : "—"}
                 </p>
-                <p className="mt-1 text-xs text-[#5a5a5a]">couriers currently on route</p>
+                <p className="mt-1 text-xs text-[#5a5a5a] dark:text-zinc-400">in progress right now</p>
               </div>
               {/* Card 2 - purple */}
-              <div className="flex flex-col justify-between rounded-lg border border-primary/10 bg-primary p-4 text-white">
+              <div className="card-hover flex flex-col justify-between rounded-lg border border-primary/10 bg-primary p-4 text-white">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70">
                     CO₂ offset
@@ -132,44 +154,44 @@ export default function CustomerDashboardPage() {
                   </span>
                 </div>
                 <p className="mt-4 text-3xl font-semibold tracking-tight">
-                  12.8kg
+                  {stats ? `${stats.co2kg}kg` : "—"}
                 </p>
                 <p className="mt-1 text-xs text-white/80">
-                  saved across your recent deliveries
+                  saved across your deliveries
                 </p>
               </div>
               {/* Card 3 - light */}
-              <div className="flex flex-col justify-between rounded-lg border border-primary/10 bg-white p-4">
+              <div className="card-hover flex flex-col justify-between rounded-lg border border-primary/10 bg-white p-4 dark:bg-[#161027]">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/50">
-                    Credit balance
+                    Total spent
                   </span>
                   <span className="material-symbols-outlined text-base text-accent">
                     payments
                   </span>
                 </div>
-                <p className="mt-4 text-3xl font-semibold tracking-tight text-[#151018]">
-                  £482
+                <p className="mt-4 text-3xl font-semibold tracking-tight text-[#151018] dark:text-[#ede9f8]">
+                  {stats ? `£${stats.totalSpent.toFixed(2)}` : "—"}
                 </p>
-                <p className="mt-1 text-xs text-[#5a5a5a]">
-                  available for upcoming bookings
+                <p className="mt-1 text-xs text-[#5a5a5a] dark:text-zinc-400">
+                  across all your bookings
                 </p>
               </div>
               {/* Card 4 - purple */}
-              <div className="flex flex-col justify-between rounded-lg border border-primary/10 bg-primary p-4 text-white">
+              <div className="card-hover flex flex-col justify-between rounded-lg border border-primary/10 bg-primary p-4 text-white">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70">
-                    Customer rating
+                    Completed
                   </span>
                   <span className="material-symbols-outlined text-base text-accent">
-                    star
+                    check_circle
                   </span>
                 </div>
                 <p className="mt-4 text-3xl font-semibold tracking-tight">
-                  4.9
+                  {stats ? stats.completed : "—"}
                 </p>
                 <p className="mt-1 text-xs text-white/80">
-                  based on your last 100 deliveries
+                  deliveries successfully delivered
                 </p>
               </div>
             </div>
@@ -183,14 +205,14 @@ export default function CustomerDashboardPage() {
                     Impact efficiency
                   </h3>
                   <div className="mt-3 flex items-baseline gap-3">
-                    <span className="text-4xl font-semibold tracking-tight text-[#151018] lg:text-5xl">
+                    <span className="text-4xl font-semibold tracking-tight text-[#151018] dark:text-[#ede9f8] lg:text-5xl">
                     85%
                   </span>
                     <span className="material-symbols-outlined text-xl text-accent lg:text-2xl">
                     energy_savings_leaf
                   </span>
                 </div>
-                  <p className="mt-2 max-w-md text-sm font-normal leading-relaxed text-[#5a5a5a]">
+                  <p className="mt-2 max-w-md text-sm font-normal leading-relaxed text-[#5a5a5a] dark:text-zinc-400">
                     Your deliveries are outperforming{" "}
                     <span className="font-semibold text-primary">
                       85% of regional benchmarks

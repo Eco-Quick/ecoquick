@@ -1,8 +1,29 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 
 export default function BusinessPage() {
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    companySize: "1–50 employees",
+    monthlyVolume: "< 1,000 pkgs",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const subject = encodeURIComponent("EcoQuick Business Partnership Enquiry");
+    const body = encodeURIComponent(
+      `Name: ${form.firstName} ${form.lastName}\nEmail: ${form.email}\nCompany size: ${form.companySize}\nMonthly volume: ${form.monthlyVolume}`
+    );
+    window.location.href = `mailto:hello@ecoquick.delivery?subject=${subject}&body=${body}`;
+    setSubmitted(true);
+  }
   return (
     <div className="landing-shell min-h-screen bg-white text-[#3e0074] antialiased">
       <div className="landing-grid-layer" />
@@ -13,14 +34,16 @@ export default function BusinessPage() {
 
       <main className="pt-16 md:pt-24">
         {/* Hero */}
-        <section className="pb-16 px-6 md:px-10 md:pb-24">
+        <section className="pb-10 px-6 md:px-10 md:pb-18">
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-6 md:grid-cols-12">
               <div className="col-span-12 lg:col-span-10">
                 <h1 className="satoshi-thin mb-8 text-[12vw] leading-[0.9] uppercase md:mb-12 md:text-[8vw]">
                   Scale With
                   <br />
-                  <span className="md:pl-[8vw]">Eco-Friendly</span>
+                  <span className="sm:whitespace-normal whitespace-nowrap">
+                    Eco-Friendly
+                  </span>
                   <br />
                   Delivery
                 </h1>
@@ -43,6 +66,30 @@ export default function BusinessPage() {
                   >
                     View solutions
                   </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Highlights row to avoid empty whitespace */}
+            <div className="mt-10 rounded-lg border border-[#3e0074]/10 bg-[rgba(62,0,116,0.04)] p-6 md:mt-12 md:p-8">
+              <div className="grid gap-8 md:grid-cols-3">
+                <div className="space-y-2">
+                  <p className="satoshi-thin text-4xl text-[#3e0074]">99.8%</p>
+                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70">
+                    On-time delivery
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="satoshi-thin text-4xl text-[#3e0074]">LEAD</p>
+                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70">
+                    Industry speed
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="satoshi-thin text-4xl text-[#3e0074]">24/7</p>
+                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70">
+                    Availability
+                  </p>
                 </div>
               </div>
             </div>
@@ -169,7 +216,7 @@ export default function BusinessPage() {
               {[
                 {
                   title: "Starter",
-                  price: "$0",
+                  price: "£0",
                   period: "/ month",
                   features: ["Pay-as-you-go rates", "Standard 9–5 support", "Basic analytics"],
                   cta: "Start free",
@@ -177,7 +224,7 @@ export default function BusinessPage() {
                 },
                 {
                   title: "Professional",
-                  price: "$499",
+                  price: "£499",
                   period: "/ month",
                   features: ["Priority 24/7 support", "Advanced analytics", "5 team seats"],
                   cta: "Upgrade now",
@@ -265,62 +312,104 @@ export default function BusinessPage() {
                 </p>
               </div>
               <div className="lg:col-span-7">
-                <form className="space-y-8">
-                  <div className="grid gap-8 sm:grid-cols-2">
-                    {["First name", "Last name"].map((label) => (
-                      <div key={label} className="group flex flex-col gap-2">
+                {submitted ? (
+                  <div className="flex flex-col gap-4 py-12">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#3e0074]/60">
+                      Request sent
+                    </p>
+                    <p className="text-2xl font-light text-[#3e0074]">
+                      Thank you! We&apos;ll be in touch within 1 business day.
+                    </p>
+                    <button
+                      onClick={() => setSubmitted(false)}
+                      className="mt-4 self-start text-[10px] font-bold uppercase tracking-[0.2em] opacity-50 hover:opacity-100"
+                    >
+                      Submit another
+                    </button>
+                  </div>
+                ) : (
+                  <form className="space-y-8" onSubmit={handleSubmit}>
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      <div className="group flex flex-col gap-2">
                         <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
-                          {label}
+                          First name
                         </label>
                         <input
                           type="text"
-                          placeholder={label === "First name" ? "Jane" : "Doe"}
+                          required
+                          placeholder="Jane"
+                          value={form.firstName}
+                          onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
                           className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none"
                         />
                       </div>
-                    ))}
-                  </div>
-                  <div className="group flex flex-col gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
-                      Work email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="jane@company.com"
-                      className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none"
-                    />
-                  </div>
-                  <div className="grid gap-8 sm:grid-cols-2">
-                    <div className="group flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                        Company size
-                      </label>
-                      <select className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none">
-                        <option>1–50 employees</option>
-                        <option>51–200 employees</option>
-                        <option>201–1000 employees</option>
-                        <option>1000+ employees</option>
-                      </select>
+                      <div className="group flex flex-col gap-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
+                          Last name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Doe"
+                          value={form.lastName}
+                          onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none"
+                        />
+                      </div>
                     </div>
                     <div className="group flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                        Monthly volume
+                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
+                        Work email
                       </label>
-                      <select className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none">
-                        <option>&lt; 1,000 pkgs</option>
-                        <option>1k – 10k pkgs</option>
-                        <option>10k – 50k pkgs</option>
-                        <option>50k+ pkgs</option>
-                      </select>
+                      <input
+                        type="email"
+                        required
+                        placeholder="jane@company.com"
+                        value={form.email}
+                        onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                        className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none"
+                      />
                     </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="sharp-corners border border-[#3e0074] bg-[#3e0074] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-all hover:bg-black"
-                  >
-                    Submit request
-                  </button>
-                </form>
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      <div className="group flex flex-col gap-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
+                          Company size
+                        </label>
+                        <select
+                          value={form.companySize}
+                          onChange={(e) => setForm((f) => ({ ...f, companySize: e.target.value }))}
+                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none"
+                        >
+                          <option>1–50 employees</option>
+                          <option>51–200 employees</option>
+                          <option>201–1000 employees</option>
+                          <option>1000+ employees</option>
+                        </select>
+                      </div>
+                      <div className="group flex flex-col gap-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
+                          Monthly volume
+                        </label>
+                        <select
+                          value={form.monthlyVolume}
+                          onChange={(e) => setForm((f) => ({ ...f, monthlyVolume: e.target.value }))}
+                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none"
+                        >
+                          <option>&lt; 1,000 pkgs</option>
+                          <option>1k – 10k pkgs</option>
+                          <option>10k – 50k pkgs</option>
+                          <option>50k+ pkgs</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="sharp-corners border border-[#3e0074] bg-[#3e0074] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-all hover:bg-black"
+                    >
+                      Submit request
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </div>

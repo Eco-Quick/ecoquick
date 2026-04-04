@@ -1,10 +1,11 @@
- "use client";
+"use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 const BoltIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="shrink-0" aria-hidden>
@@ -32,22 +33,37 @@ const ArrowEastIcon = () => (
 );
 
 export default function BookTypePage() {
+  const user = useCustomerAuth();
   const router = useRouter();
-  const [allowed, setAllowed] = useState(false);
+  const [selected, setSelected] = useState<"instant" | "scheduled" | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const name = window.sessionStorage.getItem("ecoquickCustomerName");
-    if (!name) {
-      router.replace("/login");
-      return;
-    }
-    setAllowed(true);
-  }, [router]);
+    try {
+      const saved = sessionStorage.getItem("deliveryRequest");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.deliveryType) setSelected(parsed.deliveryType);
+      }
+    } catch {}
+    setHydrated(true);
+  }, []);
 
-  if (!allowed) {
-    return null;
+  function selectType(type: "instant" | "scheduled") {
+    setSelected(type);
   }
+
+  function handleContinue() {
+    const type = selected ?? "instant";
+    try {
+      const saved = sessionStorage.getItem("deliveryRequest");
+      const data = saved ? JSON.parse(saved) : {};
+      sessionStorage.setItem("deliveryRequest", JSON.stringify({ ...data, deliveryType: type }));
+    } catch {}
+    router.push("/book/route");
+  }
+
+  if (!user || !hydrated) return null;
   return (
     <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <CustomerTopBar />
@@ -69,12 +85,17 @@ export default function BookTypePage() {
             </div>
           </div>
 
-        {/* Content */}
+          {/* Content */}
           <div className="bg-white px-6 py-10 md:px-10 md:py-12">
             <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-              <Link
-                href="/book/route"
-                className="group flex h-full flex-col border-2 border-slate-100 bg-slate-50 p-8 text-left transition-all hover:border-slate-300"
+              <button
+                onClick={() => selectType("instant")}
+                className={[
+                  "card-hover group flex h-full flex-col border-2 p-8 text-left transition-all active:scale-[0.98]",
+                  selected === "instant"
+                    ? "border-primary bg-primary/5"
+                    : "border-slate-100 bg-slate-50 hover:border-slate-300",
+                ].join(" ")}
               >
                 <div className="mb-6 flex w-full justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white">
@@ -98,11 +119,16 @@ export default function BookTypePage() {
                     Couriers available now
                   </span>
                 </div>
-              </Link>
+              </button>
 
-              <Link
-                href="/book/route"
-                className="group flex h-full flex-col border-2 border-slate-100 bg-slate-50 p-8 text-left transition-all hover:border-slate-300"
+              <button
+                onClick={() => selectType("scheduled")}
+                className={[
+                  "card-hover group flex h-full flex-col border-2 p-8 text-left transition-all active:scale-[0.98]",
+                  selected === "scheduled"
+                    ? "border-primary bg-primary/5"
+                    : "border-slate-100 bg-slate-50 hover:border-slate-300",
+                ].join(" ")}
               >
                 <div className="mb-6 flex w-full justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white">
@@ -121,7 +147,7 @@ export default function BookTypePage() {
                     Book up to 14 days ahead
                   </span>
                 </div>
-              </Link>
+              </button>
             </div>
 
             <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6">
@@ -135,15 +161,15 @@ export default function BookTypePage() {
                 Back
               </Link>
 
-              <Link
-                href="/book/route"
-                className="flex items-center gap-3 bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-black"
+              <button
+                onClick={handleContinue}
+                className="btn-press btn-sweep flex items-center gap-3 bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-black"
               >
                 Continue
                 <span className="text-accent">
                   <ArrowEastIcon />
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -151,4 +177,3 @@ export default function BookTypePage() {
     </div>
   );
 }
-

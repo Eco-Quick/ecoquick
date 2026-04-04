@@ -1,7 +1,8 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function DriverDashboardPage() {
   const router = useRouter();
@@ -10,14 +11,12 @@ export default function DriverDashboardPage() {
   const [driverName, setDriverName] = useState<string>("EcoQuick Driver");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const storedDriverName =
-      window.sessionStorage.getItem("ecoquickDriverName");
-
-    if (storedDriverName) {
-      setDriverName(storedDriverName);
-    }
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.user_metadata?.full_name) {
+        setDriverName(user.user_metadata.full_name);
+      }
+    });
   }, []);
 
   const handleNotificationsClick = () => {

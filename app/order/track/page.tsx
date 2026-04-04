@@ -1,27 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 export default function OrderTrackPage() {
   const router = useRouter();
-  const [customerName, setCustomerName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const name = window.sessionStorage.getItem("ecoquickCustomerName");
-    if (!name) {
-      router.replace("/login");
-      return;
-    }
-    setCustomerName(name);
-  }, [router]);
-
-  if (!customerName) {
-    return null;
-  }
+  const user = useCustomerAuth();
+  if (!user) return null;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white text-primary">

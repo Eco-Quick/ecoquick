@@ -1,39 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DriverLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedDriverEmail = window.sessionStorage.getItem(
-      "ecoquickDriverEmail",
-    );
-    if (!storedDriverEmail) {
-      router.replace("/login");
-    }
-  }, [router]);
-
   const isActive = (href: string) => pathname === href;
 
-  const handleSignOut = () => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.removeItem("ecoquickDriverEmail");
-      window.sessionStorage.removeItem("ecoquickDriverName");
-      window.sessionStorage.removeItem("ecoquickCustomerName");
-      window.sessionStorage.removeItem("ecoquickCustomerEmail");
-    }
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/");
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-slate-900">
-      <aside className="fixed inset-y-0 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
+    <div className="flex min-h-screen bg-gray-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+      <aside className="fixed inset-y-0 hidden w-64 flex-col border-r border-slate-200 bg-white dark:border-zinc-800 dark:bg-[#0d0916] lg:flex">
         <div className="p-8">
           <div className="mb-12">
             <BrandLogo size="sm" labelSuffix="Driver" />
@@ -131,9 +118,10 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
             </div>
           </nav>
         </div>
-        <div className="mt-auto border-t border-slate-200 p-8">
+        <div className="mt-auto border-t border-slate-200 dark:border-zinc-800 p-8 space-y-4">
+          <ThemeToggle className="w-full justify-start gap-3 px-3 h-10 rounded-none" />
           <button
-            className="flex w-full items-center gap-3 text-sm font-medium text-slate-500 transition-colors hover:text-red-600"
+            className="flex w-full items-center gap-3 text-sm font-medium text-slate-500 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
             onClick={handleSignOut}
           >
             <span className="material-symbols-outlined text-xl">logout</span>
@@ -144,7 +132,7 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
 
       <main className="flex-1 lg:ml-64">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-primary/20 bg-white px-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-700 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-primary/20 bg-white px-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-700 dark:border-zinc-800 dark:bg-[#0d0916] dark:text-zinc-400 lg:hidden">
         <button
           className={`flex flex-col items-center gap-0.5 ${
             isActive("/driver") ? "text-primary" : "opacity-70"

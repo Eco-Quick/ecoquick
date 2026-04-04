@@ -2,18 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.removeItem("ecoquickCustomerName");
-      window.sessionStorage.removeItem("ecoquickCustomerEmail");
-    }
-    router.replace("/login");
+    const supabase = createClient();
+    supabase.auth.signOut().then(() => {
+      router.replace("/login");
+    });
   }, [router]);
 
   return null;
 }
-

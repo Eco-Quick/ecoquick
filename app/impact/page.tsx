@@ -1,64 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CustomerSidebar } from "@/components/layout/CustomerSidebar";
+import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { CustomerMobileNav } from "@/components/layout/CustomerMobileNav";
-import { BrandLogo } from "@/components/layout/BrandLogo";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 export default function ImpactReportPage() {
-  const router = useRouter();
-  const [customerName, setCustomerName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const name = window.sessionStorage.getItem("ecoquickCustomerName");
-    if (!name) {
-      router.replace("/login");
-      return;
-    }
-    setCustomerName(name);
-  }, [router]);
-
-  if (!customerName) return null;
+  const user = useCustomerAuth();
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white text-slate-900">
-      <CustomerSidebar />
-      <div className="flex min-h-screen flex-col bg-white text-slate-900 lg:ml-64">
-      {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-primary bg-white px-8 py-4">
-        <BrandLogo size="sm" />
-        <nav className="hidden items-center gap-10 md:flex text-xs font-bold uppercase tracking-[0.22em]">
-          <Link
-            href="/order/track"
-            className="border-b-2 border-transparent text-slate-500 transition-colors hover:border-primary hover:text-primary"
-          >
-            Live Fleet
-          </Link>
-          <span className="border-b-2 border-primary text-primary">
-            Impact Report
-          </span>
-          <Link
-            href="/business"
-            className="border-b-2 border-transparent text-slate-500 transition-colors hover:border-primary hover:text-primary"
-          >
-            Partnerships
-          </Link>
-        </nav>
-        <div className="flex items-center gap-4">
-          <span className="bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase">
-            System: Optimal
-          </span>
-          <button
-            className="bg-primary px-6 py-2 text-xs font-bold uppercase tracking-[0.22em] text-white sharp-edge hover:bg-black"
-            onClick={() => router.push("/dashboard")}
-          >
-            Dashboard
-          </button>
-        </div>
-      </header>
+    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900">
+      <CustomerTopBar />
 
       <main className="flex flex-1 flex-col">
         {/* Hero / heading */}
@@ -319,7 +271,6 @@ export default function ImpactReportPage() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-primary px-8 py-12 text-white">
         <div className="mx-auto flex max-w-screen-2xl flex-col gap-12 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
@@ -417,9 +368,9 @@ export default function ImpactReportPage() {
           </span>
         </div>
       </footer>
+
+      <CustomerMobileNav />
     </div>
-    <CustomerMobileNav />
-  </div>
   );
 }
 

@@ -1,82 +1,90 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [welcomeName, setWelcomeName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
+  // Hydrate remembered email preference
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const existingCustomerName =
-      window.sessionStorage.getItem("ecoquickCustomerName");
-    const existingDriverEmail =
-      window.sessionStorage.getItem("ecoquickDriverEmail");
-
-    if (existingCustomerName) {
-      router.replace("/dashboard");
-      return;
+    try {
+      const stored = window.localStorage.getItem("ecoquickRememberEmail");
+      if (stored) {
+        setEmail(stored);
+        setRememberMe(true);
+      }
+    } catch {
+      // ignore storage errors
     }
+  }, []);
 
-    if (existingDriverEmail) {
-      router.replace("/driver");
-      return;
-    }
-  }, [router]);
-
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: { preventDefault(): void }) => {
     event.preventDefault();
     setError(null);
+    setLoading(true);
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
 
-    const customerEmail = "sam@gmail.com";
-    const customerPassword = "test@123";
-    const customerName = "Sam Daniel";
+    setLoading(false);
 
-    const driverEmail = "driver@gmail.com";
-    const driverPassword = "test@123";
-    const driverName = "EcoQuick Driver";
-
-    if (normalizedEmail === driverEmail && password === driverPassword) {
-      setWelcomeName(driverName);
-      setError(null);
-
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem("ecoquickDriverEmail", driverEmail);
-        window.sessionStorage.setItem("ecoquickDriverName", driverName);
-      }
-
-      router.push("/driver");
-    } else if (
-      normalizedEmail === customerEmail &&
-      password === customerPassword
-    ) {
-      setWelcomeName(customerName);
-      setError(null);
-
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem("ecoquickCustomerName", customerName);
-        window.sessionStorage.setItem("ecoquickCustomerEmail", customerEmail);
-      }
-
-      router.push("/dashboard");
-    } else {
-      setWelcomeName(null);
-      setError("Invalid email or password. Try the demo account.");
+    if (error) {
+      setError(error.message);
+      return;
     }
+
+    // Persist email locally when "Remember me" is on
+    try {
+      if (rememberMe) {
+        window.localStorage.setItem("ecoquickRememberEmail", email.trim().toLowerCase());
+      } else {
+        window.localStorage.removeItem("ecoquickRememberEmail");
+      }
+    } catch {
+      // ignore storage errors
+    }
+
+    const role = data.user?.user_metadata?.role;
+    router.push(role === "driver" ? "/driver" : "/dashboard");
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError("Enter your email address above, then click 'Forgot password?'");
+      return;
+    }
+    setForgotLoading(true);
+    setError(null);
+    const supabase = createClient();
+    await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/account/settings`,
+    });
+    setForgotLoading(false);
+    setForgotSent(true);
+    setForgotMode(false);
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fcfaff] text-[#3e0074]">
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-6">
+    <div className="flex min-h-screen flex-col bg-[#fcfaff] text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc]">
+      <div className="px-5 sm:px-6">
         <LandingHeader />
       </div>
 
@@ -86,10 +94,7 @@ export default function LoginPage() {
             Welcome back
           </h1>
 
-
-
-
-          <div className="sharp-corners w-full bg-white p-8 shadow-[0_20px_50px_rgba(62,0,116,0.05)] md:p-12">
+          <div className="sharp-corners w-full bg-white p-8 shadow-[0_20px_50px_rgba(62,0,116,0.05)] dark:bg-[#161027] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] md:p-12">
             <div className="mb-8">
               <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#3e0074]/40">
                 Login
@@ -99,12 +104,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {welcomeName && (
-              <div className="mb-4 rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
-                Signed in as {welcomeName}.
-              </div>
-            )}
-            {error && !welcomeName && (
+            {error && (
               <div className="mb-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
                 {error}
               </div>
@@ -139,8 +139,9 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@company.com"
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0"
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#0d0916] dark:border-[#4c1d95]/50 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/30 dark:focus:border-[#c084fc]"
                   />
                 </div>
               </div>
@@ -170,12 +171,20 @@ export default function LoginPage() {
                   </span>
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0"
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#0d0916] dark:border-[#4c1d95]/50 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/30 dark:focus:border-[#c084fc]"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3e0074]/70 hover:text-[#3e0074]"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
                 </div>
               </div>
 
@@ -183,6 +192,8 @@ export default function LoginPage() {
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074]"
                   />
                   <span className="text-[11px] font-bold uppercase tracking-[0.16em]">
@@ -191,17 +202,28 @@ export default function LoginPage() {
                 </label>
                 <button
                   type="button"
-                  className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3e0074] underline-offset-4 hover:underline"
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading}
+                  className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3e0074] underline-offset-4 hover:underline disabled:opacity-50"
                 >
-                  Forgot password?
+                  {forgotLoading ? "Sending…" : "Forgot password?"}
                 </button>
               </div>
 
+              {forgotSent && (
+                <div className="rounded border border-green-300 bg-green-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-green-700">
+                  Reset link sent — check your inbox.
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="group sharp-corners relative w-full overflow-hidden bg-[#3e0074] py-4 text-xs font-bold uppercase tracking-[0.22em] text-white"
+                disabled={loading}
+                className="btn-press btn-sweep group sharp-corners relative w-full overflow-hidden bg-[#3e0074] py-4 text-xs font-bold uppercase tracking-[0.22em] text-white disabled:opacity-60"
               >
-                <span className="relative z-10">Sign in</span>
+                <span className="relative z-10">
+                  {loading ? "Signing in…" : "Sign in"}
+                </span>
                 <div className="absolute bottom-0 left-0 h-1 w-full translate-y-full bg-[#ff9b16] transition-transform duration-300 group-hover:translate-y-0" />
                 <div className="absolute right-0 top-0 h-full w-1 bg-[#ff9b16]/60" />
               </button>
@@ -247,10 +269,9 @@ export default function LoginPage() {
         </div>
       </main>
 
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-6">
+      <div className="px-5 sm:px-6">
         <LandingFooter />
       </div>
     </div>
   );
 }
-

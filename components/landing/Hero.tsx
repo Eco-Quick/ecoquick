@@ -1,12 +1,22 @@
  "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function HeroSection() {
+  const router = useRouter();
   const [deliveredText, setDeliveredText] = useState("");
   const [instantlyText, setInstantlyText] = useState("");
   const deliveredComplete = deliveredText === "Delivered";
+  const [kicked, setKicked] = useState<"driver" | "customer" | null>(null);
+
+  function handleClick(target: "customer" | "driver") {
+    const kickSide = target === "customer" ? "driver" : "customer";
+    setKicked(kickSide);
+    setTimeout(() => {
+      router.push(target === "customer" ? "/signup?profile=customer" : "/signup?profile=driver");
+    }, 300);
+  }
 
   useEffect(() => {
     const fullDelivered = "Delivered";
@@ -32,23 +42,18 @@ export function HeroSection() {
   return (
     <section className="hero-fade relative flex flex-col items-center text-center">
       <div className="hero-chip-fade mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
-        <span className="inline-flex items-center gap-2">
-          <span className="h-1 w-1 rounded-full bg-accent" />
-          Live tracking
-        </span>
-        <span className="text-zinc-300">•</span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-1 w-1 rounded-full bg-accent" />
-          Quick delivery
-        </span>
-        <span className="text-zinc-300">•</span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-1 w-1 rounded-full bg-accent" />
-          Zero emissions
-        </span>
+        {["Live tracking", "Quick delivery", "Zero emissions"].map((label, i) => (
+          <span key={label} className="contents">
+            {i > 0 && <span className="text-zinc-300">•</span>}
+            <span className="inline-flex cursor-default items-center gap-2 rounded-full border border-transparent px-3 py-1 transition-all duration-200 hover:scale-105 hover:border-[#3f0075]/30 hover:bg-[#3f0075]/5 hover:text-[#3f0075]">
+              <span className="h-1 w-1 rounded-full bg-accent transition-colors duration-200" />
+              {label}
+            </span>
+          </span>
+        ))}
       </div>
 
-      <h1 className="mt-6 sm:mt-8 md:mt-10 text-balance text-5xl uppercase leading-[0.92] tracking-tight text-[#3f0075] sm:text-6xl md:text-7xl lg:text-8xl">
+      <h1 className="mt-6 sm:mt-8 md:mt-10 text-balance text-4xl uppercase leading-[0.9] tracking-tight text-[#3f0075] sm:text-5xl md:text-6xl lg:text-7xl">
         <span className="block">Why wait?</span>
         <span className="block">Get your parcels</span>
         <span className="block font-black text-[#3f0075]">
@@ -65,20 +70,39 @@ export function HeroSection() {
 
       <div
         id="get-started"
-        className="hero-buttons-fade mt-6 sm:mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-4"
+        className="hero-buttons-fade mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
       >
-        <Link
-          href="/signup"
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[#3f0075] px-7 text-xs font-semibold uppercase tracking-[0.25em] text-white transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#2f005a] hover:shadow-lg"
+        {/* Primary CTA */}
+        <button
+          onClick={() => handleClick("customer")}
+          className={[
+            "group relative overflow-hidden flex items-center gap-4 bg-[#3f0075] px-12 py-5 text-[11px] font-bold uppercase tracking-[0.26em] text-white",
+            "shadow-[0_6px_28px_rgba(63,0,117,0.38),0_2px_8px_rgba(63,0,117,0.22)] hover:shadow-[0_12px_40px_rgba(63,0,117,0.55),0_4px_12px_rgba(63,0,117,0.3)] hover:-translate-y-0.5 hover:bg-[#360069]",
+            kicked === "customer" ? "btn-kick-left" : "transition-all duration-300",
+            kicked === "driver" ? "btn-launch" : "",
+          ].join(" ")}
         >
-          Start now
-        </Link>
-        <Link
-          href="/login"
-          className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-200 bg-white px-7 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-900 transition-transform duration-300 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md"
+          {/* top-edge highlight for depth */}
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/20" aria-hidden />
+          <span className="relative z-10">Deliver a parcel</span>
+          <span className="relative z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#ff9b16] text-[13px] text-white transition-transform duration-300 group-hover:scale-110 group-hover:translate-x-0.5">
+            →
+          </span>
+        </button>
+
+        {/* Secondary CTA */}
+        <button
+          onClick={() => handleClick("driver")}
+          className={[
+            "group flex items-center gap-4 border border-zinc-300 bg-white px-12 py-5 text-[11px] font-bold uppercase tracking-[0.26em] text-zinc-600",
+            "hover:-translate-y-0.5 hover:border-zinc-400 hover:text-zinc-900 hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)]",
+            kicked === "driver" ? "btn-kick-right" : "transition-all duration-300",
+            kicked === "customer" ? "btn-launch" : "",
+          ].join(" ")}
         >
-          Deliver a parcel
-        </Link>
+          <span>Become a driver</span>
+          <span className="text-zinc-300 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-zinc-700">→</span>
+        </button>
       </div>
 
       {/* Bike animation – full-width lined road */}

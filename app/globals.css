@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   scroll-behavior: smooth;
 }
@@ -7,6 +10,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.dark {
+  --background: #0d0916;
+  --foreground: #ede9f8;
 }
 
 @theme inline {
@@ -248,17 +256,19 @@ body {
 }
 
 .page-fade {
-  animation: pageFadeIn 320ms ease-out both;
+  animation: pageFadeIn 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(18px) scale(0.985);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -290,6 +300,107 @@ body {
   transform: translateY(-1px);
 }
 
+.btn-pill-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 3px 8px rgba(62, 0, 116, 0.1);
+}
+
+/* Tactile press feedback + ripple for primary action buttons */
+.btn-press {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 140ms ease-out,
+    opacity 140ms ease-out !important;
+}
+
+.btn-press:active {
+  transform: scale(0.95) !important;
+  opacity: 0.85 !important;
+}
+
+.btn-press::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(0);
+}
+
+.btn-press:active::after {
+  animation: btn-ripple 500ms ease-out forwards;
+}
+
+@keyframes btn-ripple {
+  from {
+    opacity: 0.5;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+
+/* Card hover lift */
+.card-hover {
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(62, 0, 116, 0.13);
+}
+
+/* Background sweep on hover — premium button effect */
+.btn-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-sweep::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: skewX(-15deg);
+  transition: left 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.btn-sweep:hover::before {
+  left: 130%;
+}
+
+/* Mobile nav icon bounce on tap */
+.mobile-nav-tap {
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav-tap:active {
+  transform: scale(1.2) translateY(-2px);
+}
+
+.mobile-nav-tap[data-active="true"] {
+  transform: scale(1.1) translateY(-2px);
+}
+
 .text-outline-primary {
   color: #ffffff;
   -webkit-text-stroke: 3px #3e0074;
@@ -298,36 +409,49 @@ body {
 
 .nav-tab {
   position: relative;
-  padding-bottom: 0.5rem;
+  padding: 5px 12px;
+  border-radius: 8px;
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out,
+    transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-tab:hover {
+  background-color: rgba(62, 0, 116, 0.07);
+}
+
+.nav-tab:active {
+  transform: scale(0.94);
+}
+
+.nav-tab-active {
+  background-color: rgba(62, 0, 116, 0.1);
 }
 
 .nav-tab::after {
   content: "";
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 0px;
   border-radius: 9999px;
   background-color: #3e0075;
   opacity: 0;
   transition:
-    width 150ms ease-out,
-    opacity 150ms ease-out,
-    transform 150ms ease-out;
+    height 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 180ms ease-out;
 }
 
 .nav-tab:hover::after {
-  width: 45%;
-  opacity: 0.7;
+  height: 2px;
+  opacity: 0.5;
 }
 
 .nav-tab-active::after {
-  width: 80%;
   height: 3px;
   opacity: 1;
-  bottom: 0;
 }
 
 @keyframes bike-ride {
@@ -342,4 +466,131 @@ body {
 .animate-bike-ride {
   animation: bike-ride 12s linear infinite;
 }
+
+@keyframes kick-right {
+  0%   { transform: translateX(0)    rotate(0deg)  scale(1);    opacity: 1; }
+  40%  { transform: translateX(18px) rotate(6deg)  scale(0.95); opacity: 0.7; }
+  100% { transform: translateX(72px) rotate(14deg) scale(0.85); opacity: 0; }
+}
+
+@keyframes kick-left {
+  0%   { transform: translateX(0)     rotate(0deg)   scale(1);    opacity: 1; }
+  40%  { transform: translateX(-18px) rotate(-6deg)  scale(0.95); opacity: 0.7; }
+  100% { transform: translateX(-72px) rotate(-14deg) scale(0.85); opacity: 0; }
+}
+
+.btn-kick-right {
+  animation: kick-right 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+
+.btn-kick-left {
+  animation: kick-left 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes btn-launch {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.93); }
+  70%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.btn-launch {
+  animation: btn-launch 280ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Stats band hover underline */
+.stat-hover-line {
+  position: relative;
+}
+
+.stat-hover-line::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 0;
+  background: #ff9b16;
+  border-radius: 9999px;
+  transition: width 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stat-hover-line:hover::after {
+  width: 60%;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dark .landing-grid-layer {
+  opacity: 0.08;
+  mix-blend-mode: screen;
+}
+
+.dark .nav-tab:hover {
+  background-color: rgba(192, 132, 252, 0.08);
+}
+
+.dark .nav-tab-active {
+  background-color: rgba(192, 132, 252, 0.12);
+}
+
+.dark .nav-tab::after {
+  background-color: #c084fc;
+}
+
+.dark .timeline-line { background-color: #7c3aed; }
+.dark .timeline-dot { border-color: #7c3aed; background-color: #0d0916; }
+.dark .timeline-dot.active { background-color: #7c3aed; color: #ffffff; }
+.dark .timeline-dot.pending { border-color: #3d2d70; background-color: #0d0916; }
+
+.dark .dashboard-grid-bg {
+  background-color: #0d0916;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(192, 132, 252, 0.06) 1px, transparent 0),
+    radial-gradient(circle at 3px 4px, rgba(62, 0, 117, 0.1) 1px, transparent 0);
+}
+
+.dark .map-bg {
+  background-color: #1a1030;
+  background-image: radial-gradient(circle at 2px 2px, #2d2050 1px, transparent 0.5px);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 16px 36px rgba(192, 132, 252, 0.1);
+}
+
+.dark .text-primary { color: #c084fc; }
+.dark .border-primary { border-color: #4c1d95; }
+.dark .bg-primary { background-color: #3f0075; }
+
+/* Catch-all: surfaces and text that use hardcoded light values */
+.dark .bg-white { background-color: #161027; }
+.dark .bg-zinc-50 { background-color: #0d0916; }
+.dark .bg-gray-50 { background-color: #0d0916; }
+.dark .bg-slate-50 { background-color: #0d0916; }
+.dark .text-zinc-900 { color: #ede9f8; }
+.dark .text-zinc-800 { color: #d8d0f0; }
+.dark .text-slate-900 { color: #ede9f8; }
+.dark .text-slate-800 { color: #d8d0f0; }
+.dark .text-zinc-600 { color: #a78bbd; }
+.dark .text-zinc-500 { color: #8b7aaa; }
+.dark .text-slate-600 { color: #a78bbd; }
+.dark .text-slate-500 { color: #8b7aaa; }
+.dark .text-zinc-400 { color: #7c6d99; }
+.dark .text-slate-400 { color: #7c6d99; }
+.dark .border-zinc-200 { border-color: #2d2050; }
+.dark .border-zinc-300 { border-color: #3d2d70; }
+.dark .border-slate-200 { border-color: #2d2050; }
+.dark .border-gray-200 { border-color: #2d2050; }
+.dark .border-gray-100 { border-color: #231840; }
 
