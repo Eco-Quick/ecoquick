@@ -1,15 +1,21 @@
+"use client";
+
+import { Reveal } from "@/components/Reveal";
+
 export function FutureDeliverySection() {
   return (
     <section id="delivery" className="mt-20 border-t border-zinc-400 pt-12 dark:border-zinc-700">
-      <div className="flex items-end justify-between gap-6">
-        <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
-            02 / The future of delivery
-          </p>
+      <Reveal animation="fade">
+        <div className="flex items-end justify-between gap-6">
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+              02 / The future of delivery
+            </p>
+          </div>
         </div>
-      </div>
+      </Reveal>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <Reveal animation="up" stagger className="mt-8 grid gap-4 md:grid-cols-3">
         {[
           {
             title: "Instant delivery",
@@ -66,7 +72,7 @@ export function FutureDeliverySection() {
         ].map((card) => (
           <div
             key={card.title}
-            className="group rounded-none border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3f0075]/20 hover:shadow-lg dark:border-zinc-700 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
+            className="reveal-up group rounded-none border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3f0075]/20 hover:shadow-lg dark:border-zinc-700 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-accent group-hover:text-white">
@@ -76,14 +82,14 @@ export function FutureDeliverySection() {
                 {card.title}
               </h3>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+            <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {card.body}
             </p>
           </div>
         ))}
-      </div>
+      </Reveal>
 
-      <div className="mt-12 -mx-5 bg-[#3f0075] px-5 py-10 text-white sm:-mx-6 sm:px-6">
+      <Reveal animation="scale" className="mt-12 -mx-5 bg-[#3f0075] px-5 py-10 text-white sm:-mx-6 sm:px-6">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4 md:gap-10">
           {[
             { top: "99.8%", bottom: "On-time delivery" },
@@ -104,7 +110,7 @@ export function FutureDeliverySection() {
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

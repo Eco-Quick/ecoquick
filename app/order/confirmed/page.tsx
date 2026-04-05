@@ -56,7 +56,7 @@ export default function OrderConfirmedPage() {
 
 function OrderConfirmedFallback() {
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
       <main className="flex flex-1 items-center justify-center px-6 py-20">
         <p className="text-sm text-slate-500">Loading order…</p>
@@ -106,10 +106,10 @@ function OrderConfirmedContent() {
 
   if (fetchError) {
     return (
-      <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
         <CustomerTopBar />
         <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <span className="material-symbols-outlined mb-4 text-5xl text-slate-300">
+          <span className="material-symbols-outlined mb-4 text-5xl text-slate-300 dark:text-zinc-700">
             receipt_long
           </span>
           <h1 className="mb-2 text-xl font-black uppercase tracking-tight text-primary">
@@ -141,11 +141,11 @@ function OrderConfirmedContent() {
     : "—";
 
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       {/* Main */}
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-white px-6 py-16 md:py-20">
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-white dark:bg-[#161027] px-6 py-16 md:py-20">
         <div className="architectural-grid pointer-events-none absolute inset-0" />
         <div className="relative z-10 w-full max-w-xl text-center">
           <div className="mb-8 flex justify-center">
@@ -165,8 +165,8 @@ function OrderConfirmedContent() {
           </p>
 
           {/* Order summary card */}
-          <div className="mb-8 border border-primary/10 bg-primary/5 p-1">
-            <div className="border border-primary/5 bg-white p-6 text-left">
+          <div className="mb-8 border border-primary/10 bg-primary/5 dark:bg-[#c084fc]/5 p-1">
+            <div className="border border-primary/5 bg-white dark:bg-[#0d0916] p-6 text-left">
               {/* Status + ID */}
               <div className="mb-6 flex items-start justify-between border-b border-slate-100 pb-6">
                 <div>
@@ -312,7 +312,7 @@ function OrderConfirmedContent() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white px-6 pb-8 pt-12 md:px-8 md:pt-16">
+      <footer className="border-t border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#161027] px-6 pb-8 pt-12 md:px-8 md:pt-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 grid gap-10 md:grid-cols-4 md:gap-12">
             <div>
@@ -339,7 +339,7 @@ function OrderConfirmedContent() {
             </div>
 
             <div>
-              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900">
+              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-[#ede9f8]">
                 Platform
               </h4>
               <ul className="space-y-4 text-xs font-medium text-slate-500">
@@ -362,7 +362,7 @@ function OrderConfirmedContent() {
             </div>
 
             <div>
-              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900">
+              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-[#ede9f8]">
                 Legal
               </h4>
               <ul className="space-y-4 text-xs font-medium text-slate-500">
@@ -388,7 +388,7 @@ function OrderConfirmedContent() {
             </div>
 
             <div>
-              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900">
+              <h4 className="mb-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-[#ede9f8]">
                 Contact
               </h4>
               <ul className="space-y-4 text-xs font-medium text-slate-500">

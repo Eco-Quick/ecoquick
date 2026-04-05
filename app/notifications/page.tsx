@@ -10,11 +10,11 @@ export default function NotificationsPage() {
   if (!user) return null;
 
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 sm:px-6">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-[#7c6d99]">
           Inbox
         </p>
         <h1 className="mb-8 text-3xl font-black uppercase tracking-tight text-primary">
@@ -22,11 +22,11 @@ export default function NotificationsPage() {
         </h1>
 
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <span className="material-symbols-outlined mb-4 text-5xl text-slate-200">
+          <span className="material-symbols-outlined mb-4 text-5xl text-slate-200 dark:text-zinc-700">
             notifications_none
           </span>
-          <p className="text-sm font-semibold text-slate-500">You&apos;re all caught up.</p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="text-sm font-semibold text-slate-500 dark:text-[#8b7aaa]">You&apos;re all caught up.</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-[#7c6d99]">
             Order updates and alerts will appear here.
           </p>
           <Link

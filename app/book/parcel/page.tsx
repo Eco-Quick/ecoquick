@@ -99,13 +99,13 @@ export default function BookParcelPage() {
 
   if (!user || !hydrated) return null;
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)]">
+        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
           {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8">
+          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
             <BookingStepper currentStep={3} />
             <div className="mt-10 text-center">
               <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
@@ -116,8 +116,8 @@ export default function BookParcelPage() {
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12">
-            <div className="border border-primary bg-white p-10 shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)]">
+          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
+            <div className="border border-primary bg-white p-10 shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
               <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
                   <div className="space-y-4">
@@ -126,7 +126,7 @@ export default function BookParcelPage() {
                     </label>
                     <select
                       className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary",
+                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
                         errors.packageCategory ? "border-accent" : "border-primary",
                       ].join(" ")}
                       value={form.packageCategory}
@@ -151,7 +151,7 @@ export default function BookParcelPage() {
                     </label>
                     <select
                       className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary",
+                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
                         errors.packageSize ? "border-accent" : "border-primary",
                       ].join(" ")}
                       value={form.packageSize}
@@ -179,7 +179,7 @@ export default function BookParcelPage() {
                         step="0.1"
                         placeholder="0.0"
                         className={[
-                          "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary",
+                          "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
                           errors.weight ? "border-accent" : "border-primary",
                         ].join(" ")}
                         value={form.weight}
@@ -203,7 +203,7 @@ export default function BookParcelPage() {
                       type="number"
                       placeholder="1"
                       className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary",
+                        "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
                         errors.totalItems ? "border-accent" : "border-primary",
                       ].join(" ")}
                       value={form.totalItems}
@@ -223,7 +223,7 @@ export default function BookParcelPage() {
                   </label>
                   <textarea
                     rows={4}
-                    className="w-full border border-primary bg-white p-5 text-sm font-medium tracking-wide text-primary/80"
+                    className="w-full border border-primary bg-white p-5 text-sm font-medium tracking-wide text-primary/80 dark:bg-[#0d0916] dark:text-[#c084fc] dark:placeholder-[#7c6d99]"
                     placeholder="E.g. fragile items, gate codes, specific recipient instructions..."
                     value={form.handlingInstructions}
                     onChange={(e) => setForm((f) => ({ ...f, handlingInstructions: e.target.value }))}
@@ -237,10 +237,10 @@ export default function BookParcelPage() {
                 {submitError}
               </p>
             )}
-            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6">
+            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
               <Link
                 href="/book/route"
-                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary"
+                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
               >
                 <span className="material-symbols-outlined text-sm">arrow_back</span>
                 Back

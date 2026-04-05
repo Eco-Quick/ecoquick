@@ -151,13 +151,13 @@ export default function BookRoutePage() {
 
   if (!user || !hydrated) return null;
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)]">
+        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
           {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8">
+          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
             <BookingStepper currentStep={2} />
             <div className="mt-10 text-center">
               <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
@@ -168,8 +168,8 @@ export default function BookRoutePage() {
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12">
-            <div className="mb-10 border border-primary bg-white p-8 md:p-10">
+          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
+            <div className="mb-10 border border-primary bg-white p-8 md:p-10 dark:bg-[#161027]">
               <form className="space-y-14" onSubmit={(e) => e.preventDefault()}>
 
                 {/* ── Pickup ── */}
@@ -208,7 +208,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.pickupPostcode ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="E.g. KT1 1QT"
@@ -228,7 +228,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.pickupCity ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="E.g. London"
@@ -248,7 +248,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.senderName ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="Full name"
@@ -268,7 +268,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.senderPhone ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="+44 7000 000000"
@@ -321,7 +321,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.dropoffPostcode ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="E.g. TW10 6RW"
@@ -341,7 +341,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.dropoffCity ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="E.g. Richmond"
@@ -361,7 +361,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.recipientName ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="Full name"
@@ -381,7 +381,7 @@ export default function BookRoutePage() {
                       </label>
                       <input
                         className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none",
+                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
                           errors.recipientPhone ? "border-accent" : "border-primary",
                         ].join(" ")}
                         placeholder="+44 7000 000000"
@@ -405,10 +405,10 @@ export default function BookRoutePage() {
                 {submitError}
               </p>
             )}
-            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6">
+            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
               <Link
                 href="/book/type"
-                className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary"
+                className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
               >
                 <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">
                   arrow_back

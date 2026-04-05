@@ -64,7 +64,7 @@ function PaymentFormContent({ amount, onSuccess }: Omit<PaymentFormProps, "order
       )}
 
       <div className="border border-primary/20 bg-primary/5 p-1">
-        <div className="border border-primary/10 bg-white p-6">
+        <div className="border border-primary/10 bg-white dark:bg-[#161027] p-6">
           <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
             <span className="material-symbols-outlined text-xl text-accent">
               credit_card

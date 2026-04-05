@@ -90,16 +90,16 @@ export default function LoginPage() {
 
       <main className="flex flex-1 items-center justify-center p-6 md:p-12">
         <div className="flex w-full max-w-md flex-col items-center">
-          <h1 className="mb-4 text-center text-4xl uppercase leading-[0.9] tracking-[-0.06em] text-[#3e0074] sm:text-5xl md:text-6xl">
+          <h1 className="mb-4 text-center text-4xl uppercase leading-[0.9] tracking-[-0.06em] text-[#3e0074] dark:text-[#c084fc] sm:text-5xl md:text-6xl">
             Welcome back
           </h1>
 
           <div className="sharp-corners w-full bg-white p-8 shadow-[0_20px_50px_rgba(62,0,116,0.05)] dark:bg-[#161027] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] md:p-12">
             <div className="mb-8">
-              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#3e0074]/40">
+              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#3e0074]/40 dark:text-[#c084fc]/40">
                 Login
               </h2>
-              <p className="text-sm font-medium text-[#3e0074]/90">
+              <p className="text-sm font-medium text-[#3e0074]/90 dark:text-[#ede9f8]/90">
                 Please enter your credentials to access your dashboard.
               </p>
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60"
+                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60"
                 >
                   Email address
                 </label>
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <label
                   htmlFor="password"
-                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60"
+                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60"
                 >
                   Password
                 </label>
@@ -181,7 +181,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3e0074]/70 hover:text-[#3e0074]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3e0074]/70 hover:text-[#3e0074] dark:text-[#c084fc]/70 dark:hover:text-[#c084fc]"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -194,7 +194,7 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074]"
+                    className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]"
                   />
                   <span className="text-[11px] font-bold uppercase tracking-[0.16em]">
                     Remember me
@@ -204,7 +204,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={forgotLoading}
-                  className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3e0074] underline-offset-4 hover:underline disabled:opacity-50"
+                  className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3e0074] dark:text-[#c084fc] underline-offset-4 hover:underline disabled:opacity-50"
                 >
                   {forgotLoading ? "Sending…" : "Forgot password?"}
                 </button>
@@ -229,12 +229,12 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-8 border-t border-[#3e0074]/10 pt-8 text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60">
+            <div className="mt-8 border-t border-[#3e0074]/10 dark:border-[#4c1d95]/30 pt-8 text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                 New to EcoQuick?{" "}
                 <Link
                   href="/signup"
-                  className="text-[#3e0074] underline-offset-4 hover:underline"
+                  className="text-[#3e0074] dark:text-[#c084fc] underline-offset-4 hover:underline"
                 >
                   Create one here
                 </Link>
@@ -242,7 +242,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col items-center gap-6 text-[#3e0074]/40">
+          <div className="mt-12 flex flex-col items-center gap-6 text-[#3e0074]/40 dark:text-[#c084fc]/40">
             <div className="flex flex-wrap items-center justify-center gap-6">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px] font-bold">

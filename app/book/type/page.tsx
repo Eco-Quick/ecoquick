@@ -65,20 +65,20 @@ export default function BookTypePage() {
 
   if (!user || !hydrated) return null;
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)]">
+        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
           {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8">
+          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
             <BookingStepper currentStep={1} />
 
             <div className="mt-10 text-center">
               <h1 className="text-3xl uppercase tracking-tight text-primary sm:text-4xl">
                 Delivery Type
               </h1>
-              <p className="mx-auto mt-3 max-w-lg text-sm font-medium text-slate-500">
+              <p className="mx-auto mt-3 max-w-lg text-sm font-medium text-slate-500 dark:text-[#8b7aaa]">
                 Select the urgency and service level required for your
                 shipment.
               </p>
@@ -86,31 +86,31 @@ export default function BookTypePage() {
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12">
+          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
             <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
               <button
                 onClick={() => selectType("instant")}
                 className={[
                   "card-hover group flex h-full flex-col border-2 p-8 text-left transition-all active:scale-[0.98]",
                   selected === "instant"
-                    ? "border-primary bg-primary/5"
-                    : "border-slate-100 bg-slate-50 hover:border-slate-300",
+                    ? "border-primary bg-primary/5 dark:border-[#7c3aed] dark:bg-[#7c3aed]/10"
+                    : "border-slate-100 bg-slate-50 hover:border-slate-300 dark:border-[#2d2050] dark:bg-[#0d0916] dark:hover:border-[#7c6d99]",
                 ].join(" ")}
               >
                 <div className="mb-6 flex w-full justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white dark:bg-[#161027]">
                     <BoltIcon />
                   </div>
                 </div>
                 <h3 className="mb-3 text-xl font-black uppercase tracking-tight text-primary">
                   Instant delivery
                 </h3>
-                <p className="mb-6 flex-grow text-sm leading-relaxed text-slate-600">
+                <p className="mb-6 flex-grow text-sm leading-relaxed text-slate-600 dark:text-[#a78bbd]">
                   Best for urgent needs. An electric courier is dispatched
                   immediately for direct point-to-point delivery within 60
                   minutes.
                 </p>
-                <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-4">
+                <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-4 dark:border-[#1e1538]">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
@@ -126,34 +126,34 @@ export default function BookTypePage() {
                 className={[
                   "card-hover group flex h-full flex-col border-2 p-8 text-left transition-all active:scale-[0.98]",
                   selected === "scheduled"
-                    ? "border-primary bg-primary/5"
-                    : "border-slate-100 bg-slate-50 hover:border-slate-300",
+                    ? "border-primary bg-primary/5 dark:border-[#7c3aed] dark:bg-[#7c3aed]/10"
+                    : "border-slate-100 bg-slate-50 hover:border-slate-300 dark:border-[#2d2050] dark:bg-[#0d0916] dark:hover:border-[#7c6d99]",
                 ].join(" ")}
               >
                 <div className="mb-6 flex w-full justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded border-2 border-accent/40 bg-white text-accent transition-colors group-hover:bg-accent group-hover:text-white dark:bg-[#161027]">
                     <CalendarIcon />
                   </div>
                 </div>
-                <h3 className="mb-3 text-xl font-black uppercase tracking-tight text-slate-900">
+                <h3 className="mb-3 text-xl font-black uppercase tracking-tight text-slate-900 dark:text-[#ede9f8]">
                   Scheduled
                 </h3>
-                <p className="mb-6 flex-grow text-sm leading-relaxed text-slate-600">
+                <p className="mb-6 flex-grow text-sm leading-relaxed text-slate-600 dark:text-[#a78bbd]">
                   Plan ahead. Select a specific pickup window up to 2 weeks in
                   advance. Ideal for recurring business logistics.
                 </p>
-                <div className="mt-auto border-t border-slate-100 pt-4">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <div className="mt-auto border-t border-slate-100 pt-4 dark:border-[#1e1538]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                     Book up to 14 days ahead
                   </span>
                 </div>
               </button>
             </div>
 
-            <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6">
+            <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary"
+                className="flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
               >
                 <span className="text-accent">
                   <ArrowWestIcon />

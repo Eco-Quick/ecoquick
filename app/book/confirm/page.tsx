@@ -194,13 +194,13 @@ export default function BookConfirmPage() {
   if (!user) return null;
 
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)]">
+        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
           {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8">
+          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
             <BookingStepper currentStep={4} />
             <div className="mt-10 text-center">
               <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
@@ -210,16 +210,16 @@ export default function BookConfirmPage() {
             </div>
           </div>
 
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12">
+          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
 
             {/* ── REVIEW STEP ── */}
             {step === "review" && (
               <>
                 {/* Order summary card */}
-                <div className="overflow-hidden bg-white ring-1 ring-slate-200">
-                  <div className="grid border-b border-slate-200 md:grid-cols-2">
-                    <div className="border-b border-slate-100 p-8 md:border-r">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <div className="overflow-hidden bg-white ring-1 ring-slate-200 dark:bg-[#161027] dark:ring-[#2d2050]">
+                  <div className="grid border-b border-slate-200 md:grid-cols-2 dark:border-[#2d2050]">
+                    <div className="border-b border-slate-100 p-8 md:border-r dark:border-[#1e1538]">
+                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                         01. Service mode
                       </h3>
                       <div className="flex items-center gap-4">
@@ -237,46 +237,46 @@ export default function BookConfirmPage() {
                       </div>
                     </div>
 
-                    <div className="border-b border-slate-100 p-8">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <div className="border-b border-slate-100 p-8 dark:border-[#1e1538]">
+                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                         02. Cargo specs
                       </h3>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Size</p>
-                          <p className="text-xs font-black uppercase text-slate-900">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-[#7c6d99]">Size</p>
+                          <p className="text-xs font-black uppercase text-slate-900 dark:text-[#ede9f8]">
                             {sizeLabelMap[order.packageSize ?? ""] ?? order.packageSize ?? "—"}
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Weight</p>
-                          <p className="text-xs font-black uppercase text-slate-900">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-[#7c6d99]">Weight</p>
+                          <p className="text-xs font-black uppercase text-slate-900 dark:text-[#ede9f8]">
                             {order.weight ? `${order.weight} kg` : "—"}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="border-b border-slate-100 p-8 md:border-r">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <div className="border-b border-slate-100 p-8 md:border-r dark:border-[#1e1538]">
+                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                         03. Origin
                       </h3>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">
+                      <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-[#ede9f8]">
                         {[order.pickupPostcode, order.pickupCity].filter(Boolean).join(", ") || "—"}
                       </p>
-                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500">
+                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500 dark:text-[#8b7aaa]">
                         {order.pickupAddress || "Address not provided"}
                       </p>
                     </div>
 
-                    <div className="border-b border-slate-100 p-8">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <div className="border-b border-slate-100 p-8 dark:border-[#1e1538]">
+                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                         04. Destination
                       </h3>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">
+                      <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-[#ede9f8]">
                         {[order.dropoffPostcode, order.dropoffCity].filter(Boolean).join(", ") || "—"}
                       </p>
-                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500">
+                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500 dark:text-[#8b7aaa]">
                         {order.dropoffAddress || "Address not provided"}
                       </p>
                     </div>
@@ -339,15 +339,15 @@ export default function BookConfirmPage() {
                 </div>
 
                 {error && (
-                  <div className="mt-6 border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  <div className="mt-6 border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
                     {error}
                   </div>
                 )}
 
-                <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6">
+                <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
                   <Link
                     href="/book/parcel"
-                    className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary"
+                    className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
                   >
                     <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">
                       arrow_back
@@ -369,11 +369,11 @@ export default function BookConfirmPage() {
                 </div>
 
                 <div className="mt-10 flex flex-col items-center gap-4">
-                  <div className="flex items-center gap-2 border border-slate-200 bg-white px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  <div className="flex items-center gap-2 border border-slate-200 bg-white px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:border-[#2d2050] dark:bg-[#161027] dark:text-[#8b7aaa]">
                     <span className="text-primary"><ShieldCheckIcon /></span>
                     Secure architectural protocol
                   </div>
-                  <p className="max-w-md text-center text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  <p className="max-w-md text-center text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                     Final valuation is subject to real‑time verification at pickup point. EcoQuick maintains carbon neutrality across all operations.
                   </p>
                 </div>
@@ -384,9 +384,9 @@ export default function BookConfirmPage() {
             {step === "payment" && pendingOrderId && (
               <div className="mx-auto max-w-xl">
                 {/* Order amount reminder */}
-                <div className="mb-8 flex items-center justify-between border border-slate-200 bg-slate-50 px-6 py-4">
+                <div className="mb-8 flex items-center justify-between border border-slate-200 bg-slate-50 px-6 py-4 dark:border-[#2d2050] dark:bg-[#0d0916]">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
                       Order total
                     </p>
                     <p className="text-2xl font-black tracking-tight text-primary">
@@ -395,7 +395,7 @@ export default function BookConfirmPage() {
                   </div>
                   <button
                     onClick={() => { setStep("review"); setPendingOrderId(null); }}
-                    className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary"
+                    className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
                   >
                     ← Edit order
                   </button>

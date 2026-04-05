@@ -14,8 +14,14 @@ export function LandingHeader() {
 
   function handleNav(target: "login" | "signup") {
     if (sweeping) return;
+    const href = target === "login" ? "/login" : "/signup";
+    // Already on this page — no-op
+    if (pathname === href) return;
     setSweeping(target);
-    setTimeout(() => router.push(target === "login" ? "/login" : "/signup"), 360);
+    setTimeout(() => {
+      router.push(href);
+      setSweeping(null);
+    }, 360);
   }
 
   const linkBase =
@@ -65,7 +71,7 @@ export function LandingHeader() {
 
         {/* Right: auth actions */}
         <div className="ml-auto flex items-center gap-2.5">
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
 
           {/* Log in — outline swipe */}
           <button
@@ -110,30 +116,30 @@ export function LandingHeader() {
 
       {isOpen && (
         <nav className="mt-3 flex flex-col gap-2 text-[11px] font-medium tracking-[0.05em] text-zinc-600 dark:text-zinc-400 md:hidden">
-          <Link href="/" className="py-0.5 transition hover:text-zinc-900">
+          <Link href="/" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
             Home
           </Link>
-          <Link href="/about" className="py-0.5 transition hover:text-zinc-900">
+          <Link href="/about" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
             About
           </Link>
           <Link
             href="/business"
-            className="py-0.5 transition hover:text-zinc-900"
+            className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200"
           >
             Business
           </Link>
-          <Link href="/help" className="py-0.5 transition hover:text-zinc-900">
+          <Link href="/help" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
             Help
           </Link>
           <Link
             href="/login"
-            className="py-0.5 transition hover:text-zinc-900"
+            className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="py-0.5 text-[#3f0075] transition hover:text-zinc-900"
+            className="py-0.5 text-[#3f0075] dark:text-[#c084fc] transition hover:text-zinc-900 dark:hover:text-zinc-200"
           >
             Get started
           </Link>

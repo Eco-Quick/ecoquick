@@ -115,13 +115,13 @@ export default function OrderHistoryPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 {orders.length} total order{orders.length !== 1 ? "s" : ""}
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700 dark:text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 100% carbon neutral
               </span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur dark:border-[#2d2050] dark:bg-[#161027]/80 dark:text-zinc-400">
             {filters.map((f, i) => (
               <button
                 key={f.key}
@@ -130,7 +130,7 @@ export default function OrderHistoryPage() {
                   "rounded-full px-4 py-1.5 transition-colors active:scale-95",
                   activeFilter === f.key
                     ? "bg-primary text-white shadow-sm"
-                    : "hover:bg-slate-50",
+                    : "hover:bg-slate-50 dark:hover:bg-[#1e1538]",
                   i === filters.length - 1 ? "inline-flex items-center gap-1" : "",
                 ].join(" ")}
               >
@@ -152,7 +152,7 @@ export default function OrderHistoryPage() {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <span className="material-symbols-outlined mb-4 text-5xl text-slate-200">
+            <span className="material-symbols-outlined mb-4 text-5xl text-slate-200 dark:text-zinc-700">
               error_outline
             </span>
             <p className="text-sm font-semibold text-slate-500">{error}</p>
@@ -165,7 +165,7 @@ export default function OrderHistoryPage() {
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <span className="material-symbols-outlined mb-4 text-5xl text-slate-200">
+            <span className="material-symbols-outlined mb-4 text-5xl text-slate-200 dark:text-zinc-700">
               local_shipping
             </span>
             {orders.length === 0 ? (
@@ -202,13 +202,13 @@ export default function OrderHistoryPage() {
                   <div className="col-span-1">Status</div>
                   <div className="col-span-2 text-right">Price</div>
                 </div>
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 dark:divide-[#1e1538]">
                   {filteredOrders.map((order) => (
                     <div
                       key={order.id}
                       className="grid grid-cols-12 items-center bg-white/80 px-6 py-4 text-sm transition-colors hover:bg-slate-50 dark:bg-[#161027]/80 dark:hover:bg-[#1e1538]"
                     >
-                      <div className="col-span-2 font-semibold tracking-tight text-slate-900">
+                      <div className="col-span-2 font-semibold tracking-tight text-slate-900 dark:text-[#ede9f8]">
                         {displayId(order.id)}
                       </div>
                       <div className="col-span-2 text-sm font-medium text-slate-500">
@@ -218,7 +218,7 @@ export default function OrderHistoryPage() {
                         </span>
                       </div>
                       <div className="col-span-5 pr-8">
-                        <p className="truncate text-sm font-semibold text-slate-900">
+                        <p className="truncate text-sm font-semibold text-slate-900 dark:text-[#ede9f8]">
                           {order.delivery_address || order.delivery_city || "—"}
                         </p>
                         <p className="mt-0.5 text-[10px] font-medium uppercase tracking-tight text-slate-400">
@@ -238,7 +238,7 @@ export default function OrderHistoryPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-6 py-3 text-[11px] text-slate-500">
+                <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 dark:border-[#1e1538] dark:bg-[#0d0916]/60 px-6 py-3 text-[11px] text-slate-500">
                   <span>
                     Showing {filteredOrders.length} of {orders.length} order{orders.length !== 1 ? "s" : ""}
                   </span>
@@ -258,7 +258,7 @@ export default function OrderHistoryPage() {
                       <p className="text-[10px] font-semibold uppercase tracking-tight text-slate-500">
                         {displayId(order.id)}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-[#ede9f8]">
                         £{order.total_price.toFixed(2)}
                       </p>
                     </div>

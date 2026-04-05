@@ -22,7 +22,7 @@ function SignupFallback() {
         <LandingHeader />
       </div>
       <main className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-12">
-        <p className="text-sm font-medium text-[#3e0074]/70">Loading…</p>
+        <p className="text-sm font-medium text-[#3e0074]/70 dark:text-[#c084fc]/70">Loading…</p>
       </main>
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <LandingFooter />
@@ -97,11 +97,11 @@ function SignupPageContent() {
           {confirmEmail ? (
             <div className="flex flex-col items-center gap-6 py-16 text-center">
               <span className="text-5xl">✉️</span>
-              <h1 className="text-3xl uppercase tracking-tight text-[#3e0074]">Check your email</h1>
-              <p className="max-w-sm text-sm font-medium text-[#3e0074]/70">
+              <h1 className="text-3xl uppercase tracking-tight text-[#3e0074] dark:text-[#c084fc]">Check your email</h1>
+              <p className="max-w-sm text-sm font-medium text-[#3e0074]/70 dark:text-[#c084fc]/70">
                 We sent a confirmation link to <strong>{confirmEmail}</strong>.
                 Click it to activate your account, then{" "}
-                <Link href="/login" className="font-bold text-[#3e0074] underline underline-offset-4">
+                <Link href="/login" className="font-bold text-[#3e0074] dark:text-[#c084fc] underline underline-offset-4">
                   sign in here
                 </Link>
                 .
@@ -109,13 +109,13 @@ function SignupPageContent() {
             </div>
           ) : (
           <>
-          <h1 className="mb-12 text-center text-5xl uppercase leading-[0.85] tracking-[-0.06em] md:text-[70px]">
+          <h1 className="mb-12 text-center text-5xl uppercase leading-[0.85] tracking-[-0.06em] dark:text-[#c084fc] md:text-[70px]">
             Join EcoQuick
           </h1>
 
           <div className="space-y-12">
             <section className="space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                 01 / Select Profile
               </span>
               <div className="flex flex-wrap gap-3 md:gap-4">
@@ -124,8 +124,8 @@ function SignupPageContent() {
                     key={type}
                     className={`group flex min-w-[120px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border px-4 py-3 text-xs md:text-sm transition-all md:px-6 md:py-3.5 ${
                       profile === type
-                        ? "border-[#3e0074] bg-[#3e0074] text-white shadow-lg shadow-[#3e0074]/30"
-                        : "border-[#3e0074]/30 bg-white text-[#3e0074] hover:border-[#3e0074] hover:bg-[#3e0074]/5"
+                        ? "border-[#3e0074] bg-[#3e0074] text-white shadow-lg shadow-[#3e0074]/30 dark:border-[#7c3aed] dark:bg-[#7c3aed]"
+                        : "border-[#3e0074]/30 bg-white text-[#3e0074] hover:border-[#3e0074] hover:bg-[#3e0074]/5 dark:border-[#4c1d95] dark:bg-[#161027] dark:text-[#c084fc] dark:hover:border-[#7c3aed]"
                     }`}
                     onClick={() => {
                       setProfile(type);
@@ -161,13 +161,13 @@ function SignupPageContent() {
 
             <form className="space-y-8" onSubmit={handleSubmit}>
               <section className="space-y-6">
-                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                   {profile === "customer" ? "02 / Personal details" : "02 / Driver details"}
                 </span>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                    <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                       Full name
                     </label>
                     <input
@@ -181,7 +181,7 @@ function SignupPageContent() {
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                         Email address
                       </label>
                       <input
@@ -193,7 +193,7 @@ function SignupPageContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                         Phone number
                       </label>
                       <input
@@ -207,7 +207,7 @@ function SignupPageContent() {
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                         Password
                       </label>
                       <input
@@ -220,13 +220,13 @@ function SignupPageContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60">
+                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                         {profile === "customer" ? "Date of birth" : "License expiry"}
                       </label>
                       <input
                         type="date"
                         name={profile === "customer" ? "dob" : "licenseExpiry"}
-                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] focus:border-[#3e0074] focus:outline-none focus:ring-0"
+                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
                       />
                     </div>
                   </div>
@@ -235,14 +235,14 @@ function SignupPageContent() {
 
               <section className="sharp-corners space-y-4 border border-[#3e0074]/20 bg-[#3e0074]/5 p-6 dark:border-[#4c1d95]/40 dark:bg-[#3f0075]/10">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#3e0074] text-xs font-bold">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#3e0074] dark:border-[#4c1d95] text-xs font-bold">
                     ✓
                   </span>
                   <h4 className="text-[10px] font-black uppercase tracking-[0.22em]">
                     Identity verification
                   </h4>
                 </div>
-                <ul className="space-y-2 text-[9px] font-bold uppercase leading-relaxed text-[#3e0074]/70">
+                <ul className="space-y-2 text-[9px] font-bold uppercase leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
                   <li className="flex items-start gap-2">
                     <span className="mt-1 h-1 w-1 flex-shrink-0 bg-accent" />
                     Required for UK age verification laws and secure courier operations.
@@ -266,8 +266,8 @@ function SignupPageContent() {
 
               <section className="space-y-4 pt-4">
                 <label className="flex cursor-pointer items-center gap-3">
-                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70">
+                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70 dark:text-[#c084fc]/70">
                     I agree to the{" "}
                     <Link href="/terms" className="underline underline-offset-2 hover:text-[#3e0074]">
                       Terms of Service
@@ -275,8 +275,8 @@ function SignupPageContent() {
                   </span>
                 </label>
                 <label className="flex cursor-pointer items-center gap-3">
-                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70">
+                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70 dark:text-[#c084fc]/70">
                     I agree to the{" "}
                     <Link href="/privacy" className="underline underline-offset-2 hover:text-[#3e0074]">
                       Privacy Policy
@@ -294,10 +294,10 @@ function SignupPageContent() {
               </button>
             </form>
 
-            <div className="border-t border-[#3e0074]/10 pt-8 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/60">
+            <div className="border-t border-[#3e0074]/10 dark:border-[#4c1d95]/30 pt-8 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
                 Already have an account?
-                <Link href="/login" className="ml-2 border-b border-[#3e0074] text-[#3e0074]">
+                <Link href="/login" className="ml-2 border-b border-[#3e0074] text-[#3e0074] dark:border-[#c084fc] dark:text-[#c084fc]">
                   Sign in here
                 </Link>
               </p>

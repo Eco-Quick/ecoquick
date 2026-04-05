@@ -134,7 +134,7 @@ export default function AddressAutocomplete({
       {open && predictions.length > 0 && (
         <div
           ref={listRef}
-          className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white shadow-[0_8px_24px_rgba(62,0,116,0.15)]"
+          className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white dark:bg-[#161027] shadow-[0_8px_24px_rgba(62,0,116,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
         >
           {predictions.map((p, i) => (
             <button
@@ -152,20 +152,20 @@ export default function AddressAutocomplete({
                 <p className="truncate text-xs font-bold uppercase tracking-wide text-primary">
                   {p.structured_formatting.main_text}
                 </p>
-                <p className="truncate text-[10px] font-medium text-slate-500">
+                <p className="truncate text-[10px] font-medium text-slate-500 dark:text-zinc-400">
                   {p.structured_formatting.secondary_text}
                 </p>
               </div>
             </button>
           ))}
-          <div className="bg-slate-50 px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+          <div className="bg-slate-50 dark:bg-[#0d0916] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
             Powered by Mapbox
           </div>
         </div>
       )}
 
       {open && !loading && predictions.length === 0 && value.length >= 2 && (
-        <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
+        <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white dark:bg-[#161027] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
           No addresses found — try being more specific
         </div>
       )}

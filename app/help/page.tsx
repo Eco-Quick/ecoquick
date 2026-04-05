@@ -40,7 +40,7 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="landing-shell bg-white text-[#3e0074] antialiased">
+    <div className="landing-shell bg-white text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc] antialiased">
       <div className="landing-grid-layer" />
 
       {/* Full-width header */}
@@ -50,19 +50,19 @@ export default function HelpPage() {
 
       <main className="landing-content min-h-screen pt-6">
         {/* Hero */}
-        <section className="relative flex flex-col items-center justify-center overflow-hidden bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <section className="relative flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-[#0d0916] px-4 py-20 sm:px-6 lg:px-8">
           <div className="absolute inset-0 z-0 opacity-5">
-            <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-[#3e0074] blur-3xl" />
-            <div className="absolute top-1/2 -left-24 h-64 w-64 rounded-full bg-[#3e0074] blur-3xl" />
+            <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-[#3e0074] dark:bg-[#c084fc] blur-3xl" />
+            <div className="absolute top-1/2 -left-24 h-64 w-64 rounded-full bg-[#3e0074] dark:bg-[#c084fc] blur-3xl" />
           </div>
           <div className="relative z-10 w-full max-w-3xl text-center">
-            <h1 className="mb-4 font-display text-5xl font-black tracking-tight text-[#3e0074] md:text-6xl">
+            <h1 className="mb-4 font-display text-5xl font-black tracking-tight text-[#3e0074] dark:text-[#c084fc] md:text-6xl">
               Help center
             </h1>
-            <p className="mb-10 text-lg font-medium text-[#3e0074]/60">
+            <p className="mb-10 text-lg font-medium text-[#3e0074]/60 dark:text-[#c084fc]/60">
               How can we help you today?
             </p>
-            <div className="relative w-full overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
+            <div className="relative w-full overflow-hidden rounded-xl border border-gray-100 dark:border-[#1e1538] bg-white dark:bg-[#161027] shadow-xl">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <span className="text-accent">
                   <svg
@@ -86,24 +86,24 @@ export default function HelpPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 placeholder="Search for articles, topics, or keywords..."
-                className="block w-full border-0 bg-white py-4 pl-12 pr-24 text-lg text-[#3e0074] placeholder:text-[#3e0074]/30 transition-all focus:border-0 focus:outline-none focus:ring-1 focus:ring-[#3e0074]"
+                className="block w-full border-0 bg-white dark:bg-[#161027] py-4 pl-12 pr-24 text-lg text-[#3e0074] dark:text-[#ede9f8] placeholder:text-[#3e0074]/30 dark:placeholder:text-[#c084fc]/30 transition-all focus:border-0 focus:outline-none focus:ring-1 focus:ring-[#3e0074] dark:focus:ring-[#c084fc]"
               />
               <button
                 onClick={runSearch}
-                className="absolute inset-y-0 right-0 bg-[#3e0074] px-6 text-sm font-bold text-white transition-colors hover:bg-[#2f005a]"
+                className="absolute inset-y-0 right-0 bg-[#3e0074] dark:bg-[#c084fc] px-6 text-sm font-bold text-white dark:text-[#0d0916] transition-colors hover:bg-[#2f005a] dark:hover:bg-[#d8b4fe]"
               >
                 Search
               </button>
             </div>
           </div>
           {query.trim() && (
-            <div className="mt-4 text-sm text-[#3e0074]/70">
+            <div className="mt-4 text-sm text-[#3e0074]/70 dark:text-[#c084fc]/70">
               {filteredFaqs.length > 0 ? (
                 <>
                   Found <strong>{filteredFaqs.length}</strong> result{filteredFaqs.length !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
                   <button
                     onClick={runSearch}
-                    className="ml-3 font-bold text-[#3e0074] underline underline-offset-2"
+                    className="ml-3 font-bold text-[#3e0074] dark:text-[#c084fc] underline underline-offset-2"
                   >
                     Jump to answers ↓
                   </button>
@@ -111,7 +111,7 @@ export default function HelpPage() {
               ) : (
                 <>
                   No results for &ldquo;{query}&rdquo; —{" "}
-                  <a href="mailto:hello@ecoquick.delivery" className="font-bold text-[#3e0074] underline underline-offset-2">
+                  <a href="mailto:hello@ecoquick.delivery" className="font-bold text-[#3e0074] dark:text-[#c084fc] underline underline-offset-2">
                     contact support
                   </a>
                 </>
@@ -189,20 +189,20 @@ export default function HelpPage() {
               <a
                 key={card.title}
                 href={card.href}
-                className="group flex flex-col items-start gap-4 border border-[#3e0074]/10 bg-[#3e0074]/[0.03] p-8 transition-all hover:border-[#3e0074]/30 hover:bg-[#3e0074]/[0.05]"
+                className="group flex flex-col items-start gap-4 border border-[#3e0074]/10 dark:border-[#c084fc]/10 bg-[#3e0074]/[0.03] dark:bg-[#c084fc]/[0.03] p-8 transition-all hover:border-[#3e0074]/30 dark:hover:border-[#c084fc]/30 hover:bg-[#3e0074]/[0.05] dark:hover:bg-[#c084fc]/[0.05]"
               >
-                <div className="flex h-12 w-12 items-center justify-center border border-gray-100 bg-white text-xl text-accent shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center border border-gray-100 dark:border-[#1e1538] bg-white dark:bg-[#161027] text-xl text-accent shadow-sm">
                   {card.icon}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-display text-xl font-bold text-[#3e0074]">
+                  <h3 className="mb-1 font-display text-xl font-bold text-[#3e0074] dark:text-[#c084fc]">
                     {card.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-[#3e0074]/60">
+                  <p className="text-sm leading-relaxed text-[#3e0074]/60 dark:text-[#c084fc]/60">
                     {card.body}
                   </p>
                 </div>
-                <div className="mt-auto flex items-center pt-4 text-sm font-bold text-[#3e0074] group-hover:underline">
+                <div className="mt-auto flex items-center pt-4 text-sm font-bold text-[#3e0074] dark:text-[#c084fc] group-hover:underline">
                   {card.cta} <span className="ml-1 text-sm">→</span>
                 </div>
               </a>
@@ -211,13 +211,13 @@ export default function HelpPage() {
         </section>
 
         {/* Topics grid */}
-        <section className="mx-auto max-w-7xl border-t border-gray-100 px-6 py-12 lg:px-8">
+        <section className="mx-auto max-w-7xl border-t border-gray-100 dark:border-[#1e1538] px-6 py-12 lg:px-8">
           <div className="mb-10">
-            <h2 className="font-display text-3xl font-bold text-[#3e0074]">
+            <h2 className="font-display text-3xl font-bold text-[#3e0074] dark:text-[#c084fc]">
               Browse topics
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-px overflow-hidden border border-gray-200 bg-gray-200 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-px overflow-hidden border border-gray-200 dark:border-[#2d2050] bg-gray-200 dark:bg-[#2d2050] md:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 title: "Booking",
@@ -366,11 +366,11 @@ export default function HelpPage() {
             ].map((topic) => (
               <div
                 key={topic.title}
-                className="bg-white p-8 transition-colors hover:bg-gray-50"
+                className="bg-white dark:bg-[#161027] p-8 transition-colors hover:bg-gray-50 dark:hover:bg-[#0d0916]"
               >
                 <div className="mb-6 flex items-center gap-3">
                   <span className="text-3xl text-accent">{topic.icon}</span>
-                  <h3 className="font-display text-lg font-bold text-[#3e0074]">
+                  <h3 className="font-display text-lg font-bold text-[#3e0074] dark:text-[#c084fc]">
                     {topic.title}
                   </h3>
                 </div>
@@ -379,9 +379,9 @@ export default function HelpPage() {
                     <li key={item}>
                       <a
                         href={`mailto:hello@ecoquick.delivery?subject=Help: ${encodeURIComponent(item)}`}
-                        className="flex items-center text-sm text-[#3e0074]/60 transition-colors hover:text-[#3e0074]"
+                        className="flex items-center text-sm text-[#3e0074]/60 dark:text-[#c084fc]/60 transition-colors hover:text-[#3e0074] dark:hover:text-[#c084fc]"
                       >
-                        <span className="mr-3 h-1.5 w-1.5 rounded-full bg-[#3e0074]/30" />
+                        <span className="mr-3 h-1.5 w-1.5 rounded-full bg-[#3e0074]/30 dark:bg-[#c084fc]/30" />
                         {item}
                       </a>
                     </li>
@@ -394,11 +394,11 @@ export default function HelpPage() {
 
         {/* FAQ */}
         <section id="faq" ref={faqRef} className="mx-auto max-w-4xl px-6 py-16 lg:px-8">
-          <h2 className="mb-10 text-center font-display text-3xl font-bold text-[#3e0074]">
+          <h2 className="mb-10 text-center font-display text-3xl font-bold text-[#3e0074] dark:text-[#c084fc]">
             Frequently asked questions
           </h2>
           {filteredFaqs.length === 0 ? (
-            <p className="text-center text-[#3e0074]/50">
+            <p className="text-center text-[#3e0074]/50 dark:text-[#c084fc]/50">
               No results for &ldquo;{query}&rdquo;. Try a different search or{" "}
               <a href="mailto:hello@ecoquick.delivery" className="underline">
                 contact support
@@ -410,9 +410,9 @@ export default function HelpPage() {
               {filteredFaqs.map((item) => (
                 <details
                   key={item.q}
-                  className="group cursor-pointer border-b border-gray-100 pb-6 open:pb-6"
+                  className="group cursor-pointer border-b border-gray-100 dark:border-[#1e1538] pb-6 open:pb-6"
                 >
-                  <summary className="flex list-none items-start justify-between gap-4 text-[#3e0074] transition-colors group-hover:text-[#3e0074]/70">
+                  <summary className="flex list-none items-start justify-between gap-4 text-[#3e0074] dark:text-[#c084fc] transition-colors group-hover:text-[#3e0074]/70 dark:group-hover:text-[#c084fc]/70">
                     <span className="font-display text-xl font-bold leading-tight md:text-2xl">
                       {item.q}
                     </span>
@@ -420,7 +420,7 @@ export default function HelpPage() {
                       ▼
                     </span>
                   </summary>
-                  <div className="mt-4 max-w-2xl leading-relaxed text-[#3e0074]/70">
+                  <div className="mt-4 max-w-2xl leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
                     {item.a}
                   </div>
                 </details>
@@ -430,19 +430,19 @@ export default function HelpPage() {
         </section>
 
         {/* Emergency banner */}
-        <section className="mt-12 bg-[#3e0074] px-6 py-12 text-white lg:px-8">
+        <section className="mt-12 bg-[#3e0074] dark:bg-[#161027] px-6 py-12 text-white dark:text-[#ede9f8] lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
             <div className="text-center md:text-left">
               <h2 className="mb-2 font-display text-3xl font-black tracking-tight">
                 Need immediate help?
               </h2>
-              <p className="text-lg text-white/70">
+              <p className="text-lg text-white/70 dark:text-[#ede9f8]/70">
                 Our support team is available 24/7 for urgent delivery issues.
               </p>
             </div>
             <a
               href="mailto:hello@ecoquick.delivery?subject=Urgent Support Request"
-              className="flex items-center gap-4 border border-white/10 bg-white/10 px-8 py-4 backdrop-blur-sm transition-colors hover:bg-white/20"
+              className="flex items-center gap-4 border border-white/10 dark:border-[#c084fc]/20 bg-white/10 dark:bg-[#c084fc]/10 px-8 py-4 backdrop-blur-sm transition-colors hover:bg-white/20 dark:hover:bg-[#c084fc]/20"
             >
               <span className="text-accent">
                 <svg

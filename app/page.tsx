@@ -10,7 +10,6 @@ import { CoverageSection } from "@/components/landing/CoverageSection";
 export default function Home() {
   return (
     <div className="landing-shell page-fade min-h-screen bg-white text-zinc-950 dark:bg-[#0d0916] dark:text-[#ede9f8]">
-      <div className="landing-grid-layer" />
 
       {/* Full-width header */}
       <div className="landing-content px-6 lg:px-8">

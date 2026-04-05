@@ -11,9 +11,9 @@ export default function OrderTrackPage() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white text-primary">
+    <div className="flex h-screen flex-col overflow-hidden bg-white text-primary dark:bg-[#0d0916]">
       {/* Header */}
-      <header className="z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
+      <header className="z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#0d0916] px-6">
         <BrandLogo size="sm" />
         <div className="flex items-center gap-6">
           <div className="hidden items-center gap-6 text-xs font-bold uppercase tracking-[0.22em] text-slate-400 md:flex">
@@ -28,7 +28,7 @@ export default function OrderTrackPage() {
             </span>
           </div>
           <button
-            className="flex h-10 w-10 items-center justify-center border border-slate-200 sharp-corners transition-colors hover:bg-slate-50"
+            className="flex h-10 w-10 items-center justify-center border border-slate-200 dark:border-[#2d2050] dark:text-zinc-400 sharp-corners transition-colors hover:bg-slate-50 dark:hover:bg-[#161027]"
             onClick={() => router.push("/dashboard")}
             aria-label="Close tracking"
           >
@@ -40,8 +40,8 @@ export default function OrderTrackPage() {
       {/* Main layout */}
       <main className="relative flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Left panel */}
-        <aside className="z-20 flex w-full flex-col border-r border-slate-200 bg-white md:w-[420px]">
-          <div className="border-b border-slate-200 p-8">
+        <aside className="z-20 flex w-full flex-col border-r border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#0d0916] md:w-[420px]">
+          <div className="border-b border-slate-200 dark:border-[#2d2050] p-8">
             <div className="mb-4 inline-flex items-center gap-2 bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
               Live Tracking
@@ -60,7 +60,7 @@ export default function OrderTrackPage() {
             </p>
           </div>
 
-          <div className="border-b border-slate-200 bg-slate-50 p-8">
+          <div className="border-b border-slate-200 bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027] p-8">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
               Your Rider
             </h3>
@@ -74,7 +74,7 @@ export default function OrderTrackPage() {
                   />
                 </div>
                 <div>
-                  <div className="text-lg font-bold leading-none text-slate-900">
+                  <div className="text-lg font-bold leading-none text-slate-900 dark:text-[#ede9f8]">
                     Marcus Sterling
                   </div>
                   <div className="mt-1 flex items-center gap-1.5">
@@ -167,7 +167,7 @@ export default function OrderTrackPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 border-t border-slate-200 p-6">
+          <div className="grid grid-cols-2 gap-4 border-t border-slate-200 dark:border-[#2d2050] p-6">
             <div className="sharp-corners border border-slate-100 p-4">
               <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
                 Distance
@@ -250,19 +250,19 @@ export default function OrderTrackPage() {
 
           {/* Map controls */}
           <div className="absolute bottom-8 right-8 flex flex-col gap-2">
-            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50">
+            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
               <span className="material-symbols-outlined">add</span>
             </button>
-            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50">
+            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
               <span className="material-symbols-outlined">remove</span>
             </button>
-            <button className="mt-4 flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50">
+            <button className="mt-4 flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
               <span className="material-symbols-outlined">my_location</span>
             </button>
           </div>
 
           {/* Fleet data card */}
-          <div className="sharp-corners absolute right-8 top-8 hidden w-48 border border-slate-200 bg-white p-4 shadow-sm lg:block">
+          <div className="sharp-corners absolute right-8 top-8 hidden w-48 border border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#161027] p-4 shadow-sm lg:block">
             <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
               Live Fleet Data
             </h4>
@@ -284,7 +284,7 @@ export default function OrderTrackPage() {
           </div>
 
           {/* Mobile slide-up ETA */}
-          <div className="sharp-corners fixed bottom-0 left-0 right-0 z-50 transform border-t-4 border-primary bg-white md:hidden transition-transform duration-500 hover:translate-y-0 translate-y-[60%]">
+          <div className="sharp-corners fixed bottom-0 left-0 right-0 z-50 transform border-t-4 border-primary bg-white dark:bg-[#0d0916] md:hidden transition-transform duration-500 hover:translate-y-0 translate-y-[60%]">
             <div className="mx-auto my-4 h-1 w-12 rounded-full bg-slate-200" />
             <div className="px-6 pb-12">
               <div className="mb-6 flex items-center justify-between">
@@ -298,17 +298,17 @@ export default function OrderTrackPage() {
                   Details
                 </button>
               </div>
-              <div className="flex items-center gap-4 border border-slate-100 bg-slate-50 p-4 sharp-corners">
+              <div className="flex items-center gap-4 border border-slate-100 bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027] p-4 sharp-corners">
                 <img
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn4K4kgBcgCE0sJInj6Nb_N2SwPySGh-LYb5hDgJSkB8mcsc2Lkh8BQaRd4yAIQe8LGxVzMFo1f9Dy07KBiY2AgjzQNrzEXBW_2mwivskyfh6_cAwTlLQyvUMP1OYJCi2q8IxFotqH4qLPUkEiHM9hMMrqulFJvlAD-YwVha_wl7s4CgnTLDVNUHH2wrrx5CMI-6XtHiC6x2dOvDvBaVlhd9Ydo0ETfAwLTz3fJxYJsumnpj_-FWY-3DnfHu-KTogZlYBzfzqSUUM"
                   alt="Rider"
                   className="h-12 w-12 object-cover sharp-corners grayscale"
                 />
                 <div className="flex-grow">
-                  <div className="font-bold text-slate-900">
+                  <div className="font-bold text-slate-900 dark:text-[#ede9f8]">
                     Marcus Sterling
                   </div>
-                  <div className="text-[10px] font-bold uppercase text-slate-500">
+                  <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-zinc-400">
                     Electric Bike
                   </div>
                 </div>

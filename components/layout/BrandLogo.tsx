@@ -28,7 +28,7 @@ export function BrandLogo({
       />
       {withWordmark && (
         <span
-          className={`font-extrabold uppercase tracking-tight text-zinc-950 ${
+          className={`font-extrabold uppercase tracking-tight text-zinc-950 dark:text-zinc-100 ${
             size === "sm" ? "text-[11px] sm:text-xs" : "text-sm sm:text-base"
           }`}
         >

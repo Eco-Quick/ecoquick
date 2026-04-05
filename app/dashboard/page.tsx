@@ -75,7 +75,7 @@ export default function CustomerDashboardPage() {
 
             <div className="mt-6 inline-flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <button
-                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
+                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100 dark:bg-[#161027] dark:hover:bg-[#1e1538]"
                 onClick={() => router.push("/book/type")}
               >
                 <span className="material-symbols-outlined text-base text-accent">
@@ -84,7 +84,7 @@ export default function CustomerDashboardPage() {
                 New delivery
               </button>
               <button
-                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100"
+                className="btn-press inline-flex items-center justify-center gap-2 border border-primary bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm transition-colors hover:bg-zinc-100 dark:bg-[#161027] dark:hover:bg-[#1e1538]"
                 onClick={() => router.push("/orders")}
               >
                 <span className="material-symbols-outlined text-base text-accent">
@@ -95,7 +95,7 @@ export default function CustomerDashboardPage() {
             </div>
           </section>
 
-          <section className="relative mb-10 overflow-hidden rounded-lg border border-primary/10 bg-[rgba(62,0,116,0.015)] p-6 lg:p-8">
+          <section className="relative mb-10 overflow-hidden rounded-lg border border-primary/10 bg-[rgba(62,0,116,0.015)] dark:bg-[rgba(192,132,252,0.03)] p-6 lg:p-8">
             <div className="pointer-events-none absolute right-[-120px] top-[-80px] hidden h-56 w-56 rounded-full border border-primary/20 sm:block lg:border-primary/30" />
             <div className="pointer-events-none absolute right-[-40px] bottom-[-80px] h-40 w-40 rounded-full border border-primary/20 sm:block lg:border-primary/30" />
             <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
@@ -198,7 +198,7 @@ export default function CustomerDashboardPage() {
           </section>
 
           <section className="mb-4 lg:mb-6" id="impact-section">
-            <div className="relative overflow-hidden rounded-lg border border-primary/10 bg-white p-6 lg:p-8">
+            <div className="relative overflow-hidden rounded-lg border border-primary/10 bg-white dark:bg-[#161027] p-6 lg:p-8">
               <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h3 className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/60">
@@ -225,7 +225,7 @@ export default function CustomerDashboardPage() {
                     Last 30 days · Auto-calculated
                   </p>
                   <button
-                    className="inline-flex items-center justify-center border border-accent/60 bg-white px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary transition-colors hover:bg-accent hover:text-white"
+                    className="inline-flex items-center justify-center border border-accent/60 bg-white dark:bg-[#161027] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary transition-colors hover:bg-accent hover:text-white"
                     onClick={() => router.push("/impact")}
                   >
                     View impact report

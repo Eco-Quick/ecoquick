@@ -11,7 +11,7 @@ export function CustomerTopBar() {
   const pathname = usePathname();
 
   const linkBase =
-    "nav-tab text-[11px] sm:text-sm font-semibold tracking-[0.08em] transition-colors active:scale-95 active:opacity-75";
+    "nav-tab text-[11px] sm:text-sm font-semibold tracking-[0.08em] transition-colors active:scale-95 active:opacity-75 dark:text-zinc-400 dark:hover:text-[#c084fc]";
 
   const handleSignOut = async () => {
     const supabase = createClient();

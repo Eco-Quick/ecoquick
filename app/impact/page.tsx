@@ -9,12 +9,12 @@ export default function ImpactReportPage() {
   if (!user) return null;
 
   return (
-    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900">
+    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col">
         {/* Hero / heading */}
-        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] px-8 py-16 md:py-20">
+        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] px-8 py-16 md:py-20 dark:border-[#2d2050] dark:bg-[rgba(192,132,252,0.08)]">
           <div className="mx-auto max-w-screen-2xl">
             <div className="flex flex-col items-end gap-8 md:flex-row md:justify-between">
               <div className="max-w-3xl">
@@ -33,7 +33,7 @@ export default function ImpactReportPage() {
                 </p>
               </div>
               <div className="flex w-full flex-col gap-4 border-l-4 border-primary pl-6 md:w-auto md:py-4">
-                <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">
+                <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#8b7aaa]">
                   Current Session Period
                 </span>
                 <span className="text-2xl font-bold uppercase tracking-tight text-primary">
@@ -45,9 +45,9 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Top stats */}
-        <section className="grid grid-cols-1 border-b border-slate-200 md:grid-cols-3">
-          <div className="flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-white p-8 md:border-b-0 md:border-r">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">
+        <section className="grid grid-cols-1 border-b border-slate-200 md:grid-cols-3 dark:border-[#2d2050]">
+          <div className="flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-white p-8 md:border-b-0 md:border-r dark:border-[#2d2050] dark:bg-[#161027]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
               Total CO2 Offset
             </span>
             <div>
@@ -66,8 +66,8 @@ export default function ImpactReportPage() {
             </div>
           </div>
 
-          <div className="checkerboard flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-slate-50 p-8 md:border-b-0 md:border-r">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">
+          <div className="checkerboard flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-slate-50 p-8 md:border-b-0 md:border-r dark:border-[#2d2050] dark:bg-[#0d0916]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
               Trees Equivalent
             </span>
             <div>
@@ -79,17 +79,17 @@ export default function ImpactReportPage() {
               </p>
             </div>
             <div className="mt-6">
-              <div className="h-1 w-full overflow-hidden bg-slate-200 sharp-edge">
+              <div className="h-1 w-full overflow-hidden bg-slate-200 sharp-edge dark:bg-[#2d2050]">
                 <div className="h-full w-2/3 bg-accent" />
               </div>
-              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
                 Forestry Goal Alignment
               </p>
             </div>
           </div>
 
-          <div className="flex min-h-[260px] flex-col justify-between bg-white p-8">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">
+          <div className="flex min-h-[260px] flex-col justify-between bg-white p-8 dark:bg-[#161027]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
               Green Miles Driven
             </span>
             <div>
@@ -110,18 +110,18 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Chart + efficiency */}
-        <section className="grid grid-cols-1 bg-white lg:grid-cols-2">
-          <div className="border-b border-r border-slate-200 p-8 md:p-12">
+        <section className="grid grid-cols-1 bg-white lg:grid-cols-2 dark:bg-[#161027]">
+          <div className="border-b border-r border-slate-200 p-8 md:p-12 dark:border-[#2d2050]">
             <div className="mb-12 flex items-start justify-between">
               <div>
                 <h3 className="mb-2 text-2xl font-black uppercase tracking-tight text-primary">
                   CO2 Savings Projection
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
                   Temporal Analysis (Metric Tons / Month)
                 </p>
               </div>
-              <div className="flex gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+              <div className="flex gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#8b7aaa]">
                 <span className="inline-flex items-center gap-2">
                   <span className="h-3 w-3 bg-primary sharp-edge" /> Actual
                 </span>
@@ -130,7 +130,7 @@ export default function ImpactReportPage() {
                 </span>
               </div>
             </div>
-            <div className="relative h-[340px] w-full border-b border-l border-slate-300 grid-line">
+            <div className="relative h-[340px] w-full border-b border-l border-slate-300 grid-line dark:border-[#3d2d70]">
               <svg
                 className="absolute inset-0 h-full w-full"
                 preserveAspectRatio="none"
@@ -145,16 +145,16 @@ export default function ImpactReportPage() {
                 />
                 <polyline
                   fill="none"
-                  stroke="#3e0074"
+                  className="stroke-[#3e0074] dark:stroke-[#c084fc]"
                   strokeWidth="6"
                   points="0,380 150,340 300,350 450,290 600,210 750,180 900,140 1000,80"
                 />
-                <circle cx="150" cy="340" r="6" fill="#3e0074" />
-                <circle cx="450" cy="290" r="6" fill="#3e0074" />
-                <circle cx="750" cy="180" r="6" fill="#3e0074" />
-                <circle cx="1000" cy="80" r="6" fill="#3e0074" />
+                <circle cx="150" cy="340" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
+                <circle cx="450" cy="290" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
+                <circle cx="750" cy="180" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
+                <circle cx="1000" cy="80" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
               </svg>
-              <div className="absolute -bottom-7 flex w-full justify-between text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+              <div className="absolute -bottom-7 flex w-full justify-between text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
                 <span>JAN</span>
                 <span>MAR</span>
                 <span>MAY</span>
@@ -165,13 +165,13 @@ export default function ImpactReportPage() {
             </div>
           </div>
 
-          <div className="border-b border-slate-200 bg-slate-50 p-8 md:p-12">
+          <div className="border-b border-slate-200 bg-slate-50 p-8 md:p-12 dark:border-[#2d2050] dark:bg-[#0d0916]">
             <div className="mb-12 flex items-start justify-between">
               <div>
                 <h3 className="mb-2 text-2xl font-black uppercase tracking-tight text-primary">
                   Network Efficiency
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
                   Energy Usage per 1000 Deliveries (kWh)
                 </p>
               </div>
@@ -196,7 +196,7 @@ export default function ImpactReportPage() {
                   <span className="w-24 text-[11px] uppercase">
                     {item.label}
                   </span>
-                  <div className="flex flex-1 items-center border border-slate-200 bg-white sharp-edge">
+                  <div className="flex flex-1 items-center border border-slate-200 bg-white sharp-edge dark:border-[#2d2050] dark:bg-[#161027]">
                     <div className={`h-12 bg-primary ${item.width}`} />
                     <span className="ml-4 text-xs font-bold text-primary">
                       {item.value}
@@ -206,12 +206,12 @@ export default function ImpactReportPage() {
               ))}
 
               <div className="mt-4 flex items-center gap-6 text-xs font-bold">
-                <span className="w-24 text-[11px] uppercase italic text-slate-400">
+                <span className="w-24 text-[11px] uppercase italic text-slate-400 dark:text-[#7c6d99]">
                   Industry Std.
                 </span>
-                <div className="flex flex-1 items-center border border-dashed border-slate-300 bg-white sharp-edge">
-                  <div className="h-12 w-full bg-slate-200" />
-                  <span className="ml-4 text-xs font-bold text-slate-400">
+                <div className="flex flex-1 items-center border border-dashed border-slate-300 bg-white sharp-edge dark:border-[#3d2d70] dark:bg-[#161027]">
+                  <div className="h-12 w-full bg-slate-200 dark:bg-[#2d2050]" />
+                  <span className="ml-4 text-xs font-bold text-slate-400 dark:text-[#7c6d99]">
                     210.0 kWh
                   </span>
                 </div>
@@ -221,7 +221,7 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Telemetry table */}
-        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] p-8 md:p-12">
+        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] p-8 md:p-12 dark:border-[#2d2050] dark:bg-[rgba(192,132,252,0.08)]">
           <h3 className="mb-10 text-2xl font-black uppercase tracking-tight text-primary">
             System Telemetry Log
           </h3>
