@@ -19,17 +19,28 @@ interface AddressAutocompleteProps {
   className?: string;
 }
 
+// Matches full or partial UK postcodes: "KT2 6DF", "SW1A 1AA", "EC1A", "KT2"
+const UK_POSTCODE_REGEX = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+// Partial postcode for early detection (outward code only)
+const UK_POSTCODE_PARTIAL = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d?$/i;
+
+function isLikelyPostcode(input: string): boolean {
+  const trimmed = input.trim();
+  return UK_POSTCODE_REGEX.test(trimmed);
+}
+
 export default function AddressAutocomplete({
   value,
   onChange,
   onSelect,
-  placeholder = "Enter address",
+  placeholder = "Enter address or postcode",
   className = "",
 }: AddressAutocompleteProps) {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
+  const [source, setSource] = useState<"mapbox" | "postcode" | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -44,13 +55,31 @@ export default function AddressAutocomplete({
       return;
     }
 
+    const usePostcode = isLikelyPostcode(value);
+
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `/api/places/autocomplete?input=${encodeURIComponent(value)}`
-        );
-        const data = await res.json();
+        let data: { predictions?: Prediction[] } = {};
+
+        if (usePostcode) {
+          // Try getAddress.io first for postcodes
+          const postcodeRes = await fetch(`/api/places/postcode?postcode=${encodeURIComponent(value.trim())}`);
+          data = await postcodeRes.json();
+          if ((data.predictions ?? []).length > 0) {
+            setSource("postcode");
+          } else {
+            // Fallback to Mapbox if getAddress.io fails or returns nothing
+            const mapboxRes = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(value)}`);
+            data = await mapboxRes.json();
+            setSource("mapbox");
+          }
+        } else {
+          const res = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(value)}`);
+          data = await res.json();
+          setSource("mapbox");
+        }
+
         setPredictions(data.predictions ?? []);
         setOpen((data.predictions ?? []).length > 0);
         setHighlighted(-1);
@@ -60,7 +89,7 @@ export default function AddressAutocomplete({
       } finally {
         setLoading(false);
       }
-    }, 300);
+    }, usePostcode ? 500 : 300); // Slightly longer debounce for postcode to avoid hitting API on partial input
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -135,18 +164,26 @@ export default function AddressAutocomplete({
         <div
           ref={listRef}
           className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white dark:bg-[#161027] shadow-[0_8px_24px_rgba(62,0,116,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
+          style={{ maxHeight: "320px", overflowY: "auto" }}
         >
+          {source === "postcode" && (
+            <div className="border-b border-slate-100 dark:border-zinc-800 bg-primary/5 dark:bg-primary/10 px-4 py-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60">
+                {predictions.length} address{predictions.length !== 1 ? "es" : ""} found at {value.trim().toUpperCase()}
+              </span>
+            </div>
+          )}
           {predictions.map((p, i) => (
             <button
               key={p.place_id}
               type="button"
               onMouseDown={() => select(p)}
-              className={`flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-b-0 transition-colors ${
+              className={`flex w-full items-start gap-3 border-b border-slate-100 dark:border-zinc-800 px-4 py-3 text-left last:border-b-0 transition-colors ${
                 i === highlighted ? "bg-primary/5" : "hover:bg-primary/5"
               }`}
             >
               <span className="material-symbols-outlined mt-0.5 shrink-0 text-sm text-accent">
-                location_on
+                {source === "postcode" ? "home" : "location_on"}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold uppercase tracking-wide text-primary">
@@ -159,14 +196,16 @@ export default function AddressAutocomplete({
             </button>
           ))}
           <div className="bg-slate-50 dark:bg-[#0d0916] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            Powered by Mapbox
+            {source === "postcode" ? "UK Postcode Lookup" : "Powered by Mapbox"}
           </div>
         </div>
       )}
 
       {open && !loading && predictions.length === 0 && value.length >= 2 && (
         <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white dark:bg-[#161027] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
-          No addresses found — try being more specific
+          {isLikelyPostcode(value)
+            ? "No addresses found for this postcode"
+            : "No addresses found — try a postcode (e.g. KT2 6DF)"}
         </div>
       )}
     </div>

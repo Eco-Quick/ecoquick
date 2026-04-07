@@ -1,12 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { CustomerMobileNav } from "@/components/layout/CustomerMobileNav";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ImpactReportPage() {
   const user = useCustomerAuth();
+  const [co2Offset, setCo2Offset] = useState(0);
+  const [deliveryCount, setDeliveryCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase
+      .from("delivery_orders")
+      .select("weight")
+      .eq("customer_id", user.id)
+      .eq("status", "delivered")
+      .then(({ data }) => {
+        if (data) {
+          setDeliveryCount(data.length);
+          setCo2Offset(data.reduce((sum, o) => sum + Number(o.weight) * 0.15, 0));
+        }
+      });
+  }, [user?.id]);
+
   if (!user) return null;
+
+  const treesEquiv = Math.round(co2Offset / 22);
 
   return (
     <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
@@ -28,41 +51,39 @@ export default function ImpactReportPage() {
                 </h1>
                 <p className="mt-8 max-w-xl text-xl font-medium leading-relaxed text-primary/80">
                   Quantifying the carbon reduction and ecological contribution
-                  of our high-efficiency delivery network. Real-time telemetry
-                  integrated.
+                  of our high-efficiency delivery network. Your personal impact
+                  from {deliveryCount} deliveries.
                 </p>
               </div>
               <div className="flex w-full flex-col gap-4 border-l-4 border-primary pl-6 md:w-auto md:py-4">
                 <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#8b7aaa]">
-                  Current Session Period
+                  Your Deliveries
                 </span>
                 <span className="text-2xl font-bold uppercase tracking-tight text-primary">
-                  JAN 01 — OCT 24, 2025
+                  {deliveryCount} Completed
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Top stats */}
+        {/* Top stats — YOUR personal impact */}
         <section className="grid grid-cols-1 border-b border-slate-200 md:grid-cols-3 dark:border-[#2d2050]">
           <div className="flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-white p-8 md:border-b-0 md:border-r dark:border-[#2d2050] dark:bg-[#161027]">
             <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
-              Total CO2 Offset
+              Your CO2 Offset
             </span>
             <div>
               <p className="stat-value text-5xl font-black uppercase tracking-[-0.05em] text-primary md:text-6xl">
-                1,482.9
+                {co2Offset.toFixed(1)}
               </p>
               <p className="text-sm font-bold uppercase text-primary/60">
-                Metric Tons Carbon
+                Kilograms Carbon
               </p>
             </div>
             <div className="mt-6 flex items-center gap-2 text-sm font-bold text-emerald-600">
-              <span className="material-symbols-outlined text-sm">
-                trending_up
-              </span>
-              +12.4% vs Last Quarter
+              <span className="material-symbols-outlined text-sm">eco</span>
+              Every delivery counts
             </div>
           </div>
 
@@ -72,7 +93,7 @@ export default function ImpactReportPage() {
             </span>
             <div>
               <p className="stat-value text-5xl font-black uppercase tracking-[-0.05em] text-accent md:text-6xl">
-                24,510
+                {treesEquiv}
               </p>
               <p className="text-sm font-bold uppercase text-accent/80">
                 Active Saplings
@@ -80,24 +101,24 @@ export default function ImpactReportPage() {
             </div>
             <div className="mt-6">
               <div className="h-1 w-full overflow-hidden bg-slate-200 sharp-edge dark:bg-[#2d2050]">
-                <div className="h-full w-2/3 bg-accent" />
+                <div className="h-full bg-accent" style={{ width: `${Math.min((treesEquiv / 100) * 100, 100)}%` }} />
               </div>
               <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
-                Forestry Goal Alignment
+                Personal Forestry Goal
               </p>
             </div>
           </div>
 
           <div className="flex min-h-[260px] flex-col justify-between bg-white p-8 dark:bg-[#161027]">
             <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
-              Green Miles Driven
+              Green Deliveries
             </span>
             <div>
               <p className="stat-value text-5xl font-black uppercase tracking-[-0.05em] text-primary md:text-6xl">
-                842,002
+                {deliveryCount}
               </p>
               <p className="text-sm font-bold uppercase text-primary/60">
-                Zero-Emission Kilometers
+                Zero-Emission Deliveries
               </p>
             </div>
             <div className="mt-6 flex gap-3">

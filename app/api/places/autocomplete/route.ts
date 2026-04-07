@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     url.searchParams.set("access_token", token);
     url.searchParams.set("country", "gb");
     url.searchParams.set("limit", "5");
-    url.searchParams.set("types", "address,postcode,locality,place,neighborhood");
+    url.searchParams.set("types", "address,poi,postcode,locality,place");
     url.searchParams.set("autocomplete", "true");
 
     const res = await fetch(url.toString());

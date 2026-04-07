@@ -1,335 +1,458 @@
 "use client";
 
+import { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { BrandLogo } from "@/components/layout/BrandLogo";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { createClient } from "@/lib/supabase/client";
+
+interface TrackedOrder {
+  id: string;
+  status: string;
+  driver_id: string | null;
+  pickup_address: string;
+  pickup_city: string;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
+  weight: number;
+  total_price: number;
+  scheduling_type: string;
+  created_at: string;
+  assigned_at: string | null;
+  picked_up_at: string | null;
+  in_transit_at: string | null;
+  delivered_at: string | null;
+  verification_code: string | null;
+  driver_profiles: {
+    full_name: string;
+    vehicle_type: string;
+    rating: number;
+    current_lat: number | null;
+    current_lng: number | null;
+  } | null;
+}
+
+const TIMELINE_STEPS = [
+  { key: "confirmed", label: "Order Confirmed", icon: "check_circle", tsField: "created_at", desc: "Payment verified" },
+  { key: "assigned", label: "Driver Assigned", icon: "person", tsField: "assigned_at", desc: "Driver en route to pickup" },
+  { key: "picked_up", label: "Picked Up", icon: "inventory_2", tsField: "picked_up_at", desc: "Package collected" },
+  { key: "in_transit", label: "On the Way", icon: "local_shipping", tsField: "in_transit_at", desc: "Heading to you" },
+  { key: "delivered", label: "Delivered", icon: "task_alt", tsField: "delivered_at", desc: "Handed to recipient" },
+];
+
+const STATUS_ORDER = ["pending", "confirmed", "assigned", "picked_up", "in_transit", "delivered"];
 
 export default function OrderTrackPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0d0916]"><span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span></div>}>
+      <OrderTrackContent />
+    </Suspense>
+  );
+}
+
+function OrderTrackContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("id");
   const user = useCustomerAuth();
+
+  const [order, setOrder] = useState<TrackedOrder | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [eta, setEta] = useState<string | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const driverMarkerRef = useRef<mapboxgl.Marker | null>(null);
+
+  useEffect(() => {
+    if (!orderId || !user) return;
+    fetchOrder();
+  }, [orderId, user?.id]);
+
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!orderId) return;
+    const supabase = createClient();
+
+    const orderChannel = supabase
+      .channel(`track-order-${orderId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_orders", filter: `id=eq.${orderId}` }, () => { fetchOrder(); })
+      .subscribe();
+
+    const locationChannel = supabase
+      .channel(`track-location-${orderId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "driver_locations", filter: `order_id=eq.${orderId}` }, (payload) => {
+        const loc = payload.new as { lat: number; lng: number };
+        updateDriverMarkerOnMap(loc.lat, loc.lng);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(orderChannel);
+      supabase.removeChannel(locationChannel);
+    };
+  }, [orderId]);
+
+  // Initialize map
+  useEffect(() => {
+    if (!order || !mapContainerRef.current || mapRef.current) return;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    if (!token) return;
+
+    // Need at least one set of coordinates
+    if (!order.pickup_lat && !order.delivery_lat) return;
+
+    import("mapbox-gl").then((mapboxgl) => {
+      mapboxgl.default.accessToken = token;
+
+      const center: [number, number] = [
+        order.delivery_lng ?? order.pickup_lng ?? -0.1276,
+        order.delivery_lat ?? order.pickup_lat ?? 51.5074,
+      ];
+
+      const map = new mapboxgl.default.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/light-v11",
+        center,
+        zoom: 12,
+      });
+      mapRef.current = map;
+
+      map.on("load", () => {
+        if (order.pickup_lat && order.pickup_lng) {
+          const el = document.createElement("div");
+          el.innerHTML = `<div style="background:#10b981;color:#fff;padding:4px 10px;font-size:11px;font-weight:700;border-radius:8px;white-space:nowrap;">Pickup</div>`;
+          new mapboxgl.default.Marker({ element: el }).setLngLat([order.pickup_lng!, order.pickup_lat]).addTo(map);
+        }
+        if (order.delivery_lat && order.delivery_lng) {
+          const el = document.createElement("div");
+          el.innerHTML = `<div style="background:#3e0074;color:#fff;padding:4px 10px;font-size:11px;font-weight:700;border-radius:8px;white-space:nowrap;">Delivery</div>`;
+          new mapboxgl.default.Marker({ element: el }).setLngLat([order.delivery_lng!, order.delivery_lat]).addTo(map);
+        }
+
+        // Driver marker
+        const dLat = order.driver_profiles?.current_lat;
+        const dLng = order.driver_profiles?.current_lng;
+        if (dLat && dLng) {
+          const el = document.createElement("div");
+          el.innerHTML = `<div style="width:32px;height:32px;background:#3e0074;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#fff;">pedal_bike</span></div>`;
+          driverMarkerRef.current = new mapboxgl.default.Marker({ element: el }).setLngLat([dLng, dLat]).addTo(map);
+        }
+
+        // Fit bounds
+        const coords: [number, number][] = [];
+        if (order.pickup_lat && order.pickup_lng) coords.push([order.pickup_lng, order.pickup_lat]);
+        if (order.delivery_lat && order.delivery_lng) coords.push([order.delivery_lng, order.delivery_lat]);
+        if (dLat && dLng) coords.push([dLng, dLat]);
+
+        if (coords.length >= 2) {
+          const lngs = coords.map(c => c[0]);
+          const lats = coords.map(c => c[1]);
+          map.fitBounds([[Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01], [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]], { padding: 60 });
+        }
+
+        // Route line
+        if (order.pickup_lat && order.pickup_lng && order.delivery_lat && order.delivery_lng) {
+          fetch(`https://api.mapbox.com/directions/v5/mapbox/cycling/${order.pickup_lng},${order.pickup_lat};${order.delivery_lng},${order.delivery_lat}?geometries=geojson&access_token=${token}`)
+            .then(r => r.json())
+            .then(data => {
+              if (data.routes?.[0]) {
+                setDistance(Math.round(data.routes[0].distance / 100) / 10);
+                setEta(`${Math.round(data.routes[0].duration / 60)}`);
+                map.addSource("route", { type: "geojson", data: { type: "Feature", properties: {}, geometry: data.routes[0].geometry } });
+                map.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#3e0074", "line-width": 4, "line-opacity": 0.5 } });
+              }
+            }).catch(() => {});
+        }
+      });
+    });
+
+    return () => { mapRef.current?.remove(); mapRef.current = null; };
+  }, [order?.id]);
+
+  function updateDriverMarkerOnMap(lat: number, lng: number) {
+    if (!mapRef.current) return;
+    import("mapbox-gl").then((mapboxgl) => {
+      if (driverMarkerRef.current) {
+        driverMarkerRef.current.setLngLat([lng, lat]);
+      } else {
+        const el = document.createElement("div");
+        el.innerHTML = `<div style="width:32px;height:32px;background:#3e0074;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,0.3);"></div>`;
+        driverMarkerRef.current = new mapboxgl.default.Marker({ element: el }).setLngLat([lng, lat]).addTo(mapRef.current!);
+      }
+    });
+  }
+
+  async function fetchOrder() {
+    if (!orderId) return;
+    const supabase = createClient();
+
+    const { data, error: err } = await supabase
+      .from("delivery_orders")
+      .select("id, status, pickup_address, pickup_city, pickup_lat, pickup_lng, delivery_address, delivery_city, delivery_lat, delivery_lng, weight, total_price, scheduling_type, created_at, assigned_at, picked_up_at, in_transit_at, delivered_at, verification_code, driver_id")
+      .eq("id", orderId)
+      .single();
+
+    if (err || !data) { setError("Order not found"); setLoading(false); return; }
+
+    let driverProfile = null;
+    if (data.driver_id) {
+      const { data: dp } = await supabase
+        .from("driver_profiles")
+        .select("full_name, vehicle_type, rating, current_lat, current_lng")
+        .eq("id", data.driver_id)
+        .single();
+      driverProfile = dp;
+    }
+
+    setOrder({ ...data, driver_profiles: driverProfile } as unknown as TrackedOrder);
+    setLoading(false);
+  }
+
+  function formatTime(ts: string | null) {
+    if (!ts) return null;
+    return new Date(ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function getStepStatus(stepKey: string, orderStatus: string): "completed" | "active" | "pending" {
+    const stepIdx = STATUS_ORDER.indexOf(stepKey);
+    const currentIdx = STATUS_ORDER.indexOf(orderStatus);
+    if (stepIdx < currentIdx) return "completed";
+    if (stepIdx === currentIdx) return "active";
+    return "pending";
+  }
+
   if (!user) return null;
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0d0916]">
+        <span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 dark:bg-[#0d0916]">
+        <span className="material-symbols-outlined text-5xl text-zinc-300">error_outline</span>
+        <p className="font-semibold text-zinc-500">{error || "Order not found"}</p>
+        <Link href="/orders" className="text-sm font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">View all orders</Link>
+      </div>
+    );
+  }
+
+  const driver = order.driver_profiles;
+  const co2Saved = (order.weight * 0.15).toFixed(1);
+  const isDelivered = order.status === "delivered";
+  const hasCoords = order.pickup_lat && order.delivery_lat;
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white text-primary dark:bg-[#0d0916]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916]">
       {/* Header */}
-      <header className="z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#0d0916] px-6">
-        <BrandLogo size="sm" />
-        <div className="flex items-center gap-6">
-          <div className="hidden items-center gap-6 text-xs font-bold uppercase tracking-[0.22em] text-slate-400 md:flex">
-            <Link
-              href="/help"
-              className="transition-colors hover:text-accent"
-            >
-              Live Support
-            </Link>
-            <span className="transition-colors hover:text-accent">
-              Order #EQ-8821
-            </span>
-          </div>
-          <button
-            className="flex h-10 w-10 items-center justify-center border border-slate-200 dark:border-[#2d2050] dark:text-zinc-400 sharp-corners transition-colors hover:bg-slate-50 dark:hover:bg-[#161027]"
-            onClick={() => router.push("/dashboard")}
-            aria-label="Close tracking"
-          >
-            <span className="material-symbols-outlined text-xl">close</span>
-          </button>
-        </div>
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/90 px-4 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 sm:px-6">
+        <button onClick={() => router.push("/orders")} className="flex items-center gap-2 text-[13px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
+          <span className="material-symbols-outlined text-lg">arrow_back</span>
+          Orders
+        </button>
+        <span className="font-mono text-[12px] font-semibold text-zinc-400 dark:text-zinc-500">
+          EQ-{order.id.slice(0, 6).toUpperCase()}
+        </span>
+        <button onClick={() => router.push("/dashboard")} className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
+          <span className="material-symbols-outlined text-lg">close</span>
+        </button>
       </header>
 
-      {/* Main layout */}
-      <main className="relative flex flex-1 flex-col overflow-hidden md:flex-row">
-        {/* Left panel */}
-        <aside className="z-20 flex w-full flex-col border-r border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#0d0916] md:w-[420px]">
-          <div className="border-b border-slate-200 dark:border-[#2d2050] p-8">
-            <div className="mb-4 inline-flex items-center gap-2 bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-              Live Tracking
-            </div>
-            <h2 className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
-              Estimated Arrival
-            </h2>
-            <div className="mb-2 text-6xl font-black leading-none tracking-tighter sm:text-7xl">
-              12
-              <span className="ml-2 align-top text-2xl">MINS</span>
-            </div>
-            <p className="text-sm font-medium text-slate-500">
-              Rider is currently picking up your order from{" "}
-              <span className="font-bold text-primary">Green Bites Kitchen</span>
-              .
-            </p>
-          </div>
+      <main className="flex flex-1 flex-col overflow-hidden lg:flex-row" style={{ height: "calc(100vh - 56px)" }}>
+        {/* Left panel — info */}
+        <div className="w-full shrink-0 overflow-y-auto lg:h-full lg:w-[420px] lg:border-r lg:border-zinc-200 dark:lg:border-zinc-800">
+          <div className="p-5 sm:p-6">
 
-          <div className="border-b border-slate-200 bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027] p-8">
-            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
-              Your Rider
-            </h3>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden border border-slate-200 bg-white sharp-corners">
-                  <img
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCGeNJyNsfib0T8D7JQdnNfYlNuZ7TnwD19TomCkEnG7JUCF-66w_ZeBHyHXJqwVLH4Wrmu9bSxNukAmIHWdmmy5EDnEqqVZ0kqKspxoWrxMCcX3LUJp-OLrda6hJUg98XQ5xLCeg5sGnk92wN2cKw_jb4Nk1XZLLyFIgNUC5CAx8ekJyjGMTbSvFG94jRN_kjYRFH2WlgRqVDZcogtXWi_Afy5xayU4f6LqZcewd_qLxFXqvKErwKjXJ9glABcgMSOMqQvnWuzis"
-                    alt="Rider"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="text-lg font-bold leading-none text-slate-900 dark:text-[#ede9f8]">
-                    Marcus Sterling
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-xs text-accent">
-                      electric_bolt
-                    </span>
-                    <span className="text-xs font-bold uppercase tracking-tight text-slate-500">
-                      Electric Bike • 4.9 ★
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <button className="flex h-12 w-12 items-center justify-center bg-primary text-white sharp-corners transition-colors hover:bg-primary/90">
-                <span className="material-symbols-outlined">chat_bubble</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 p-8">
-            <h3 className="mb-8 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
-              Order Journey
-            </h3>
-            <div className="space-y-10">
-              <div className="relative flex gap-6">
-                <div className="timeline-line" />
-                <div className="timeline-dot active">
-                  <span className="material-symbols-outlined text-xs">
-                    check
-                  </span>
-                </div>
-                <div>
-                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
-                    11:42 AM
-                  </div>
-                  <div className="font-bold text-primary">Order Confirmed</div>
-                  <div className="mt-1 text-xs uppercase text-slate-500">
-                    Payment verified successfully
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative flex gap-6">
-                <div className="timeline-line bg-slate-200" />
-                <div className="timeline-dot active border-primary">
-                  <span className="material-symbols-outlined text-xs">
-                    local_mall
-                  </span>
-                </div>
-                <div>
-                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
-                    11:55 AM
-                  </div>
-                  <div className="font-bold text-primary">
-                    Picking up Order
-                  </div>
-                  <div className="mt-1 text-xs uppercase text-slate-500">
-                    Rider has arrived at restaurant
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative flex gap-6">
-                <div className="timeline-line bg-slate-200" />
-                <div className="timeline-dot pending" />
-                <div>
-                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-300">
-                    ETA 12:08 PM
-                  </div>
-                  <div className="font-bold text-slate-400">
-                    Out for Delivery
-                  </div>
-                  <div className="mt-1 text-xs uppercase text-slate-400">
-                    Direct carbon-neutral route
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative flex gap-6">
-                <div className="timeline-dot pending" />
-                <div>
-                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-300">
-                    ETA 12:15 PM
-                  </div>
-                  <div className="font-bold text-slate-400">Delivered</div>
-                  <div className="mt-1 text-xs uppercase text-slate-400">
-                    Handed to customer
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 border-t border-slate-200 dark:border-[#2d2050] p-6">
-            <div className="sharp-corners border border-slate-100 p-4">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                Distance
-              </div>
-              <div className="text-xl font-black">
-                2.4<span className="ml-1 text-xs">KM</span>
-              </div>
-            </div>
-            <div className="sharp-corners border border-slate-100 p-4">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                CO2 Saved
-              </div>
-              <div className="text-xl font-black text-emerald-600">
-                0.8<span className="ml-1 text-xs">KG</span>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Map section */}
-        <section className="relative flex flex-1 overflow-hidden map-bg">
-          <svg
-            className="pointer-events-none absolute inset-0 h-full w-full opacity-10"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0 100 L1200 100 M0 300 L1200 300 M0 500 L1200 500 M0 700 L1200 700"
-              stroke="#000"
-              strokeWidth="1"
-            />
-            <path
-              d="M100 0 L100 800 M400 0 L400 800 M700 0 L700 800 M1000 0 L1000 800"
-              stroke="#000"
-              strokeWidth="1"
-            />
-          </svg>
-          <svg
-            className="pointer-events-none absolute inset-0 h-full w-full"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M300 450 L500 450 L500 250 L850 250"
-              fill="none"
-              stroke="#3e0074"
-              strokeWidth="6"
-              strokeLinecap="square"
-              strokeLinejoin="miter"
-            />
-          </svg>
-
-          {/* Rider marker */}
-          <div className="absolute left-[400px] top-[450px] z-30 -translate-x-1/2 -translate-y-1/2">
-            <div className="relative">
-              <div className="sharp-corners absolute inset-0 animate-ping bg-accent opacity-25" />
-              <div className="relative flex h-10 w-10 items-center justify-center bg-accent text-white shadow-xl sharp-corners">
-                <span className="material-symbols-outlined">pedal_bike</span>
-              </div>
-            </div>
-            <div className="sharp-corners absolute left-1/2 top-full mt-2 -translate-x-1/2 bg-primary px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white">
-              Rider: Marcus
-            </div>
-          </div>
-
-          {/* Destination marker */}
-          <div className="absolute left-[850px] top-[250px] z-30 -translate-x-1/2 -translate-y-1/2">
-            <div className="flex h-10 w-10 items-center justify-center border-4 border-primary bg-white text-primary shadow-xl sharp-corners">
-              <span className="material-symbols-outlined">home</span>
-            </div>
-            <div className="sharp-corners absolute left-1/2 top-full mt-2 -translate-x-1/2 border border-slate-200 bg-white px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
-              Your Location
-            </div>
-          </div>
-
-          {/* Restaurant marker */}
-          <div className="absolute left-[300px] top-[450px] z-30 -translate-x-1/2 -translate-y-1/2">
-            <div className="flex h-10 w-10 items-center justify-center border-2 border-slate-300 bg-slate-100 text-slate-400 sharp-corners">
-              <span className="material-symbols-outlined">restaurant</span>
-            </div>
-          </div>
-
-          {/* Map controls */}
-          <div className="absolute bottom-8 right-8 flex flex-col gap-2">
-            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
-              <span className="material-symbols-outlined">add</span>
-            </button>
-            <button className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
-              <span className="material-symbols-outlined">remove</span>
-            </button>
-            <button className="mt-4 flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-primary shadow-sm sharp-corners transition-colors hover:bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027]">
-              <span className="material-symbols-outlined">my_location</span>
-            </button>
-          </div>
-
-          {/* Fleet data card */}
-          <div className="sharp-corners absolute right-8 top-8 hidden w-48 border border-slate-200 bg-white dark:border-[#2d2050] dark:bg-[#161027] p-4 shadow-sm lg:block">
-            <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-              Live Fleet Data
-            </h4>
-            <div className="space-y-2">
+            {/* Status card */}
+            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium">Network Load</span>
-                <span className="text-[11px] font-bold">OPTIMAL</span>
-              </div>
-              <div className="h-1 w-full bg-slate-100 sharp-corners">
-                <div className="h-full w-2/3 bg-primary" />
-              </div>
-              <div className="flex items-center justify-between border-t border-slate-100 pt-2">
-                <span className="text-[11px] font-medium">Traffic Impact</span>
-                <span className="text-[11px] font-bold text-emerald-600">
-                  MINIMAL
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile slide-up ETA */}
-          <div className="sharp-corners fixed bottom-0 left-0 right-0 z-50 transform border-t-4 border-primary bg-white dark:bg-[#0d0916] md:hidden transition-transform duration-500 hover:translate-y-0 translate-y-[60%]">
-            <div className="mx-auto my-4 h-1 w-12 rounded-full bg-slate-200" />
-            <div className="px-6 pb-12">
-              <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <div className="text-4xl font-black">12 MINS</div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    Estimated Arrival
+                  <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-bold ${
+                    isDelivered
+                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
+                      : "bg-[#3e0074]/10 text-[#3e0074] dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                  }`}>
+                    {!isDelivered && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />}
+                    {isDelivered ? "Delivered" : "Live Tracking"}
                   </div>
+                  {eta && !isDelivered && (
+                    <p className="mt-3 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
+                      {eta} <span className="text-base font-medium text-zinc-400">min</span>
+                    </p>
+                  )}
+                  {isDelivered && (
+                    <p className="mt-3 text-xl font-bold text-emerald-600">Delivery complete</p>
+                  )}
                 </div>
-                <button className="sharp-corners bg-primary px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-white">
-                  Details
-                </button>
+                <div className="text-right">
+                  {distance && (
+                    <div>
+                      <p className="text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">{distance} km</p>
+                      <p className="text-[11px] text-zinc-400">distance</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-4 border border-slate-100 bg-slate-50 dark:border-[#2d2050] dark:bg-[#161027] p-4 sharp-corners">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn4K4kgBcgCE0sJInj6Nb_N2SwPySGh-LYb5hDgJSkB8mcsc2Lkh8BQaRd4yAIQe8LGxVzMFo1f9Dy07KBiY2AgjzQNrzEXBW_2mwivskyfh6_cAwTlLQyvUMP1OYJCi2q8IxFotqH4qLPUkEiHM9hMMrqulFJvlAD-YwVha_wl7s4CgnTLDVNUHH2wrrx5CMI-6XtHiC6x2dOvDvBaVlhd9Ydo0ETfAwLTz3fJxYJsumnpj_-FWY-3DnfHu-KTogZlYBzfzqSUUM"
-                  alt="Rider"
-                  className="h-12 w-12 object-cover sharp-corners grayscale"
-                />
-                <div className="flex-grow">
-                  <div className="font-bold text-slate-900 dark:text-[#ede9f8]">
-                    Marcus Sterling
+            </div>
+
+            {/* Verification PIN */}
+            {order.verification_code && !isDelivered && (
+              <div className="mb-5 flex items-center justify-between rounded-2xl border border-[#3e0074]/20 bg-[#3e0074]/5 p-5 dark:border-[#c084fc]/20 dark:bg-[#c084fc]/5">
+                <div>
+                  <p className="text-[11px] font-bold text-[#3e0074] dark:text-[#c084fc]">Your Delivery PIN</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Share this with the driver</p>
+                </div>
+                <p className="font-mono text-3xl font-bold tracking-widest text-[#3e0074] dark:text-[#c084fc]">{order.verification_code}</p>
+              </div>
+            )}
+
+            {/* Driver card */}
+            {driver && (
+              <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+                <p className="mb-3 text-[11px] font-semibold uppercase text-zinc-400">Your driver</p>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3e0074] text-white dark:bg-[#5b21b6]">
+                    <span className="material-symbols-outlined text-xl">person</span>
                   </div>
-                  <div className="text-[10px] font-bold uppercase text-slate-500 dark:text-zinc-400">
-                    Electric Bike
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{driver.full_name}</p>
+                    <div className="flex items-center gap-2 text-[12px] text-zinc-400">
+                      <span>{driver.vehicle_type}</span>
+                      <span>&bull;</span>
+                      <span className="flex items-center gap-0.5">
+                        <span className="material-symbols-outlined text-xs text-amber-400">star</span>
+                        {Number(driver.rating).toFixed(1)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <span className="material-symbols-outlined text-primary">
-                  call
-                </span>
+              </div>
+            )}
+
+            {!driver && !isDelivered && (
+              <div className="mb-5 rounded-2xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-[#161027]">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined animate-spin text-lg text-amber-500">progress_activity</span>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Finding a driver nearby...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Route */}
+            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center pt-1">
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <div className="my-1 h-8 w-px bg-zinc-200 dark:bg-zinc-700" />
+                  <div className="h-2.5 w-2.5 rounded-full border-2 border-[#3e0074] dark:border-[#c084fc]" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <p className="text-[11px] font-semibold text-zinc-400">Pickup</p>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">{order.pickup_city}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-zinc-400">Delivery</p>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">{order.delivery_city}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+              <p className="mb-4 text-[11px] font-semibold uppercase text-zinc-400">Order journey</p>
+              <div className="space-y-6">
+                {TIMELINE_STEPS.map((step, i) => {
+                  const stepStatus = getStepStatus(step.key, order.status);
+                  const ts = (order as unknown as Record<string, unknown>)[step.tsField] as string | null;
+                  const isLast = i === TIMELINE_STEPS.length - 1;
+                  return (
+                    <div key={step.key} className="relative flex gap-4">
+                      {!isLast && (
+                        <div className={`absolute left-[13px] top-[28px] h-[calc(100%)] w-px ${
+                          stepStatus === "completed" ? "bg-[#3e0074] dark:bg-[#c084fc]" : "bg-zinc-200 dark:bg-zinc-700"
+                        }`} />
+                      )}
+                      <div className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                        stepStatus === "completed"
+                          ? "bg-[#3e0074] text-white dark:bg-[#c084fc] dark:text-[#0d0916]"
+                          : stepStatus === "active"
+                            ? "border-2 border-[#3e0074] bg-white text-[#3e0074] dark:border-[#c084fc] dark:bg-[#0d0916] dark:text-[#c084fc]"
+                            : "border border-zinc-200 bg-white text-zinc-300 dark:border-zinc-700 dark:bg-[#0d0916]"
+                      }`}>
+                        <span className="material-symbols-outlined text-sm">{step.icon}</span>
+                      </div>
+                      <div className="flex-1 pb-1">
+                        <div className="flex items-baseline justify-between">
+                          <p className={`text-sm font-semibold ${
+                            stepStatus === "pending" ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-[#ede9f8]"
+                          }`}>{step.label}</p>
+                          <span className={`text-[11px] ${stepStatus === "pending" ? "text-zinc-300 dark:text-zinc-700" : "text-zinc-400"}`}>
+                            {ts ? formatTime(ts) : ""}
+                          </span>
+                        </div>
+                        <p className={`text-[12px] ${stepStatus === "pending" ? "text-zinc-300 dark:text-zinc-700" : "text-zinc-400"}`}>
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#161027]">
+                <p className="text-[11px] font-semibold text-zinc-400">CO₂ Saved</p>
+                <p className="mt-1 text-lg font-bold text-emerald-600">{co2Saved} kg</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#161027]">
+                <p className="text-[11px] font-semibold text-zinc-400">Price</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">£{order.total_price.toFixed(2)}</p>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Mobile support FAB */}
-        <button
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center bg-accent text-white shadow-2xl sharp-corners md:hidden"
-          onClick={() => router.push("/help")}
-          aria-label="Support"
-        >
-          <span className="material-symbols-outlined">support_agent</span>
-        </button>
+        {/* Right panel — Map */}
+        <div className="relative h-[400px] flex-1 lg:h-auto">
+          <div ref={mapContainerRef} className="absolute inset-0" />
+          {/* Fallback overlay when map can't render */}
+          {!hasCoords && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#161027]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800">
+                <span className="material-symbols-outlined text-3xl text-zinc-400">map</span>
+              </div>
+              <p className="text-sm font-semibold text-zinc-400">Map available when driver is en route</p>
+              <p className="max-w-xs text-center text-[12px] text-zinc-400">
+                The live map will appear here once a driver picks up your order and starts the delivery.
+              </p>
+            </div>
+          )}
+
+          {/* Help button */}
+          <Link
+            href="/help"
+            className="absolute bottom-6 right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#3e0074] text-white shadow-lg transition-all hover:scale-105 active:scale-95 dark:bg-[#5b21b6] lg:bottom-8 lg:right-8"
+          >
+            <span className="material-symbols-outlined">support_agent</span>
+          </Link>
+        </div>
       </main>
     </div>
   );
 }
-

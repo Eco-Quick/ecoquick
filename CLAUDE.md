@@ -133,16 +133,31 @@ function calculatePrice(packageSize: string, deliveryType: string) {
 
 ## In-Progress Work
 
-**Booking flow end-to-end wiring** — full plan: `/Users/roshanichede/.claude/plans/bubbly-crafting-frog.md`
+**Full E2E delivery platform** — plan: `/Users/roshanichede/.claude/plans/declarative-pondering-hamming.md`
 
-**Status** (2026-03-18): Plan approved, implementation not yet started.
+**Status** (2026-04-06): All code implemented. Build passes.
 
-**Prerequisite** (manual): Run `delivery_orders` SQL in the Supabase SQL Editor (full SQL in plan file above).
+**Prerequisite** (manual): Run the SQL from the plan file in the Supabase SQL Editor to create:
+- `driver_profiles` table (online status, location, rating, earnings)
+- `driver_locations` table (GPS tracking history)
+- `notifications` table (order status updates)
+- Additional columns on `delivery_orders` (lat/lng, status timestamps)
+- RLS policies for driver access
+- Enable Realtime on `delivery_orders`, `driver_locations`, `notifications`
 
-Remaining tasks:
-1. `app/book/type/page.tsx` — write `deliveryType` to sessionStorage on card/Continue click
-2. `app/book/route/page.tsx` — 10 controlled inputs initialised from sessionStorage, save on Continue
-3. `app/book/parcel/page.tsx` — 5 controlled inputs initialised from sessionStorage, save on Continue
-4. `app/book/confirm/page.tsx` — read sessionStorage, real price calc, Supabase INSERT → `/order/confirmed?id=<uuid>`
-5. `app/order/confirmed/page.tsx` — add `useSearchParams()`, fetch order by id, replace hardcoded values
-6. `app/orders/page.tsx` — remove hardcoded array, fetch `delivery_orders` for current user, add empty state
+### New API Routes
+- `POST /api/driver/accept-job` — atomic job claim (sets driver_id, notifies customer)
+- `POST /api/driver/update-status` — status progression (assigned→picked_up→in_transit→delivered)
+
+### New Hook
+- `hooks/useNotificationCount.ts` — realtime unread notification count
+
+### Key Data Flows
+1. Customer books → pays via Stripe → webhook sets status='confirmed' + sends notification
+2. Driver sees job in `/driver/jobs` → accepts → API atomically claims it
+3. Driver progresses: assigned → picked_up → in_transit → delivered (GPS tracked throughout)
+4. Customer tracks in real-time via Supabase Realtime (order status + driver location on Mapbox map)
+5. Notifications sent at each status change, badge count in TopBar
+
+### Driver earnings formula
+Driver receives 80% of `total_price` per completed delivery.

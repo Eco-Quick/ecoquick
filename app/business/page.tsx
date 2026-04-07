@@ -24,123 +24,87 @@ export default function BusinessPage() {
     window.location.href = `mailto:hello@ecoquick.delivery?subject=${subject}&body=${body}`;
     setSubmitted(true);
   }
-  return (
-    <div className="landing-shell min-h-screen bg-white text-[#3e0074] antialiased dark:bg-[#0d0916] dark:text-[#c084fc]">
-      <div className="landing-grid-layer" />
 
-      <div className="landing-content px-6 lg:px-8">
+  const inputClass =
+    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
+
+  const selectClass =
+    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
+
+  return (
+    <div className="min-h-screen bg-white text-zinc-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+      <div className="px-6 lg:px-8">
         <LandingHeader />
       </div>
 
-      <main className="pt-16 md:pt-24">
+      <main>
         {/* Hero */}
-        <section className="pb-10 px-6 md:px-10 md:pb-18">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-6 md:grid-cols-12">
-              <div className="col-span-12 lg:col-span-10">
-                <h1 className="satoshi-thin mb-8 text-[12vw] leading-[0.9] uppercase md:mb-12 md:text-[8vw]">
-                  Scale With
-                  <br />
-                  <span className="sm:whitespace-normal whitespace-nowrap">
-                    Eco-Friendly
-                  </span>
-                  <br />
-                  Delivery
-                </h1>
-              </div>
-              <div className="col-span-12 lg:col-span-5 lg:col-start-8">
-                <p className="max-w-xl text-lg font-light leading-relaxed text-[#3e0074]/80 dark:text-[#c084fc]/80 md:text-xl">
-                  Comprehensive delivery infrastructure for enterprise. Reduce
-                  your carbon footprint without sacrificing speed or reliability.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <Link
-                    href="/signup"
-                    className="sharp-corners border border-[#3e0074] bg-[#3e0074] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-all hover:bg-black dark:border-[#c084fc] dark:bg-[#c084fc] dark:text-[#0d0916] dark:hover:bg-white"
-                  >
-                    Get started
-                  </Link>
-                  <a
-                    href="#solutions"
-                    className="sharp-corners border border-[#3e0074] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.25em] text-[#3e0074] transition-all hover:bg-[#3e0074] hover:text-white dark:border-[#c084fc] dark:text-[#c084fc] dark:hover:bg-[#c084fc] dark:hover:text-[#0d0916]"
-                  >
-                    View solutions
-                  </a>
-                </div>
-              </div>
+        <section className="px-6 pt-8 pb-12 md:px-10 md:pt-10 md:pb-16">
+          <div className="mx-auto max-w-5xl">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#3e0074]/50 dark:text-[#c084fc]/50">
+              For Business
+            </p>
+            <h1 className="text-4xl font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-[#ede9f8] md:text-6xl lg:text-7xl">
+              Scale with
+              <br />
+              <span className="text-[#3e0074] dark:text-[#c084fc]">eco-friendly delivery</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-zinc-500 dark:text-zinc-400 md:text-lg">
+              Comprehensive delivery infrastructure for enterprise. Reduce your
+              carbon footprint without sacrificing speed or reliability.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                href="/signup"
+                className="rounded-full bg-[#3e0074] px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.97] dark:bg-[#5b21b6]"
+              >
+                Get started
+              </Link>
+              <a
+                href="#solutions"
+                className="rounded-full border border-zinc-200 bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-zinc-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3e0074]/30 hover:text-[#3e0074] active:scale-[0.97] dark:border-zinc-700 dark:bg-[#161027] dark:text-zinc-300 dark:hover:border-[#c084fc]/40 dark:hover:text-[#c084fc]"
+              >
+                View solutions
+              </a>
             </div>
 
-            {/* Highlights row to avoid empty whitespace */}
-            <div className="mt-10 rounded-lg border border-[#3e0074]/10 bg-[rgba(62,0,116,0.04)] p-6 md:mt-12 md:p-8 dark:border-[#4c1d95]/20 dark:bg-[rgba(192,132,252,0.05)]">
-              <div className="grid gap-8 md:grid-cols-3">
-                <div className="space-y-2">
-                  <p className="satoshi-thin text-4xl text-[#3e0074] dark:text-[#c084fc]">99.8%</p>
-                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                    On-time delivery
-                  </p>
+            {/* Stats */}
+            <div className="mt-12 grid gap-6 rounded-2xl border border-zinc-100 bg-zinc-50 p-8 sm:grid-cols-3 dark:border-zinc-800 dark:bg-[#161027]">
+              {[
+                { value: "99.8%", label: "On-time delivery" },
+                { value: "45min", label: "Average delivery time" },
+                { value: "24/7", label: "Availability" },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <p className="text-3xl font-bold text-[#3e0074] dark:text-[#c084fc]">{stat.value}</p>
+                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{stat.label}</p>
                 </div>
-                <div className="space-y-2">
-                  <p className="satoshi-thin text-4xl text-[#3e0074] dark:text-[#c084fc]">LEAD</p>
-                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                    Industry speed
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p className="satoshi-thin text-4xl text-[#3e0074] dark:text-[#c084fc]">24/7</p>
-                  <p className="text-[11px] font-medium leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                    Availability
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Benefits */}
-        <section
-          id="solutions"
-          className="border-y border-[#3e0074]/5 bg-[rgba(62,0,116,0.05)] py-16 px-6 md:px-10 md:py-24 dark:border-[#4c1d95]/20 dark:bg-[rgba(192,132,252,0.05)]"
-        >
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-12 flex flex-col items-start justify-between border-b border-[#3e0074]/10 pb-8 md:mb-16 md:flex-row md:items-end dark:border-[#4c1d95]/20">
-              <h2 className="satoshi-thin mb-4 text-5xl uppercase md:mb-0 md:text-7xl">
-                Why EcoQuick
-              </h2>
-              <p className="max-w-[200px] text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 md:text-right">
-                Enterprise-grade infrastructure, carbon-neutral.
-              </p>
-            </div>
-            <div className="grid gap-6 md:grid-cols-12">
+        {/* Why EcoQuick */}
+        <section id="solutions" className="border-y border-zinc-100 bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:border-zinc-800 dark:bg-[#0d0916]">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
+              Why EcoQuick
+            </h2>
+            <p className="mb-8 text-sm text-zinc-400 dark:text-zinc-500">
+              Enterprise-grade infrastructure, carbon-neutral.
+            </p>
+            <div className="grid gap-8 sm:grid-cols-3">
               {[
-                {
-                  k: "01",
-                  title: "Cost Optimization",
-                  body: "AI-driven routing cuts operational overhead by up to 40%.",
-                },
-                {
-                  k: "02",
-                  title: "Seamless Integration",
-                  body: "Plug-and-play architecture. 99.9% uptime for mission-critical logistics.",
-                },
-                {
-                  k: "03",
-                  title: "Enterprise Support",
-                  body: "24/7 access to specialized logistics experts for immediate resolution.",
-                },
+                { k: "01", title: "Cost Optimization", body: "AI-driven routing cuts operational overhead by up to 40%." },
+                { k: "02", title: "Seamless Integration", body: "Plug-and-play architecture. 99.9% uptime for mission-critical logistics." },
+                { k: "03", title: "Enterprise Support", body: "24/7 access to specialized logistics experts for immediate resolution." },
               ].map((item) => (
-                <div
-                  key={item.k}
-                  className="group col-span-12 border-l border-[#3e0074]/10 py-8 pl-6 sm:col-span-6 lg:col-span-4 dark:border-[#4c1d95]/20"
-                >
-                  <span className="satoshi-thin text-3xl opacity-20 transition-opacity group-hover:opacity-100">
+                <div key={item.k} className="group rounded-2xl border border-zinc-100 bg-white p-8 transition-all duration-200 hover:border-[#3e0074]/20 hover:shadow-lg dark:border-zinc-800 dark:bg-[#161027] dark:hover:border-[#c084fc]/20">
+                  <span className="text-4xl font-bold text-zinc-200 transition-colors group-hover:text-[#3e0074] dark:text-zinc-700 dark:group-hover:text-[#c084fc]">
                     {item.k}
                   </span>
-                  <h3 className="satoshi-bold mt-6 mb-3 text-base uppercase">
-                    {item.title}
-                  </h3>
-                  <p className="text-[10px] font-medium uppercase leading-relaxed tracking-[0.2em] opacity-60">
-                    {item.body}
-                  </p>
+                  <h3 className="mt-4 mb-2 text-base font-bold text-zinc-900 dark:text-[#ede9f8]">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -148,53 +112,27 @@ export default function BusinessPage() {
         </section>
 
         {/* Solutions */}
-        <section id="api" className="py-16 px-6 md:px-10 md:py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-12 flex flex-col items-start justify-between border-b border-[#3e0074]/10 pb-8 md:mb-16 md:flex-row md:items-end dark:border-[#4c1d95]/20">
-              <h2 className="satoshi-thin mb-4 text-5xl uppercase md:mb-0 md:text-7xl">
-                Solutions
-              </h2>
-              <p className="max-w-[200px] text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 md:text-right">
-                Tailored for scale and complexity.
-              </p>
-            </div>
-            <div className="grid border border-[#3e0074]/10 bg-[#3e0074]/10 md:grid-cols-2 gap-px dark:border-[#4c1d95]/20 dark:bg-[#4c1d95]/10">
+        <section className="px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">Solutions</h2>
+            <p className="mb-8 text-sm text-zinc-400 dark:text-zinc-500">Tailored for scale and complexity.</p>
+            <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 sm:grid-cols-2">
               {[
-                {
-                  title: "Bulk Delivery",
-                  body: "High-volume orders with consolidated pickup and drop-off points designed for scale.",
-                  variant: "white",
-                },
-                {
-                  title: "Account Management",
-                  body: "Dedicated account managers to optimize your logistics strategy quarterly.",
-                  variant: "subtle",
-                },
-                {
-                  title: "API Automation",
-                  body: "Full webhook support and RESTful API to automate your entire logistics workflow.",
-                  variant: "subtle",
-                },
-                {
-                  title: "White-Label",
-                  body: "Custom branding for tracking pages and notifications. Enterprise-grade.",
-                  variant: "white",
-                },
+                { title: "Bulk Delivery", body: "High-volume orders with consolidated pickup and drop-off points designed for scale.", variant: "white" },
+                { title: "Account Management", body: "Dedicated account managers to optimize your logistics strategy quarterly.", variant: "purple" },
+                { title: "API Automation", body: "Full webhook support and RESTful API to automate your entire logistics workflow.", variant: "purple" },
+                { title: "White-Label", body: "Custom branding for tracking pages and notifications. Enterprise-grade.", variant: "white" },
               ].map((item) => (
                 <div
                   key={item.title}
-                  className={`space-y-4 p-10 md:p-12 ${
-                    item.variant === "subtle"
-                      ? "bg-[rgba(62,0,116,0.05)] dark:bg-[rgba(192,132,252,0.05)]"
+                  className={`p-10 md:p-12 ${
+                    item.variant === "purple"
+                      ? "bg-[#3e0074]/[0.06] dark:bg-[#c084fc]/[0.08]"
                       : "bg-white dark:bg-[#161027]"
                   }`}
                 >
-                  <h4 className="satoshi-bold text-xl uppercase">
-                    {item.title}
-                  </h4>
-                  <p className="text-[11px] font-medium uppercase leading-relaxed tracking-[0.2em] opacity-60">
-                    {item.body}
-                  </p>
+                  <h4 className="mb-3 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">{item.title}</h4>
+                  <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -202,16 +140,10 @@ export default function BusinessPage() {
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="bg-[#fafafa] py-16 px-6 md:px-10 md:py-24 dark:bg-[#0d0916]">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-12 flex flex-col items-start justify-between border-b border-[#3e0074]/10 pb-8 md:mb-16 md:flex-row md:items-end dark:border-[#4c1d95]/20">
-              <h2 className="satoshi-thin mb-4 text-5xl uppercase md:mb-0 md:text-7xl">
-                Pricing
-              </h2>
-              <p className="max-w-[200px] text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 md:text-right">
-                Choose the plan that fits your scale.
-              </p>
-            </div>
+        <section id="pricing" className="bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:bg-[#0d0916]">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">Pricing</h2>
+            <p className="mb-8 text-sm text-zinc-400 dark:text-zinc-500">Choose the plan that fits your scale.</p>
             <div className="grid gap-6 md:grid-cols-3">
               {[
                 {
@@ -220,7 +152,7 @@ export default function BusinessPage() {
                   period: "/ month",
                   features: ["Pay-as-you-go rates", "Standard 9–5 support", "Basic analytics"],
                   cta: "Start free",
-                  variant: "outline",
+                  featured: false,
                 },
                 {
                   title: "Professional",
@@ -228,7 +160,7 @@ export default function BusinessPage() {
                   period: "/ month",
                   features: ["Priority 24/7 support", "Advanced analytics", "5 team seats"],
                   cta: "Upgrade now",
-                  variant: "primary",
+                  featured: true,
                   badge: "Popular",
                 },
                 {
@@ -237,52 +169,41 @@ export default function BusinessPage() {
                   period: "",
                   features: ["30%+ shipping discount", "Dedicated account manager", "Custom API & SLA"],
                   cta: "Contact sales",
-                  variant: "outline",
+                  featured: false,
                 },
               ].map((plan) => (
                 <div
                   key={plan.title}
-                  className={`border p-10 md:p-12 ${
-                    plan.variant === "primary"
-                      ? "border-[#3e0074]/20 bg-white dark:border-[#4c1d95]/30 dark:bg-[#161027]"
-                      : "border-[#3e0074]/10 bg-white dark:border-[#4c1d95]/20 dark:bg-[#161027]"
+                  className={`relative rounded-2xl border p-8 transition-all md:p-10 ${
+                    plan.featured
+                      ? "border-[#3e0074]/30 bg-white shadow-lg dark:border-[#c084fc]/30 dark:bg-[#161027]"
+                      : "border-zinc-100 bg-white dark:border-zinc-800 dark:bg-[#161027]"
                   }`}
                 >
-                  <div className="mb-6 flex items-start justify-between">
-                    <h4 className="satoshi-bold text-xl uppercase">
-                      {plan.title}
-                    </h4>
-                    {plan.badge && (
-                      <span className="border border-[#ff9b16]/20 bg-[#ff9b16]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff9b16]">
-                        {plan.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mb-8 flex items-baseline">
-                    <span className="satoshi-thin text-4xl text-[#3e0074] dark:text-[#c084fc]">
-                      {plan.price}
+                  {plan.badge && (
+                    <span className="absolute -top-3 right-6 rounded-full bg-accent px-3 py-1 text-[10px] font-bold text-white">
+                      {plan.badge}
                     </span>
-                    <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                      {plan.period}
-                    </span>
+                  )}
+                  <h4 className="text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">{plan.title}</h4>
+                  <div className="mt-4 mb-6 flex items-baseline">
+                    <span className="text-4xl font-bold text-[#3e0074] dark:text-[#c084fc]">{plan.price}</span>
+                    <span className="ml-1 text-sm text-zinc-400">{plan.period}</span>
                   </div>
-                  <ul className="mb-10 space-y-3">
+                  <ul className="mb-8 space-y-3">
                     {plan.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] opacity-60"
-                      >
-                        <span className="h-px w-3 bg-[#3e0074] opacity-40 dark:bg-[#c084fc]" />
+                      <li key={f} className="flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+                        <span className="material-symbols-outlined text-sm text-emerald-500">check</span>
                         {f}
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={plan.cta === "Contact sales" ? "#contact" : "/signup"}
-                    className={`sharp-corners block w-full border px-8 py-4 text-center text-[10px] font-bold uppercase tracking-[0.25em] transition-all ${
-                      plan.variant === "primary"
-                        ? "border-[#3e0074] bg-[#3e0074] text-white hover:bg-black dark:border-[#c084fc] dark:bg-[#c084fc] dark:text-[#0d0916] dark:hover:bg-white"
-                        : "border-[#3e0074] text-[#3e0074] hover:bg-[#3e0074] hover:text-white dark:border-[#c084fc] dark:text-[#c084fc] dark:hover:bg-[#c084fc] dark:hover:text-[#0d0916]"
+                    className={`block w-full rounded-xl py-3.5 text-center text-[12px] font-bold transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${
+                      plan.featured
+                        ? "bg-[#3e0074] text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] dark:bg-[#5b21b6]"
+                        : "border border-zinc-200 text-zinc-700 hover:border-[#3e0074]/30 hover:text-[#3e0074] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-[#c084fc]/40 dark:hover:text-[#c084fc]"
                     }`}
                   >
                     {plan.cta}
@@ -294,117 +215,106 @@ export default function BusinessPage() {
         </section>
 
         {/* Partnership form */}
-        <section id="contact" className="py-16 px-6 md:px-10 md:py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-12">
-              <div className="lg:col-span-5">
-                <h2 className="satoshi-thin mb-6 text-5xl uppercase md:text-7xl">
+        <section id="contact" className="px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-5xl">
+            <div className="grid gap-12 lg:grid-cols-2">
+              <div>
+                <h2 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
                   Partnership
                 </h2>
-                <div className="h-px w-16 bg-[#3e0074]/20 dark:bg-[#c084fc]/20" />
-                <p className="mt-8 max-w-md text-base font-light leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
+                <p className="mt-4 max-w-md text-base leading-relaxed text-zinc-500 dark:text-zinc-400">
                   Join enterprise partners scaling their logistics with EcoQuick.
                   Request a personalized demo.
                 </p>
-                <p className="mt-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                  <span className="h-px w-4 bg-[#3e0074] dark:bg-[#c084fc]" />
-                  GDPR compliant &amp; secure
-                </p>
+                <div className="mt-6 flex items-center gap-2 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">
+                  <span className="material-symbols-outlined text-sm">verified_user</span>
+                  GDPR compliant & secure
+                </div>
               </div>
-              <div className="lg:col-span-7">
+
+              <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-[#161027]">
                 {submitted ? (
-                  <div className="flex flex-col gap-4 py-12">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                      Request sent
-                    </p>
-                    <p className="text-2xl font-light text-[#3e0074] dark:text-[#ede9f8]">
-                      Thank you! We&apos;ll be in touch within 1 business day.
-                    </p>
+                  <div className="flex flex-col items-center gap-4 py-8 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20">
+                      <span className="material-symbols-outlined text-2xl text-emerald-600">check_circle</span>
+                    </div>
+                    <p className="text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">Request sent</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">We&apos;ll be in touch within 1 business day.</p>
                     <button
                       onClick={() => setSubmitted(false)}
-                      className="mt-4 self-start text-[10px] font-bold uppercase tracking-[0.2em] opacity-50 hover:opacity-100"
+                      className="mt-2 text-[12px] font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]"
                     >
                       Submit another
                     </button>
                   </div>
                 ) : (
-                  <form className="space-y-8" onSubmit={handleSubmit}>
-                    <div className="grid gap-8 sm:grid-cols-2">
-                      <div className="group flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
-                          First name
-                        </label>
+                  <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">First name</label>
                         <input
                           type="text"
                           required
                           placeholder="Jane"
                           value={form.firstName}
                           onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none dark:border-[#4c1d95]/30 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/40 dark:focus:border-[#c084fc]"
+                          className={inputClass}
                         />
                       </div>
-                      <div className="group flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
-                          Last name
-                        </label>
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Last name</label>
                         <input
                           type="text"
                           required
                           placeholder="Doe"
                           value={form.lastName}
                           onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none dark:border-[#4c1d95]/30 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/40 dark:focus:border-[#c084fc]"
+                          className={inputClass}
                         />
                       </div>
                     </div>
-                    <div className="group flex flex-col gap-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 transition-opacity group-focus-within:opacity-100">
-                        Work email
-                      </label>
+                    <div>
+                      <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Work email</label>
                       <input
                         type="email"
                         required
                         placeholder="jane@company.com"
                         value={form.email}
                         onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                        className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] placeholder:opacity-40 focus:border-[#3e0074] focus:outline-none dark:border-[#4c1d95]/30 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/40 dark:focus:border-[#c084fc]"
+                        className={inputClass}
                       />
                     </div>
-                    <div className="grid gap-8 sm:grid-cols-2">
-                      <div className="group flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                          Company size
-                        </label>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Company size</label>
                         <select
                           value={form.companySize}
                           onChange={(e) => setForm((f) => ({ ...f, companySize: e.target.value }))}
-                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none dark:border-[#4c1d95]/30 dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
+                          className={selectClass}
                         >
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">1–50 employees</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">51–200 employees</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">201–1000 employees</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">1000+ employees</option>
+                          <option>1–50 employees</option>
+                          <option>51–200 employees</option>
+                          <option>201–1000 employees</option>
+                          <option>1000+ employees</option>
                         </select>
                       </div>
-                      <div className="group flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
-                          Monthly volume
-                        </label>
+                      <div>
+                        <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">Monthly volume</label>
                         <select
                           value={form.monthlyVolume}
                           onChange={(e) => setForm((f) => ({ ...f, monthlyVolume: e.target.value }))}
-                          className="border-b border-[#3e0074]/20 bg-transparent px-0 py-3 text-[#3e0074] focus:border-[#3e0074] focus:outline-none dark:border-[#4c1d95]/30 dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
+                          className={selectClass}
                         >
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">&lt; 1,000 pkgs</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">1k – 10k pkgs</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">10k – 50k pkgs</option>
-                          <option className="dark:bg-[#161027] dark:text-[#ede9f8]">50k+ pkgs</option>
+                          <option>&lt; 1,000 pkgs</option>
+                          <option>1k – 10k pkgs</option>
+                          <option>10k – 50k pkgs</option>
+                          <option>50k+ pkgs</option>
                         </select>
                       </div>
                     </div>
                     <button
                       type="submit"
-                      className="sharp-corners border border-[#3e0074] bg-[#3e0074] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-all hover:bg-black dark:border-[#c084fc] dark:bg-[#c084fc] dark:text-[#0d0916] dark:hover:bg-white"
+                      className="w-full rounded-xl bg-[#3e0074] py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] dark:bg-[#5b21b6]"
                     >
                       Submit request
                     </button>
@@ -416,42 +326,33 @@ export default function BusinessPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-6 py-16 md:px-10 md:py-24">
-          <div className="mx-auto min-h-[40vh] max-w-6xl border border-[#3e0074]/5 bg-[rgba(62,0,116,0.05)] p-12 md:p-24 lg:p-32 dark:border-[#4c1d95]/20 dark:bg-[rgba(192,132,252,0.05)]">
-            <div className="grid items-center gap-10 md:grid-cols-12">
-              <div className="col-span-12 lg:col-span-7">
-                <h2 className="satoshi-thin mb-6 text-5xl uppercase leading-[0.9] md:text-7xl lg:text-8xl">
-                  Ready to
-                  <br />
-                  Transform?
-                </h2>
-                <p className="text-xs font-light uppercase tracking-[0.2em] opacity-60 md:text-sm">
-                  Onboarding deploys your fleet within 24 hours.
-                </p>
-              </div>
-              <div className="col-span-12 flex flex-col gap-4 sm:flex-row lg:col-span-5 lg:flex-col">
-                <Link
-                  href="/signup"
-                  className="sharp-corners flex-1 border border-[#3e0074] bg-[#3e0074] px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-all hover:bg-black dark:border-[#c084fc] dark:bg-[#c084fc] dark:text-[#0d0916] dark:hover:bg-white"
-                >
-                  Get started
-                </Link>
-                <a
-                  href="tel:+442012345678"
-                  className="sharp-corners flex-1 border border-[#3e0074] px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-[#3e0074] transition-all hover:bg-[#3e0074] hover:text-white dark:border-[#c084fc] dark:text-[#c084fc] dark:hover:bg-[#c084fc] dark:hover:text-[#0d0916]"
-                >
-                  +44 20 1234 5678
-                </a>
-              </div>
+        <section className="px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
+            <h2 className="text-3xl font-bold md:text-5xl">Ready to transform?</h2>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/70">
+              Onboarding deploys your fleet within 24 hours.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/signup"
+                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
+              >
+                Get started
+              </Link>
+              <a
+                href="tel:+442012345678"
+                className="rounded-full border border-white/30 px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 active:scale-[0.97]"
+              >
+                +44 20 1234 5678
+              </a>
             </div>
           </div>
         </section>
       </main>
 
-      <div className="landing-content mx-auto w-full max-w-6xl px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
         <LandingFooter />
       </div>
     </div>
   );
 }
-

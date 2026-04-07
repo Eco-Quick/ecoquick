@@ -83,6 +83,18 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     stripe_payment_intent_id: paymentIntent.id,
     processed_at: new Date().toISOString(),
   });
+
+  // Notify customer that order is confirmed
+  const customerId = paymentIntent.metadata.customerId;
+  if (customerId) {
+    await supabase.from("notifications").insert({
+      user_id: customerId,
+      order_id: orderId,
+      type: "order_confirmed",
+      title: "Order confirmed",
+      body: `Your delivery EQ-${orderId.slice(0, 6).toUpperCase()} has been confirmed and is awaiting a driver.`,
+    });
+  }
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {

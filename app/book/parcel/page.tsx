@@ -7,6 +7,23 @@ import { BookingStepper } from "../../../components/book/BookingStepper";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
+const CATEGORIES = [
+  { value: "documents", label: "Documents", icon: "description", ageRestricted: false },
+  { value: "electronics", label: "Electronics", icon: "devices", ageRestricted: false },
+  { value: "food", label: "Food & Groceries", icon: "restaurant", ageRestricted: false },
+  { value: "clothing", label: "Clothing", icon: "checkroom", ageRestricted: false },
+  { value: "alcohol", label: "Alcohol", icon: "liquor", ageRestricted: true },
+  { value: "tobacco", label: "Tobacco", icon: "smoking_rooms", ageRestricted: true },
+  { value: "other", label: "Other", icon: "inventory_2", ageRestricted: false },
+];
+
+const SIZES = [
+  { value: "envelope", label: "Envelope", desc: "Up to 0.5 kg", icon: "mail" },
+  { value: "small", label: "Small", desc: "Up to 2 kg", icon: "package_2" },
+  { value: "medium", label: "Medium", desc: "Up to 10 kg", icon: "deployed_code" },
+  { value: "large", label: "Large", desc: "Up to 25 kg", icon: "pallet" },
+];
+
 export default function BookParcelPage() {
   const user = useCustomerAuth();
   const router = useRouter();
@@ -26,23 +43,8 @@ export default function BookParcelPage() {
       const saved = sessionStorage.getItem("deliveryRequest");
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Step gating: parcel requires route info to exist
-        const hasRoute =
-          parsed.deliveryType &&
-          parsed.pickupAddress &&
-          parsed.pickupPostcode &&
-          parsed.pickupCity &&
-          parsed.senderName &&
-          parsed.senderPhone &&
-          parsed.dropoffAddress &&
-          parsed.dropoffPostcode &&
-          parsed.dropoffCity &&
-          parsed.recipientName &&
-          parsed.recipientPhone;
-        if (!hasRoute) {
-          router.replace("/book/route");
-          return;
-        }
+        const hasRoute = parsed.deliveryType && parsed.pickupAddress && parsed.dropoffAddress;
+        if (!hasRoute) { router.replace("/book/route"); return; }
         setForm((f) => ({
           packageCategory: parsed.packageCategory ?? f.packageCategory,
           packageSize: parsed.packageSize ?? f.packageSize,
@@ -59,200 +61,191 @@ export default function BookParcelPage() {
     const next: Partial<Record<keyof typeof form, string>> = {};
     if (!form.packageCategory.trim()) next.packageCategory = "Required";
     if (!form.packageSize.trim()) next.packageSize = "Required";
-
     const w = parseFloat(form.weight);
     if (!form.weight.trim()) next.weight = "Required";
     else if (!Number.isFinite(w) || w <= 0) next.weight = "Enter a valid weight";
-
     const items = parseInt(form.totalItems, 10);
-    if (form.totalItems.trim() && (!Number.isFinite(items) || items < 1)) {
-      next.totalItems = "Must be at least 1";
-    }
-
+    if (form.totalItems.trim() && (!Number.isFinite(items) || items < 1)) next.totalItems = "Must be at least 1";
     setErrors(next);
     return Object.keys(next).length === 0;
   }
 
   function handleContinue() {
     setSubmitError(null);
-    if (!validate()) {
-      setSubmitError("Please complete the required fields to continue.");
-      return;
-    }
+    if (!validate()) { setSubmitError("Please complete the required fields."); return; }
     try {
       const saved = sessionStorage.getItem("deliveryRequest");
       const data = saved ? JSON.parse(saved) : {};
-      sessionStorage.setItem(
-        "deliveryRequest",
-        JSON.stringify({
-          ...data,
-          packageCategory: form.packageCategory,
-          packageSize: form.packageSize,
-          weight: parseFloat(form.weight) || 0,
-          totalItems: parseInt(form.totalItems) || 1,
-          handlingInstructions: form.handlingInstructions,
-        })
-      );
+      sessionStorage.setItem("deliveryRequest", JSON.stringify({
+        ...data,
+        packageCategory: form.packageCategory,
+        packageSize: form.packageSize,
+        weight: parseFloat(form.weight) || 0,
+        totalItems: parseInt(form.totalItems) || 1,
+        handlingInstructions: form.handlingInstructions,
+      }));
     } catch {}
     router.push("/book/confirm");
   }
 
   if (!user || !hydrated) return null;
+
+  const inputClass = (hasError: boolean) =>
+    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
+      hasError
+        ? "border-red-300 focus:border-red-400 focus:ring-red-100 dark:border-red-700"
+        : "border-zinc-200 focus:border-[#3e0074] focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
+    }`;
+
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
-      <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
-          {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
+      <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8">
             <BookingStepper currentStep={3} />
-            <div className="mt-10 text-center">
-              <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
-                Package details
-              </h1>
-              <div className="mx-auto mt-4 h-1 w-12 bg-primary" aria-hidden />
-            </div>
           </div>
 
-          {/* Content */}
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
-            <div className="border border-primary bg-white p-10 shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
-              <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <label className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-                      Package category *
-                    </label>
-                    <select
-                      className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
-                        errors.packageCategory ? "border-accent" : "border-primary",
-                      ].join(" ")}
-                      value={form.packageCategory}
-                      onChange={(e) => setForm((f) => ({ ...f, packageCategory: e.target.value }))}
+          <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-3xl">
+            Package details
+          </h1>
+          <p className="mb-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Tell us about what you&apos;re sending.
+          </p>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+            <form className="space-y-6 p-6" onSubmit={(e) => e.preventDefault()}>
+
+              {/* Category — selectable pills */}
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                  Category *
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.value}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, packageCategory: cat.value }))}
+                      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold transition-all ${
+                        form.packageCategory === cat.value
+                          ? "border-[#3e0074] bg-[#3e0074]/[0.06] text-[#3e0074] dark:border-[#c084fc] dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                          : "border-zinc-200 text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+                      }`}
                     >
-                      <option value="">Select category</option>
-                      <option value="documents">Documents</option>
-                      <option value="electronics">Electronics</option>
-                      <option value="food">Food &amp; groceries</option>
-                      <option value="clothing">Clothing &amp; apparel</option>
-                      <option value="other">Other</option>
-                    </select>
-                    {errors.packageCategory && (
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                        {errors.packageCategory}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <label className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-                      Package size *
-                    </label>
-                    <select
-                      className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold uppercase tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
-                        errors.packageSize ? "border-accent" : "border-primary",
-                      ].join(" ")}
-                      value={form.packageSize}
-                      onChange={(e) => setForm((f) => ({ ...f, packageSize: e.target.value }))}
+                      <span className="material-symbols-outlined text-base">{cat.icon}</span>
+                      {cat.label}
+                      {cat.ageRestricted && (
+                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:bg-red-900/20 dark:text-red-400">18+</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {errors.packageCategory && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.packageCategory}</p>}
+              </div>
+
+              {/* Size — card selection */}
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                  Size *
+                </label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {SIZES.map((size) => (
+                    <button
+                      key={size.value}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, packageSize: size.value }))}
+                      className={`flex flex-col items-center gap-1.5 rounded-xl border p-4 text-center transition-all ${
+                        form.packageSize === size.value
+                          ? "border-[#3e0074] bg-[#3e0074]/[0.06] dark:border-[#c084fc] dark:bg-[#c084fc]/10"
+                          : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600"
+                      }`}
                     >
-                      <option value="">Select size</option>
-                      <option value="envelope">Envelope (up to 0.5kg)</option>
-                      <option value="small">Small (up to 2kg)</option>
-                      <option value="medium">Medium (up to 10kg)</option>
-                      <option value="large">Large (up to 25kg)</option>
-                    </select>
-                    {errors.packageSize && (
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                        {errors.packageSize}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <label className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-                      Approximate weight *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="0.0"
-                        className={[
-                          "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
-                          errors.weight ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        value={form.weight}
-                        onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))}
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black uppercase tracking-[0.2em] text-primary">
-                        kg
-                      </span>
-                    </div>
-                    {errors.weight && (
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                        {errors.weight}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <label className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-                      Total items
-                    </label>
+                      <span className={`material-symbols-outlined text-xl ${
+                        form.packageSize === size.value ? "text-[#3e0074] dark:text-[#c084fc]" : "text-zinc-400"
+                      }`}>{size.icon}</span>
+                      <span className={`text-[12px] font-bold ${
+                        form.packageSize === size.value ? "text-[#3e0074] dark:text-[#c084fc]" : "text-zinc-700 dark:text-zinc-300"
+                      }`}>{size.label}</span>
+                      <span className="text-[10px] text-zinc-400">{size.desc}</span>
+                    </button>
+                  ))}
+                </div>
+                {errors.packageSize && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.packageSize}</p>}
+              </div>
+
+              {/* Weight + Items */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                    Weight (kg) *
+                  </label>
+                  <div className="relative">
                     <input
                       type="number"
-                      placeholder="1"
-                      className={[
-                        "h-14 w-full border bg-white px-4 text-sm font-bold tracking-wide text-primary dark:bg-[#0d0916] dark:text-[#c084fc]",
-                        errors.totalItems ? "border-accent" : "border-primary",
-                      ].join(" ")}
-                      value={form.totalItems}
-                      onChange={(e) => setForm((f) => ({ ...f, totalItems: e.target.value }))}
+                      step="0.1"
+                      placeholder="0.0"
+                      className={inputClass(!!errors.weight)}
+                      value={form.weight}
+                      onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))}
                     />
-                    {errors.totalItems && (
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                        {errors.totalItems}
-                      </p>
-                    )}
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-zinc-400">kg</span>
                   </div>
+                  {errors.weight && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.weight}</p>}
                 </div>
-
-                <div className="space-y-4">
-                  <label className="block text-xs font-black uppercase tracking-[0.2em] text-primary">
-                    Handling instructions &amp; notes
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                    Total items
                   </label>
-                  <textarea
-                    rows={4}
-                    className="w-full border border-primary bg-white p-5 text-sm font-medium tracking-wide text-primary/80 dark:bg-[#0d0916] dark:text-[#c084fc] dark:placeholder-[#7c6d99]"
-                    placeholder="E.g. fragile items, gate codes, specific recipient instructions..."
-                    value={form.handlingInstructions}
-                    onChange={(e) => setForm((f) => ({ ...f, handlingInstructions: e.target.value }))}
+                  <input
+                    type="number"
+                    placeholder="1"
+                    className={inputClass(!!errors.totalItems)}
+                    value={form.totalItems}
+                    onChange={(e) => setForm((f) => ({ ...f, totalItems: e.target.value }))}
                   />
+                  {errors.totalItems && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.totalItems}</p>}
                 </div>
-              </form>
-            </div>
+              </div>
 
-            {submitError && (
-              <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                {submitError}
-              </p>
-            )}
-            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
-              <Link
-                href="/book/route"
-                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
-              >
-                <span className="material-symbols-outlined text-sm">arrow_back</span>
-                Back
-              </Link>
-              <button
-                onClick={handleContinue}
-                className="btn-press btn-sweep flex items-center gap-3 bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-black"
-              >
-                Review order
-                <span className="material-symbols-outlined text-base text-accent">east</span>
-              </button>
+              {/* Instructions */}
+              <div>
+                <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                  Handling instructions
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
+                  placeholder="E.g. fragile, gate codes, specific instructions..."
+                  value={form.handlingInstructions}
+                  onChange={(e) => setForm((f) => ({ ...f, handlingInstructions: e.target.value }))}
+                />
+              </div>
+            </form>
+          </div>
+
+          {submitError && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+              <span className="material-symbols-outlined text-base">error</span>
+              {submitError}
             </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between">
+            <Link
+              href="/book/route"
+              className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              Back
+            </Link>
+            <button
+              onClick={handleContinue}
+              className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] dark:bg-[#5b21b6]"
+            >
+              Review Order
+            </button>
           </div>
         </div>
       </main>

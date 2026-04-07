@@ -6,6 +6,13 @@ import { BrandLogo } from "@/components/layout/BrandLogo";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
+const NAV_ITEMS = [
+  { href: "/driver", label: "Overview", icon: "dashboard" },
+  { href: "/driver/jobs", label: "Jobs", icon: "search" },
+  { href: "/driver/track", label: "Active", icon: "local_shipping" },
+  { href: "/driver/earnings", label: "Earnings", icon: "account_balance_wallet" },
+];
+
 export default function DriverLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -19,162 +26,68 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
-      <aside className="fixed inset-y-0 hidden w-64 flex-col border-r border-slate-200 bg-white dark:border-zinc-800 dark:bg-[#0d0916] lg:flex">
-        <div className="p-8">
-          <div className="mb-12">
-            <BrandLogo size="sm" labelSuffix="Driver" />
+    <div className="flex min-h-screen flex-col bg-zinc-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+      {/* Top navbar */}
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/85">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
+          {/* Left: logo */}
+          <div className="flex items-center">
+            <button onClick={() => router.push("/driver")}>
+              <BrandLogo size="sm" labelSuffix="Driver" />
+            </button>
           </div>
-          <nav className="space-y-10">
-            <div>
-              <h3 className="mb-6 px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Work &amp; Performance
-              </h3>
-              <ul className="space-y-1">
-                <li>
-                  <button
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive("/driver")
-                        ? "active-nav text-primary"
-                        : "hover:bg-slate-50"
-                    }`}
-                    onClick={() => router.push("/driver")}
-                  >
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      dashboard
-                    </span>
-                    Overview
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive("/driver/jobs")
-                        ? "active-nav text-primary"
-                        : "hover:bg-slate-50"
-                    }`}
-                    onClick={() => router.push("/driver/jobs")}
-                  >
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      search
-                    </span>
-                    Available Jobs
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive("/driver/track")
-                        ? "active-nav text-primary"
-                        : "hover:bg-slate-50"
-                    }`}
-                    onClick={() => router.push("/driver/track")}
-                  >
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      local_shipping
-                    </span>
-                    My Orders
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive("/driver/earnings")
-                        ? "active-nav text-primary"
-                        : "hover:bg-slate-50"
-                    }`}
-                    onClick={() => router.push("/driver/earnings")}
-                  >
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      account_balance_wallet
-                    </span>
-                    Earnings
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="mb-6 px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Profile &amp; Vehicle
-              </h3>
-              <ul className="space-y-1">
-                <li>
-                  <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50">
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      person_outline
-                    </span>
-                    Driver Profile
-                  </button>
-                </li>
-                <li>
-                  <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50">
-                    <span className="material-symbols-outlined text-xl text-accent">
-                      description
-                    </span>
-                    Documents
-                  </button>
-                </li>
-              </ul>
-            </div>
+
+          {/* Center: nav */}
+          <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.href}
+                onClick={() => router.push(item.href)}
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all ${
+                  isActive(item.href)
+                    ? "bg-[#3e0074]/10 text-[#3e0074] dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
           </nav>
+
+          {/* Right: actions */}
+          <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              className="hidden h-9 items-center rounded-full border border-zinc-200 px-3 text-sm font-medium text-zinc-700 transition hover:border-red-300 hover:text-red-600 active:scale-95 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-red-800 dark:hover:text-red-400 sm:inline-flex"
+              onClick={handleSignOut}
+            >
+              Sign out
+            </button>
+          </div>
         </div>
-        <div className="mt-auto border-t border-slate-200 dark:border-zinc-800 p-8 space-y-4">
-          <ThemeToggle className="w-full justify-start gap-3 px-3 h-10 rounded-none" />
+      </header>
+
+      {/* Page content */}
+      <main className="flex-1">{children}</main>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 md:hidden">
+        {NAV_ITEMS.map((item) => (
           <button
-            className="flex w-full items-center gap-3 text-sm font-medium text-slate-500 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
-            onClick={handleSignOut}
+            key={item.href}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold ${
+              isActive(item.href)
+                ? "text-[#3e0074] dark:text-[#c084fc]"
+                : "text-zinc-400 dark:text-zinc-500"
+            }`}
+            onClick={() => router.push(item.href)}
           >
-            <span className="material-symbols-outlined text-xl">logout</span>
-            Sign Out
+            <span className="material-symbols-outlined text-xl">{item.icon}</span>
+            {item.label}
           </button>
-        </div>
-      </aside>
-
-      <main className="flex-1 lg:ml-64">{children}</main>
-
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-primary/20 bg-white px-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-700 dark:border-zinc-800 dark:bg-[#0d0916] dark:text-zinc-400 lg:hidden">
-        <button
-          className={`flex flex-col items-center gap-0.5 ${
-            isActive("/driver") ? "text-primary" : "opacity-70"
-          }`}
-          onClick={() => router.push("/driver")}
-        >
-          <span className="material-symbols-outlined text-lg">dashboard</span>
-          <span>Home</span>
-        </button>
-        <button
-          className={`flex flex-col items-center gap-0.5 ${
-            isActive("/driver/jobs") ? "text-primary" : "opacity-70"
-          }`}
-          onClick={() => router.push("/driver/jobs")}
-        >
-          <span className="material-symbols-outlined text-lg">search</span>
-          <span>Jobs</span>
-        </button>
-        <button
-          className={`flex flex-col items-center gap-0.5 ${
-            isActive("/driver/track") ? "text-primary" : "opacity-70"
-          }`}
-          onClick={() => router.push("/driver/track")}
-        >
-          <span className="material-symbols-outlined text-lg">
-            local_shipping
-          </span>
-          <span>Active</span>
-        </button>
-        <button
-          className={`flex flex-col items-center gap-0.5 ${
-            isActive("/driver/earnings") ? "text-primary" : "opacity-70"
-          }`}
-          onClick={() => router.push("/driver/earnings")}
-        >
-          <span className="material-symbols-outlined text-lg">
-            account_balance_wallet
-          </span>
-          <span>Earn</span>
-        </button>
+        ))}
       </nav>
     </div>
   );
 }
-

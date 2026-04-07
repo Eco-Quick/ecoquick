@@ -15,11 +15,15 @@ export default function BookRoutePage() {
     pickupAddress: "",
     pickupPostcode: "",
     pickupCity: "",
+    pickupLat: null as number | null,
+    pickupLng: null as number | null,
     senderName: "",
     senderPhone: "",
     dropoffAddress: "",
     dropoffPostcode: "",
     dropoffCity: "",
+    dropoffLat: null as number | null,
+    dropoffLng: null as number | null,
     recipientName: "",
     recipientPhone: "",
   });
@@ -41,11 +45,15 @@ export default function BookRoutePage() {
           pickupAddress: parsed.pickupAddress ?? f.pickupAddress,
           pickupPostcode: parsed.pickupPostcode ?? f.pickupPostcode,
           pickupCity: parsed.pickupCity ?? f.pickupCity,
+          pickupLat: parsed.pickupLat ?? f.pickupLat,
+          pickupLng: parsed.pickupLng ?? f.pickupLng,
           senderName: parsed.senderName ?? f.senderName,
           senderPhone: parsed.senderPhone ?? f.senderPhone,
           dropoffAddress: parsed.dropoffAddress ?? f.dropoffAddress,
           dropoffPostcode: parsed.dropoffPostcode ?? f.dropoffPostcode,
           dropoffCity: parsed.dropoffCity ?? f.dropoffCity,
+          dropoffLat: parsed.dropoffLat ?? f.dropoffLat,
+          dropoffLng: parsed.dropoffLng ?? f.dropoffLng,
           recipientName: parsed.recipientName ?? f.recipientName,
           recipientPhone: parsed.recipientPhone ?? f.recipientPhone,
         }));
@@ -150,279 +158,169 @@ export default function BookRoutePage() {
   }
 
   if (!user || !hydrated) return null;
+
+  const inputClass = (hasError: boolean) =>
+    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
+      hasError
+        ? "border-red-300 focus:border-red-400 focus:ring-red-100 dark:border-red-700 dark:focus:ring-red-900/20"
+        : "border-zinc-200 focus:border-[#3e0074] focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
+    }`;
+
+  const labelClass = "mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400";
+  const errorClass = "mt-1 text-[11px] font-medium text-red-500";
+
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
-      <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
-          {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
+      <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
+        <div className="w-full max-w-5xl">
+          <div className="mx-auto mb-8 max-w-2xl">
             <BookingStepper currentStep={2} />
-            <div className="mt-10 text-center">
-              <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
-                Pickup &amp; Delivery Details
-              </h1>
-              <div className="mx-auto mt-4 h-1 w-12 bg-primary" aria-hidden />
-            </div>
           </div>
 
-          {/* Content */}
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
-            <div className="mb-10 border border-primary bg-white p-8 md:p-10 dark:bg-[#161027]">
-              <form className="space-y-14" onSubmit={(e) => e.preventDefault()}>
+          <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-3xl">
+            Pickup & Delivery
+          </h1>
+          <p className="mb-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Enter the addresses and contact details for both ends.
+          </p>
 
-                {/* ── Pickup ── */}
-                <section>
-                  <div className="mb-8 flex items-center gap-3 border-b border-primary/10 pb-4">
-                    <span className="material-symbols-outlined text-xl text-accent">location_on</span>
-                    <h2 className="text-xl font-black uppercase tracking-tight">Pickup address</h2>
+          <form className="grid gap-6 lg:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
+            {/* Pickup section */}
+            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
+                  <span className="material-symbols-outlined text-base text-emerald-600">location_on</span>
+                </div>
+                <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Pickup details</h2>
+              </div>
+              <div className="space-y-4 p-6">
+                <div>
+                  <label className={labelClass}>Address</label>
+                  <AddressAutocomplete
+                    value={form.pickupAddress}
+                    onChange={(val) => setForm((f) => ({ ...f, pickupAddress: val }))}
+                    onSelect={(p) =>
+                      setForm((f) => ({
+                        ...f,
+                        pickupAddress: p.description,
+                        pickupPostcode: p.postcode || f.pickupPostcode,
+                        pickupCity: p.city || f.pickupCity,
+                        pickupLat: p.geometry?.location.lat ?? f.pickupLat,
+                        pickupLng: p.geometry?.location.lng ?? f.pickupLng,
+                      }))
+                    }
+                    placeholder="Start typing address or postcode"
+                    className={inputClass(!!errors.pickupAddress)}
+                  />
+                  {errors.pickupAddress && <p className={errorClass}>{errors.pickupAddress}</p>}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Postcode</label>
+                    <input className={inputClass(!!errors.pickupPostcode)} placeholder="E.g. KT1 1QT" value={form.pickupPostcode} onChange={set("pickupPostcode")} />
+                    {errors.pickupPostcode && <p className={errorClass}>{errors.pickupPostcode}</p>}
                   </div>
-                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-12">
-                    <div className="space-y-2 md:col-span-8">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Address line 1
-                      </label>
-                      <AddressAutocomplete
-                        value={form.pickupAddress}
-                        onChange={(val) => setForm((f) => ({ ...f, pickupAddress: val }))}
-                        onSelect={(p) =>
-                          setForm((f) => ({
-                            ...f,
-                            pickupAddress: p.description,
-                            pickupPostcode: p.postcode || f.pickupPostcode,
-                            pickupCity: p.city || f.pickupCity,
-                          }))
-                        }
-                        placeholder="E.g. 123 Kingston Road"
-                      />
-                      {errors.pickupAddress && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.pickupAddress}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Postcode
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.pickupPostcode ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="E.g. KT1 1QT"
-                        type="text"
-                        value={form.pickupPostcode}
-                        onChange={set("pickupPostcode")}
-                      />
-                      {errors.pickupPostcode && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.pickupPostcode}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        City
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.pickupCity ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="E.g. London"
-                        type="text"
-                        value={form.pickupCity}
-                        onChange={set("pickupCity")}
-                      />
-                      {errors.pickupCity && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.pickupCity}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Sender name
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.senderName ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="Full name"
-                        type="text"
-                        value={form.senderName}
-                        onChange={set("senderName")}
-                      />
-                      {errors.senderName && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.senderName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Sender phone
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.senderPhone ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="+44 7000 000000"
-                        type="tel"
-                        value={form.senderPhone}
-                        onChange={set("senderPhone")}
-                      />
-                      {errors.senderPhone && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.senderPhone}
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <label className={labelClass}>City</label>
+                    <input className={inputClass(!!errors.pickupCity)} placeholder="E.g. London" value={form.pickupCity} onChange={set("pickupCity")} />
+                    {errors.pickupCity && <p className={errorClass}>{errors.pickupCity}</p>}
                   </div>
-                </section>
-
-                {/* ── Delivery ── */}
-                <section>
-                  <div className="mb-8 flex items-center gap-3 border-b border-primary/10 pb-4">
-                    <span className="material-symbols-outlined text-xl text-accent">local_shipping</span>
-                    <h2 className="text-xl font-black uppercase tracking-tight">Delivery address</h2>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Sender name</label>
+                    <input className={inputClass(!!errors.senderName)} placeholder="Full name" value={form.senderName} onChange={set("senderName")} />
+                    {errors.senderName && <p className={errorClass}>{errors.senderName}</p>}
                   </div>
-                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-12">
-                    <div className="space-y-2 md:col-span-8">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Address line 1
-                      </label>
-                      <AddressAutocomplete
-                        value={form.dropoffAddress}
-                        onChange={(val) => setForm((f) => ({ ...f, dropoffAddress: val }))}
-                        onSelect={(p) =>
-                          setForm((f) => ({
-                            ...f,
-                            dropoffAddress: p.description,
-                            dropoffPostcode: p.postcode || f.dropoffPostcode,
-                            dropoffCity: p.city || f.dropoffCity,
-                          }))
-                        }
-                        placeholder="E.g. 45 Richmond Hill"
-                      />
-                      {errors.dropoffAddress && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.dropoffAddress}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Postcode
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.dropoffPostcode ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="E.g. TW10 6RW"
-                        type="text"
-                        value={form.dropoffPostcode}
-                        onChange={set("dropoffPostcode")}
-                      />
-                      {errors.dropoffPostcode && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.dropoffPostcode}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        City
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.dropoffCity ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="E.g. Richmond"
-                        type="text"
-                        value={form.dropoffCity}
-                        onChange={set("dropoffCity")}
-                      />
-                      {errors.dropoffCity && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.dropoffCity}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Recipient name
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.recipientName ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="Full name"
-                        type="text"
-                        value={form.recipientName}
-                        onChange={set("recipientName")}
-                      />
-                      {errors.recipientName && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.recipientName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2 md:col-span-4">
-                      <label className="block text-[10px] font-extrabold tracking-wide text-primary">
-                        Recipient phone
-                      </label>
-                      <input
-                        className={[
-                          "w-full border bg-transparent px-4 py-3 text-sm uppercase tracking-wide focus:outline-none dark:text-[#ede9f8] dark:placeholder-[#7c6d99]",
-                          errors.recipientPhone ? "border-accent" : "border-primary",
-                        ].join(" ")}
-                        placeholder="+44 7000 000000"
-                        type="tel"
-                        value={form.recipientPhone}
-                        onChange={set("recipientPhone")}
-                      />
-                      {errors.recipientPhone && (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                          {errors.recipientPhone}
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <label className={labelClass}>Sender phone</label>
+                    <input className={inputClass(!!errors.senderPhone)} placeholder="+44 7000 000000" type="tel" value={form.senderPhone} onChange={set("senderPhone")} />
+                    {errors.senderPhone && <p className={errorClass}>{errors.senderPhone}</p>}
                   </div>
-                </section>
-              </form>
+                </div>
+              </div>
             </div>
 
-            {submitError && (
-              <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-                {submitError}
-              </p>
-            )}
-            <div className="mx-auto mt-4 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
-              <Link
-                href="/book/type"
-                className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
-              >
-                <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">
-                  arrow_back
-                </span>
-                Back
-              </Link>
-              <button
-                onClick={handleContinue}
-                className="btn-press btn-sweep flex items-center gap-3 bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-black"
-              >
-                Continue
-                <span className="material-symbols-outlined text-base text-accent">east</span>
-              </button>
+            {/* Delivery section */}
+            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <span className="material-symbols-outlined text-base text-blue-600">flag</span>
+                </div>
+                <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Delivery details</h2>
+              </div>
+              <div className="space-y-4 p-6">
+                <div>
+                  <label className={labelClass}>Address</label>
+                  <AddressAutocomplete
+                    value={form.dropoffAddress}
+                    onChange={(val) => setForm((f) => ({ ...f, dropoffAddress: val }))}
+                    onSelect={(p) =>
+                      setForm((f) => ({
+                        ...f,
+                        dropoffAddress: p.description,
+                        dropoffPostcode: p.postcode || f.dropoffPostcode,
+                        dropoffCity: p.city || f.dropoffCity,
+                        dropoffLat: p.geometry?.location.lat ?? f.dropoffLat,
+                        dropoffLng: p.geometry?.location.lng ?? f.dropoffLng,
+                      }))
+                    }
+                    placeholder="Start typing address or postcode"
+                    className={inputClass(!!errors.dropoffAddress)}
+                  />
+                  {errors.dropoffAddress && <p className={errorClass}>{errors.dropoffAddress}</p>}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Postcode</label>
+                    <input className={inputClass(!!errors.dropoffPostcode)} placeholder="E.g. TW10 6RW" value={form.dropoffPostcode} onChange={set("dropoffPostcode")} />
+                    {errors.dropoffPostcode && <p className={errorClass}>{errors.dropoffPostcode}</p>}
+                  </div>
+                  <div>
+                    <label className={labelClass}>City</label>
+                    <input className={inputClass(!!errors.dropoffCity)} placeholder="E.g. Richmond" value={form.dropoffCity} onChange={set("dropoffCity")} />
+                    {errors.dropoffCity && <p className={errorClass}>{errors.dropoffCity}</p>}
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Recipient name</label>
+                    <input className={inputClass(!!errors.recipientName)} placeholder="Full name" value={form.recipientName} onChange={set("recipientName")} />
+                    {errors.recipientName && <p className={errorClass}>{errors.recipientName}</p>}
+                  </div>
+                  <div>
+                    <label className={labelClass}>Recipient phone</label>
+                    <input className={inputClass(!!errors.recipientPhone)} placeholder="+44 7000 000000" type="tel" value={form.recipientPhone} onChange={set("recipientPhone")} />
+                    {errors.recipientPhone && <p className={errorClass}>{errors.recipientPhone}</p>}
+                  </div>
+                </div>
+              </div>
             </div>
+          </form>
+
+          {submitError && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400 ">
+              <span className="material-symbols-outlined text-base">error</span>
+              {submitError}
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between ">
+            <Link
+              href="/book/type"
+              className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              Back
+            </Link>
+            <button
+              onClick={handleContinue}
+              className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] dark:bg-[#5b21b6]"
+            >
+              Continue
+            </button>
           </div>
         </div>
       </main>

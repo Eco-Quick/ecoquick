@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LandingHeader } from "@/components/layout/LandingHeader";
-import { LandingFooter } from "@/components/layout/LandingFooter";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -15,11 +14,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [forgotMode, setForgotMode] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
 
-  // Hydrate remembered email preference
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -28,9 +25,7 @@ export default function LoginPage() {
         setEmail(stored);
         setRememberMe(true);
       }
-    } catch {
-      // ignore storage errors
-    }
+    } catch {}
   }, []);
 
   const handleSubmit = async (event: { preventDefault(): void }) => {
@@ -51,24 +46,24 @@ export default function LoginPage() {
       return;
     }
 
-    // Persist email locally when "Remember me" is on
+    // Save/clear remembered email BEFORE navigating
     try {
       if (rememberMe) {
         window.localStorage.setItem("ecoquickRememberEmail", email.trim().toLowerCase());
       } else {
         window.localStorage.removeItem("ecoquickRememberEmail");
       }
-    } catch {
-      // ignore storage errors
-    }
+    } catch {}
 
     const role = data.user?.user_metadata?.role;
+    // Small delay to ensure localStorage write completes before navigation
+    await new Promise((r) => setTimeout(r, 50));
     router.push(role === "driver" ? "/driver" : "/dashboard");
   };
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
-      setError("Enter your email address above, then click 'Forgot password?'");
+      setError("Enter your email address first, then click forgot password.");
       return;
     }
     setForgotLoading(true);
@@ -79,109 +74,91 @@ export default function LoginPage() {
     });
     setForgotLoading(false);
     setForgotSent(true);
-    setForgotMode(false);
   };
 
+  const inputClass =
+    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
+
+  const labelClass =
+    "mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400";
+
   return (
-    <div className="flex min-h-screen flex-col bg-[#fcfaff] text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc]">
-      <div className="px-5 sm:px-6">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="px-6 lg:px-8">
         <LandingHeader />
       </div>
 
-      <main className="flex flex-1 items-center justify-center p-6 md:p-12">
-        <div className="flex w-full max-w-md flex-col items-center">
-          <h1 className="mb-4 text-center text-4xl uppercase leading-[0.9] tracking-[-0.06em] text-[#3e0074] dark:text-[#c084fc] sm:text-5xl md:text-6xl">
-            Welcome back
-          </h1>
+      <main className="flex flex-1 items-center justify-center px-4 py-12 md:py-20">
+        <div className="w-full max-w-md">
 
-          <div className="sharp-corners w-full bg-white p-8 shadow-[0_20px_50px_rgba(62,0,116,0.05)] dark:bg-[#161027] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] md:p-12">
-            <div className="mb-8">
-              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#3e0074]/40 dark:text-[#c084fc]/40">
-                Login
-              </h2>
-              <p className="text-sm font-medium text-[#3e0074]/90 dark:text-[#ede9f8]/90">
-                Please enter your credentials to access your dashboard.
-              </p>
-            </div>
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-4xl">
+              Welcome back
+            </h1>
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              Sign in to your EcoQuick account
+            </p>
+          </div>
+
+          {/* Card */}
+          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-[#161027]">
 
             {error && (
-              <div className="mb-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
+              <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+                <span className="material-symbols-outlined text-base">error</span>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60"
-                >
-                  Email address
-                </label>
+            {forgotSent && (
+              <div className="mb-6 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-800/40 dark:bg-emerald-950/20 dark:text-emerald-400">
+                <span className="material-symbols-outlined text-base">check_circle</span>
+                Reset link sent — check your inbox.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className={labelClass}>Email address</label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-accent">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="5" width="18" height="14" rx="2" />
-                      <path d="M3 7l9 6 9-6" />
-                    </svg>
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
+                    <span className="material-symbols-outlined text-lg text-zinc-400 dark:text-zinc-500">mail</span>
                   </span>
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="name@company.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#0d0916] dark:border-[#4c1d95]/50 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/30 dark:focus:border-[#c084fc]"
+                    className={`${inputClass} pl-11`}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60"
-                >
-                  Password
-                </label>
+              <div>
+                <label htmlFor="password" className={labelClass}>Password</label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-accent">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="4" y="10" width="16" height="10" rx="2" />
-                      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
+                    <span className="material-symbols-outlined text-lg text-zinc-400 dark:text-zinc-500">lock</span>
                   </span>
                   <input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="sharp-corners w-full border border-[#3e0074]/30 bg-white px-3 py-3 pl-10 pr-4 text-sm text-[#3e0074] placeholder:text-[#3e0074]/30 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#0d0916] dark:border-[#4c1d95]/50 dark:text-[#ede9f8] dark:placeholder:text-[#c084fc]/30 dark:focus:border-[#c084fc]"
+                    className={`${inputClass} pl-11 pr-16`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#3e0074]/70 hover:text-[#3e0074] dark:text-[#c084fc]/70 dark:hover:text-[#c084fc]"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -194,9 +171,9 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]"
+                    className="h-4 w-4 rounded border-zinc-300 text-[#3e0074] accent-[#3e0074] dark:border-zinc-600 dark:accent-[#c084fc]"
                   />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em]">
+                  <span className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
                     Remember me
                   </span>
                 </label>
@@ -204,74 +181,49 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={forgotLoading}
-                  className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3e0074] dark:text-[#c084fc] underline-offset-4 hover:underline disabled:opacity-50"
+                  className="text-[12px] font-semibold text-[#3e0074] transition-colors hover:underline disabled:opacity-50 dark:text-[#c084fc]"
                 >
                   {forgotLoading ? "Sending…" : "Forgot password?"}
                 </button>
               </div>
 
-              {forgotSent && (
-                <div className="rounded border border-green-300 bg-green-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-green-700">
-                  Reset link sent — check your inbox.
-                </div>
-              )}
-
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-press btn-sweep group sharp-corners relative w-full overflow-hidden bg-[#3e0074] py-4 text-xs font-bold uppercase tracking-[0.22em] text-white disabled:opacity-60"
+                className="w-full rounded-xl bg-[#3e0074] py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-[#5b21b6] dark:shadow-[0_4px_16px_rgba(91,33,182,0.3)]"
               >
-                <span className="relative z-10">
-                  {loading ? "Signing in…" : "Sign in"}
-                </span>
-                <div className="absolute bottom-0 left-0 h-1 w-full translate-y-full bg-[#ff9b16] transition-transform duration-300 group-hover:translate-y-0" />
-                <div className="absolute right-0 top-0 h-full w-1 bg-[#ff9b16]/60" />
+                {loading ? "Signing in…" : "Sign in"}
               </button>
             </form>
-
-            <div className="mt-8 border-t border-[#3e0074]/10 dark:border-[#4c1d95]/30 pt-8 text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                New to EcoQuick?{" "}
-                <Link
-                  href="/signup"
-                  className="text-[#3e0074] dark:text-[#c084fc] underline-offset-4 hover:underline"
-                >
-                  Create one here
-                </Link>
-              </p>
-            </div>
           </div>
 
-          <div className="mt-12 flex flex-col items-center gap-6 text-[#3e0074]/40 dark:text-[#c084fc]/40">
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px] font-bold">
-                  ✓
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
-                  End-to-end encrypted
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px] font-bold">
-                  ⚿
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
-                  Secure authentication
-                </span>
-              </div>
+          {/* Footer link */}
+          <p className="mt-6 text-center text-[13px] text-zinc-400 dark:text-zinc-500">
+            New to EcoQuick?{" "}
+            <Link href="/signup" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">
+              Create an account
+            </Link>
+          </p>
+
+          {/* Trust badges */}
+          <div className="mt-8 flex items-center justify-center gap-6 text-zinc-300 dark:text-zinc-700">
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm">lock</span>
+              <span className="text-[10px] font-medium">Encrypted</span>
             </div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em]">
-              © {new Date().getFullYear()} EcoQuick Logistics. All rights
-              reserved.
-            </p>
+            <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800" />
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm">verified_user</span>
+              <span className="text-[10px] font-medium">Secure auth</span>
+            </div>
+            <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800" />
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm">shield</span>
+              <span className="text-[10px] font-medium">GDPR</span>
+            </div>
           </div>
         </div>
       </main>
-
-      <div className="px-5 sm:px-6">
-        <LandingFooter />
-      </div>
     </div>
   );
 }

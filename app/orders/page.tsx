@@ -232,8 +232,16 @@ export default function OrderHistoryPage() {
                           {formatStatus(order.status)}
                         </span>
                       </div>
-                      <div className="col-span-2 text-right font-black text-primary">
-                        £{order.total_price.toFixed(2)}
+                      <div className="col-span-2 flex items-center justify-end gap-3">
+                        <span className="font-black text-primary">£{order.total_price.toFixed(2)}</span>
+                        {["confirmed", "assigned", "picked_up", "in_transit"].includes(order.status) && (
+                          <Link
+                            href={`/order/track?id=${order.id}`}
+                            className="text-[9px] font-black uppercase tracking-[0.2em] text-accent hover:underline"
+                          >
+                            Track
+                          </Link>
+                        )}
                       </div>
                     </div>
                   ))}

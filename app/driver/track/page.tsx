@@ -1,302 +1,365 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { BrandLogo } from "@/components/layout/BrandLogo";
+import { createClient } from "@/lib/supabase/client";
+
+interface ActiveOrder {
+  id: string;
+  status: string;
+  pickup_address: string;
+  pickup_city: string;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
+  recipient_name: string;
+  recipient_phone: string;
+  product_category: string;
+  package_size: string;
+  weight: number;
+  total_price: number;
+  driver_instructions: string;
+  scheduling_type: string;
+  verification_code: string | null;
+  assigned_at: string | null;
+  picked_up_at: string | null;
+  in_transit_at: string | null;
+}
+
+const STATUS_ACTIONS: Record<string, { label: string; next: string; icon: string }> = {
+  assigned: { label: "Confirm Pickup", next: "picked_up", icon: "inventory_2" },
+  picked_up: { label: "Start Delivery", next: "in_transit", icon: "local_shipping" },
+  in_transit: { label: "Complete Delivery", next: "delivered", icon: "task_alt" },
+};
+
+const STATUS_LABELS: Record<string, { text: string; color: string }> = {
+  assigned: { text: "Head to pickup", color: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400" },
+  picked_up: { text: "Collect package", color: "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400" },
+  in_transit: { text: "Delivering", color: "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400" },
+};
 
 export default function DriverActiveDeliveryPage() {
   const router = useRouter();
+  const [order, setOrder] = useState<ActiveOrder | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const driverMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+  const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [driverPos, setDriverPos] = useState<{ lat: number; lng: number } | null>(null);
 
+  useEffect(() => { fetchActiveOrder(); }, []);
+
+  // Map init
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedDriverEmail = window.sessionStorage.getItem(
-      "ecoquickDriverEmail",
-    );
-    if (!storedDriverEmail) {
-      router.replace("/login");
+    if (!order || !mapContainerRef.current || mapRef.current) return;
+    const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    if (!token || (!order.pickup_lat && !order.delivery_lat)) return;
+
+    import("mapbox-gl").then((mapboxgl) => {
+      mapboxgl.default.accessToken = token;
+      const map = new mapboxgl.default.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/light-v11",
+        center: [order.pickup_lng ?? -0.1276, order.pickup_lat ?? 51.5074],
+        zoom: 13,
+      });
+      mapRef.current = map;
+
+      map.on("load", () => {
+        if (order.pickup_lat && order.pickup_lng) {
+          const el = document.createElement("div");
+          el.innerHTML = `<div style="background:#10b981;color:#fff;padding:4px 10px;font-size:11px;font-weight:700;border-radius:8px;">Pickup</div>`;
+          new mapboxgl.default.Marker({ element: el }).setLngLat([order.pickup_lng, order.pickup_lat]).addTo(map);
+        }
+        if (order.delivery_lat && order.delivery_lng) {
+          const el = document.createElement("div");
+          el.innerHTML = `<div style="background:#3e0074;color:#fff;padding:4px 10px;font-size:11px;font-weight:700;border-radius:8px;">Dropoff</div>`;
+          new mapboxgl.default.Marker({ element: el }).setLngLat([order.delivery_lng, order.delivery_lat]).addTo(map);
+        }
+
+        const coords: [number, number][] = [];
+        if (order.pickup_lat && order.pickup_lng) coords.push([order.pickup_lng, order.pickup_lat]);
+        if (order.delivery_lat && order.delivery_lng) coords.push([order.delivery_lng, order.delivery_lat]);
+        if (coords.length >= 2) {
+          const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
+          map.fitBounds([[Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01], [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]], { padding: 60 });
+
+          fetch(`https://api.mapbox.com/directions/v5/mapbox/cycling/${order.pickup_lng},${order.pickup_lat};${order.delivery_lng},${order.delivery_lat}?geometries=geojson&access_token=${token}`)
+            .then(r => r.json())
+            .then(data => {
+              if (data.routes?.[0]) {
+                map.addSource("route", { type: "geojson", data: { type: "Feature", properties: {}, geometry: data.routes[0].geometry } });
+                map.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#3e0074", "line-width": 4, "line-opacity": 0.5 } });
+              }
+            }).catch(() => {});
+        }
+      });
+    });
+    return () => { mapRef.current?.remove(); mapRef.current = null; };
+  }, [order?.id]);
+
+  // GPS tracking
+  useEffect(() => {
+    if (!order) return;
+    if ("geolocation" in navigator) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setDriverPos(p);
+          if (mapRef.current) {
+            import("mapbox-gl").then((mapboxgl) => {
+              if (driverMarkerRef.current) {
+                driverMarkerRef.current.setLngLat([p.lng, p.lat]);
+              } else {
+                const el = document.createElement("div");
+                el.innerHTML = `<div style="width:28px;height:28px;background:#3e0074;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.3);"></div>`;
+                driverMarkerRef.current = new mapboxgl.default.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(mapRef.current!);
+              }
+            });
+          }
+        },
+        () => {}, { enableHighAccuracy: true, maximumAge: 5000 }
+      );
     }
-  }, [router]);
+    locationIntervalRef.current = setInterval(() => {
+      if (driverPos) sendLocation(driverPos.lat, driverPos.lng);
+    }, 10000);
+    return () => {
+      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      if (locationIntervalRef.current) clearInterval(locationIntervalRef.current);
+    };
+  }, [order?.id]);
+
+  async function sendLocation(lat: number, lng: number) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !order) return;
+    await supabase.from("driver_locations").insert({ driver_id: user.id, order_id: order.id, lat, lng });
+    await supabase.from("driver_profiles").update({ current_lat: lat, current_lng: lng }).eq("id", user.id);
+  }
+
+  async function fetchActiveOrder() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("delivery_orders")
+      .select("id, status, pickup_address, pickup_city, pickup_lat, pickup_lng, delivery_address, delivery_city, delivery_lat, delivery_lng, recipient_name, recipient_phone, product_category, package_size, weight, total_price, driver_instructions, scheduling_type, verification_code, assigned_at, picked_up_at, in_transit_at")
+      .eq("driver_id", user.id)
+      .in("status", ["assigned", "picked_up", "in_transit"])
+      .order("assigned_at", { ascending: false })
+      .limit(1)
+      .single();
+    setOrder(data);
+    setLoading(false);
+  }
+
+  const handleStatusUpdate = useCallback(async () => {
+    if (!order) return;
+    const action = STATUS_ACTIONS[order.status];
+    if (!action) return;
+    setUpdating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/driver/update-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, newStatus: action.next }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Failed to update status");
+      if (action.next === "delivered") {
+        router.push("/driver");
+      } else {
+        fetchActiveOrder();
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to update");
+    } finally {
+      setUpdating(false);
+    }
+  }, [order, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <span className="material-symbols-outlined text-3xl text-zinc-400">local_shipping</span>
+        </div>
+        <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">No active delivery</p>
+        <button
+          onClick={() => router.push("/driver/jobs")}
+          className="rounded-xl bg-[#3e0074] px-8 py-3 text-[13px] font-bold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98] dark:bg-[#5b21b6]"
+        >
+          Find available jobs
+        </button>
+      </div>
+    );
+  }
+
+  const action = STATUS_ACTIONS[order.status];
+  const statusLabel = STATUS_LABELS[order.status];
+  const orderId = `EQ-${order.id.slice(0, 6).toUpperCase()}`;
+  const hasCoords = order.pickup_lat && order.delivery_lat;
 
   return (
-    <div className="flex min-h-screen flex-col overflow-hidden bg-white text-primary">
-      <header className="z-20 flex items-center justify-between border-b border-primary bg-white px-6 py-4">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <BrandLogo size="sm" labelSuffix="Driver" />
-          <nav className="flex items-center gap-8">
-            <h2 className="text-lg font-black uppercase tracking-tighter">
-              Active Delivery
-            </h2>
-            <div className="flex gap-6">
-              <button
-                className="border-b-2 border-primary pb-1 text-xs font-bold uppercase tracking-widest"
-                onClick={() => router.push("/driver")}
-              >
-                Dashboard
-              </button>
-              <button className="text-xs font-bold uppercase tracking-widest text-primary/40 transition-colors hover:text-primary">
-                History
-              </button>
-              <button
-                className="text-xs font-bold uppercase tracking-widest text-primary/40 transition-colors hover:text-primary"
-                onClick={() => router.push("/driver/earnings")}
-              >
-                Earnings
-              </button>
-            </div>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <button className="p-2 text-primary transition-colors hover:bg-[rgba(62,0,116,0.05)]">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="p-2 text-primary transition-colors hover:bg-[rgba(62,0,116,0.05)]">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-          </div>
-          <div className="mx-2 h-10 w-px bg-primary/20" />
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary/50">
-                Driver ID #8842
-              </p>
-              <p className="text-sm font-bold">Marcus Chen</p>
-            </div>
-            <div className="size-10 border border-primary bg-white p-0.5" />
-          </div>
-        </div>
-      </header>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+      <main className="flex flex-1 flex-col overflow-hidden lg:flex-row">
 
-      <main className="relative flex flex-1 overflow-hidden">
-        <aside className="z-10 flex w-full flex-col border-r border-primary bg-white lg:w-[450px]">
-          <div className="border-b border-primary bg-white p-8">
-            <div className="mb-8 flex items-start justify-between">
+        {/* Left panel */}
+        <div className="w-full shrink-0 overflow-y-auto lg:h-full lg:w-[400px] lg:border-r lg:border-zinc-200 dark:lg:border-zinc-800">
+          <div className="p-5 sm:p-6">
+
+            {/* Order header */}
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
-                  Active Job Order
-                </p>
-                <h1 className="text-4xl font-black tracking-tighter">
-                  EQ-98422
-                </h1>
+                <p className="text-[11px] font-semibold text-zinc-400">Active Delivery</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-[#ede9f8]">{orderId}</p>
               </div>
-              <div className="border border-primary px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                EST. 14 MINS
-              </div>
-            </div>
-            <div className="flex items-center gap-4 border border-primary bg-[rgba(62,0,116,0.05)] p-4">
-              <div className="flex size-10 items-center justify-center bg-primary">
-                <span className="material-symbols-outlined text-white">
-                  near_me
+              {statusLabel && (
+                <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${statusLabel.color}`}>
+                  {statusLabel.text}
                 </span>
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">
-                  Next Objective
-                </p>
-                <p className="text-lg font-bold">Pickup at Kingston Hall</p>
-              </div>
+              )}
             </div>
-          </div>
 
-          <div className="custom-scrollbar flex-1 space-y-8 overflow-y-auto p-8">
-            <div className="space-y-6">
-              <div className="relative pl-8">
-                <div className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-primary/20">
-                  <div className="absolute left-1/2 top-0 size-2 -translate-x-1/2 bg-primary" />
-                  <div className="absolute bottom-0 left-1/2 size-2 -translate-x-1/2 border border-primary bg-white" />
-                </div>
-                <div className="mb-8">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                    Origin Point
-                  </p>
-                  <p className="text-base font-bold">Kingston Hall, Wing B</p>
-                  <p className="text-sm text-primary/60">
-                    123 Delivery St, Business District, Floor 4
-                  </p>
-                </div>
+            {/* Verification PIN */}
+            {order.verification_code && (
+              <div className="mb-4 flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/30 dark:bg-amber-900/10">
                 <div>
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                    Final Destination
-                  </p>
-                  <p className="text-base font-bold">
-                    The Penthouse Residences
-                  </p>
-                  <p className="text-sm text-primary/60">
-                    88 Skyview Terrace, Uptown Circle
-                  </p>
+                  <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400">Delivery PIN</p>
+                  <p className="text-[11px] text-amber-600/70 dark:text-amber-400/60">Ask customer for this code</p>
                 </div>
+                <p className="font-mono text-2xl font-bold tracking-widest text-amber-700 dark:text-amber-400">{order.verification_code}</p>
               </div>
-            </div>
+            )}
 
-            <div className="border border-primary/20 bg-[rgba(62,0,116,0.05)] p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-12 items-center justify-center border border-primary bg-white">
-                    <span className="material-symbols-outlined text-primary">
-                      person
-                    </span>
+            {/* Route card */}
+            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center pt-1">
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <div className="my-1 h-10 w-px bg-zinc-200 dark:bg-zinc-700" />
+                  <div className="h-2.5 w-2.5 rounded-full border-2 border-[#3e0074] dark:border-[#c084fc]" />
+                </div>
+                <div className="flex-1 space-y-5">
+                  <div>
+                    <p className="text-[11px] font-semibold text-zinc-400">Pickup</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{order.pickup_city}</p>
+                    <p className="text-[12px] text-zinc-400">{order.pickup_address}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-primary/40">
-                      Client
-                    </p>
-                    <p className="text-lg font-bold">Sarah Jenkins</p>
+                    <p className="text-[11px] font-semibold text-zinc-400">Dropoff</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{order.delivery_city}</p>
+                    <p className="text-[12px] text-zinc-400">{order.delivery_address}</p>
                   </div>
                 </div>
-                <button className="sharp-edge bg-primary px-6 py-2.5 text-xs font-black uppercase tracking-widest text-white transition-opacity hover:opacity-90">
-                  Call
-                </button>
               </div>
             </div>
 
-            <div className="border border-primary/20">
-              <div className="grid grid-cols-2">
-                <div className="border-r border-b border-primary/20 bg-[rgba(62,0,116,0.05)] p-6">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                    Cargo Type
-                  </p>
-                  <p className="flex items-center gap-2 font-bold">
-                    <span className="material-symbols-outlined text-lg">
-                      description
-                    </span>
-                    Documents
-                  </p>
+            {/* Recipient */}
+            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                    <span className="material-symbols-outlined text-lg text-zinc-500">person</span>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-zinc-400">Recipient</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{order.recipient_name}</p>
+                  </div>
                 </div>
-                <div className="border-b border-primary/20 bg-[rgba(62,0,116,0.05)] p-6">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                    Net Weight
-                  </p>
-                  <p className="font-bold">0.45 kg</p>
-                </div>
-              </div>
-              <div className="bg-white p-6">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                  Internal Instructions
-                </p>
-                <p className="text-sm font-medium leading-relaxed text-primary/80">
-                  &quot;Ring the buzzer for Wing B. Security will let you up to
-                  the 4th floor. Please leave at reception if I&apos;m not at
-                  the desk.&quot;
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-primary bg-white p-8">
-            <button className="group flex w-full items-center justify-center gap-4 bg-primary py-6 text-lg font-black uppercase tracking-[0.3em] text-white transition-all hover:bg-primary/95">
-              Slide to Complete
-              <span className="material-symbols-outlined text-2xl transition-transform group-hover:translate-x-1">
-                arrow_forward
-              </span>
-            </button>
-          </div>
-        </aside>
-
-        <div className="relative flex-1 bg-[#f0f0f0]">
-          <div className="absolute inset-0 bg-white">
-            <svg
-              className="h-full w-full opacity-60"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 800 600"
-              fill="none"
-            >
-              <path
-                d="M100 500L250 450L350 550L500 400L450 250L600 150"
-                stroke="#3e0074"
-                strokeWidth="4"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-              />
-              <defs>
-                <pattern
-                  id="mapGrid"
-                  width="60"
-                  height="60"
-                  patternUnits="userSpaceOnUse"
+                <a
+                  href={`tel:${order.recipient_phone}`}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
                 >
-                  <path
-                    d="M 60 0 L 0 0 0 60"
-                    fill="none"
-                    stroke="rgba(62,0,116,0.08)"
-                    strokeWidth="1"
-                  />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#mapGrid)" />
-            </svg>
-
-            <div className="absolute top-[150px] left-[600px] -translate-x-1/2 -translate-y-full">
-              <div className="relative flex flex-col items-center">
-                <div className="mb-0 border border-primary bg-primary px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
-                  Kingston Hall
-                </div>
-                <div className="flex size-8 items-center justify-center border-2 border-primary bg-accent shadow-lg">
-                  <span className="material-symbols-outlined text-xl font-bold text-primary">
-                    location_on
-                  </span>
-                </div>
+                  <span className="material-symbols-outlined text-lg">call</span>
+                </a>
               </div>
             </div>
 
-            <div className="absolute bottom-[100px] left-[100px] -translate-x-1/2 -translate-y-1/2">
-              <div className="keep-rounded relative flex size-10 items-center justify-center border-2 border-white bg-primary shadow-2xl">
-                <span className="material-symbols-outlined text-lg text-white">
-                  navigation
+            {/* Package details */}
+            <div className="mb-4 grid grid-cols-3 gap-3">
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+                <p className="text-[10px] font-semibold text-zinc-400">Category</p>
+                <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.product_category}</p>
+              </div>
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+                <p className="text-[10px] font-semibold text-zinc-400">Size</p>
+                <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.package_size}</p>
+              </div>
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+                <p className="text-[10px] font-semibold text-zinc-400">Weight</p>
+                <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.weight} kg</p>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            {order.driver_instructions && (
+              <div className="mb-4 rounded-2xl bg-zinc-50 p-4 dark:bg-[#0d0916]">
+                <p className="mb-1 text-[11px] font-semibold text-zinc-400">Instructions</p>
+                <p className="text-[13px] italic text-zinc-600 dark:text-zinc-300">&ldquo;{order.driver_instructions}&rdquo;</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+                <span className="material-symbols-outlined text-base">error</span>
+                {error}
+              </div>
+            )}
+
+            {/* Action button */}
+            {action && (
+              <button
+                onClick={handleStatusUpdate}
+                disabled={updating}
+                className="w-full rounded-xl bg-[#3e0074] py-4 text-[14px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-lg">{action.icon}</span>
+                  {updating ? "Updating…" : action.label}
                 </span>
-              </div>
+              </button>
+            )}
+
+            {/* Earnings preview */}
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-[#0d0916]">
+              <span className="text-[12px] text-zinc-400">You earn</span>
+              <span className="text-sm font-bold text-[#3e0074] dark:text-[#c084fc]">£{(Number(order.total_price) * 0.8).toFixed(2)}</span>
             </div>
           </div>
+        </div>
 
-          <div className="absolute right-8 top-8 flex flex-col gap-px border border-primary shadow-xl">
-            <button className="bg-white p-3 text-primary transition-colors hover:bg-[rgba(62,0,116,0.05)]">
-              <span className="material-symbols-outlined">add</span>
-            </button>
-            <button className="bg-white p-3 text-primary transition-colors hover:bg-[rgba(62,0,116,0.05)]">
-              <span className="material-symbols-outlined">remove</span>
-            </button>
-            <button className="bg-white p-3 text-primary transition-colors hover:bg-[rgba(62,0,116,0.05)]">
-              <span className="material-symbols-outlined">my_location</span>
-            </button>
-          </div>
-
-          <div className="absolute left-8 top-8">
-            <div className="border-2 border-primary bg-white p-6 shadow-xl">
-              <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-primary/40">
-                Estimated Arrival
-              </p>
-              <p className="text-4xl font-black tracking-tighter text-primary">
-                14:45
-              </p>
-              <div className="mt-4 flex items-center gap-2">
-                <span className="keep-rounded h-2 w-2 bg-accent" />
-                <p className="text-[10px] font-bold uppercase text-primary">
-                  Traffic: Moderate
-                </p>
+        {/* Right panel — Map */}
+        <div className="relative h-[400px] flex-1 lg:h-auto">
+          <div ref={mapContainerRef} className="absolute inset-0" />
+          {!hasCoords && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#161027]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800">
+                <span className="material-symbols-outlined text-3xl text-zinc-400">map</span>
               </div>
+              <p className="text-sm font-semibold text-zinc-400">Map loading...</p>
             </div>
-          </div>
+          )}
         </div>
       </main>
-
-      <footer className="hidden items-center justify-between border-t border-primary px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary lg:flex">
-        <div className="flex gap-10">
-          <div className="flex items-center gap-3">
-            <span className="keep-rounded h-2 w-2 animate-pulse bg-primary" />
-            <span>GNSS ACTIVE / 1.2m PRECISION</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[14px]">
-              battery_charging_full
-            </span>
-            <span>System: 88%</span>
-          </div>
-        </div>
-        <div className="flex gap-10">
-          <span>Channel: 5G-UL_ENCRY</span>
-          <span className="opacity-40">UTC: 12:31:04</span>
-        </div>
-      </footer>
     </div>
   );
 }
-

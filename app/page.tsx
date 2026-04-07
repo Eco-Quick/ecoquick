@@ -9,17 +9,21 @@ import { CoverageSection } from "@/components/landing/CoverageSection";
 
 export default function Home() {
   return (
-    <div className="landing-shell page-fade min-h-screen bg-white text-zinc-950 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="landing-shell page-fade min-h-screen bg-[#faf8f5] text-zinc-950 dark:bg-[#0d0916] dark:text-[#ede9f8]">
 
       {/* Full-width header */}
       <div className="landing-content px-6 lg:px-8">
         <LandingHeader />
       </div>
 
-      {/* Constrained main content */}
+      {/* Hero — full width, no max-w constraint */}
+      <div className="landing-content">
+        <HeroSection />
+      </div>
+
+      {/* Constrained sections below */}
       <div className="landing-content mx-auto max-w-6xl px-6 lg:px-8">
-        <main id="top" className="py-10 sm:py-16 lg:py-20">
-          <HeroSection />
+        <main id="top">
           <WorkflowSection />
           <FutureDeliverySection />
           <CoverageSection />

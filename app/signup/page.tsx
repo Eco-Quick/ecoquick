@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { LandingHeader } from "@/components/layout/LandingHeader";
-import { LandingFooter } from "@/components/layout/LandingFooter";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -17,16 +16,13 @@ export default function SignupPage() {
 
 function SignupFallback() {
   return (
-    <div className="min-h-screen bg-white text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc]">
-      <div className="px-4 md:px-6">
+    <div className="min-h-screen bg-white dark:bg-[#0d0916]">
+      <div className="px-6 lg:px-8">
         <LandingHeader />
       </div>
-      <main className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-12">
-        <p className="text-sm font-medium text-[#3e0074]/70 dark:text-[#c084fc]/70">Loading…</p>
+      <main className="flex min-h-[60vh] items-center justify-center">
+        <span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span>
       </main>
-      <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
-        <LandingFooter />
-      </div>
     </div>
   );
 }
@@ -65,6 +61,7 @@ function SignupPageContent() {
           full_name: fullName,
           role: profile,
           phone_number: phone,
+          verification_status: "unverified",
           ...(profile === "customer" ? { date_of_birth: dob } : { license_expiry: licenseExpiry }),
         },
       },
@@ -77,6 +74,15 @@ function SignupPageContent() {
       return;
     }
 
+    // Create driver_profiles row for driver signups
+    if (profile === "driver" && data.user) {
+      await supabase.from("driver_profiles").upsert({
+        id: data.user.id,
+        full_name: fullName,
+        phone: phone,
+      });
+    }
+
     // No session means Supabase requires email confirmation
     if (!data.session) {
       setConfirmEmail(email);
@@ -86,231 +92,167 @@ function SignupPageContent() {
     router.push(profile === "driver" ? "/driver" : "/dashboard");
   };
 
+  const inputClass =
+    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
+
+  const labelClass =
+    "mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400";
+
   return (
-    <div className="min-h-screen bg-white text-[#3e0074] dark:bg-[#0d0916] dark:text-[#c084fc]">
-      <div className="px-4 md:px-6">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="px-6 lg:px-8">
         <LandingHeader />
       </div>
 
-      <main className="flex min-h-screen flex-col items-center px-4 py-12 md:py-24">
-        <div className="w-full max-w-3xl" id="signup-form">
+      <main className="flex justify-center px-4 py-10 md:py-16">
+        <div className="w-full max-w-lg">
+
           {confirmEmail ? (
-            <div className="flex flex-col items-center gap-6 py-16 text-center">
-              <span className="text-5xl">✉️</span>
-              <h1 className="text-3xl uppercase tracking-tight text-[#3e0074] dark:text-[#c084fc]">Check your email</h1>
-              <p className="max-w-sm text-sm font-medium text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                We sent a confirmation link to <strong>{confirmEmail}</strong>.
+            <div className="flex flex-col items-center gap-6 rounded-2xl border border-zinc-200 bg-white px-8 py-16 text-center shadow-sm dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20">
+                <span className="material-symbols-outlined text-3xl text-emerald-600">mark_email_read</span>
+              </div>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">Check your email</h1>
+              <p className="max-w-sm text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                We sent a confirmation link to <strong className="text-zinc-900 dark:text-[#ede9f8]">{confirmEmail}</strong>.
                 Click it to activate your account, then{" "}
-                <Link href="/login" className="font-bold text-[#3e0074] dark:text-[#c084fc] underline underline-offset-4">
+                <Link href="/login" className="font-semibold text-[#3e0074] underline underline-offset-4 dark:text-[#c084fc]">
                   sign in here
-                </Link>
-                .
+                </Link>.
               </p>
             </div>
           ) : (
-          <>
-          <h1 className="mb-12 text-center text-5xl uppercase leading-[0.85] tracking-[-0.06em] dark:text-[#c084fc] md:text-[70px]">
-            Join EcoQuick
-          </h1>
-
-          <div className="space-y-12">
-            <section className="space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                01 / Select Profile
-              </span>
-              <div className="flex flex-wrap gap-3 md:gap-4">
-                {(["customer", "driver"] as const).map((type) => (
-                  <div
-                    key={type}
-                    className={`group flex min-w-[120px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border px-4 py-3 text-xs md:text-sm transition-all md:px-6 md:py-3.5 ${
-                      profile === type
-                        ? "border-[#3e0074] bg-[#3e0074] text-white shadow-lg shadow-[#3e0074]/30 dark:border-[#7c3aed] dark:bg-[#7c3aed]"
-                        : "border-[#3e0074]/30 bg-white text-[#3e0074] hover:border-[#3e0074] hover:bg-[#3e0074]/5 dark:border-[#4c1d95] dark:bg-[#161027] dark:text-[#c084fc] dark:hover:border-[#7c3aed]"
-                    }`}
-                    onClick={() => {
-                      setProfile(type);
-                      router.replace(type === "driver" ? "/signup?profile=driver" : "/signup");
-                    }}
-                  >
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-accent transition-colors ${
-                        profile === type ? "bg-white/15" : "bg-[#3e0074]/5"
-                      }`}
-                    >
-                      {type === "customer" ? (
-                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="8" r="3.5" />
-                          <path d="M5.5 19c1.2-3 3.3-4.5 6.5-4.5S16.8 16 18 19" />
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="7" width="11" height="8" rx="1" />
-                          <path d="M14 9h3.5L21 11.5V15h-3" />
-                          <circle cx="8" cy="17" r="1.8" />
-                          <circle cx="18" cy="17" r="1.8" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="text-[11px] md:text-xs font-semibold tracking-[0.16em] capitalize">
-                      {type}
-                    </span>
-                  </div>
-                ))}
+            <>
+              {/* Header */}
+              <div className="mb-8 text-center">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-4xl">
+                  Create your account
+                </h1>
+                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                  Join EcoQuick as a {profile === "customer" ? "customer" : "driver"} and start today.
+                </p>
               </div>
-            </section>
 
-            <form className="space-y-8" onSubmit={handleSubmit}>
-              <section className="space-y-6">
-                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                  {profile === "customer" ? "02 / Personal details" : "02 / Driver details"}
-                </span>
+              {/* Card */}
+              <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-[#161027]">
 
-                <div className="grid grid-cols-1 gap-4">
+                {/* Profile toggle */}
+                <div className="mb-8">
+                  <div className="flex rounded-xl bg-zinc-100 p-1 dark:bg-[#0d0916]">
+                    {(["customer", "driver"] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-[12px] font-semibold transition-all duration-200 ${
+                          profile === type
+                            ? "bg-white text-[#3e0074] shadow-sm dark:bg-[#241c3d] dark:text-[#c084fc]"
+                            : "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                        }`}
+                        onClick={() => {
+                          setProfile(type);
+                          router.replace(type === "driver" ? "/signup?profile=driver" : "/signup");
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          {type === "customer" ? "person" : "local_shipping"}
+                        </span>
+                        <span className="capitalize">{type}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Form */}
+                <form className="space-y-5" onSubmit={handleSubmit}>
                   <div>
-                    <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                      Full name
-                    </label>
-                    <input
-                      name="fullName"
-                      type="text"
-                      placeholder="Johnathan Doe"
-                      required
-                      className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] placeholder:opacity-50 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
-                    />
+                    <label className={labelClass}>Full name</label>
+                    <input name="fullName" type="text" placeholder="John Doe" required className={inputClass} />
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                        Email address
-                      </label>
-                      <input
-                        name="email"
-                        type="email"
-                        placeholder="john@ecoquick.com"
-                        required
-                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] placeholder:opacity-50 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
-                      />
+                      <label className={labelClass}>Email address</label>
+                      <input name="email" type="email" placeholder="john@email.com" required className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                        Phone number
-                      </label>
-                      <input
-                        name="phone"
-                        type="tel"
-                        placeholder="+44 000 000 0000"
-                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] placeholder:opacity-50 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
-                      />
+                      <label className={labelClass}>Phone number</label>
+                      <input name="phone" type="tel" placeholder="+44 7000 000000" className={inputClass} />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                        Password
-                      </label>
-                      <input
-                        name="password"
-                        type="password"
-                        placeholder="••••••••••••"
-                        required
-                        minLength={6}
-                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] placeholder:opacity-50 focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
-                      />
+                      <label className={labelClass}>Password</label>
+                      <input name="password" type="password" placeholder="Min. 6 characters" required minLength={6} className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
+                      <label className={labelClass}>
                         {profile === "customer" ? "Date of birth" : "License expiry"}
                       </label>
                       <input
                         type="date"
                         name={profile === "customer" ? "dob" : "licenseExpiry"}
-                        className="sharp-corners w-full border border-[#3e0074] bg-white p-4 text-xs font-bold uppercase text-[#3e0074] focus:border-[#3e0074] focus:outline-none focus:ring-0 dark:bg-[#161027] dark:border-[#4c1d95] dark:text-[#ede9f8] dark:focus:border-[#c084fc]"
+                        className={inputClass}
                       />
                     </div>
                   </div>
-                </div>
-              </section>
 
-              <section className="sharp-corners space-y-4 border border-[#3e0074]/20 bg-[#3e0074]/5 p-6 dark:border-[#4c1d95]/40 dark:bg-[#3f0075]/10">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[#3e0074] dark:border-[#4c1d95] text-xs font-bold">
-                    ✓
-                  </span>
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.22em]">
-                    Identity verification
-                  </h4>
-                </div>
-                <ul className="space-y-2 text-[9px] font-bold uppercase leading-relaxed text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 bg-accent" />
-                    Required for UK age verification laws and secure courier operations.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 bg-accent" />
-                    Documents are securely encrypted and stored with bank‑grade protocols.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 bg-accent" />
-                    Used exclusively for age and professional verification purposes.
-                  </li>
-                </ul>
-              </section>
+                  {/* Verification note */}
+                  <div className="flex gap-3 rounded-xl bg-zinc-50 p-4 dark:bg-[#0d0916]">
+                    <span className="material-symbols-outlined mt-0.5 text-lg text-[#3e0074] dark:text-[#c084fc]">verified_user</span>
+                    <p className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                      Your data is encrypted and only used for identity verification.
+                      We comply with UK data protection laws.
+                    </p>
+                  </div>
 
-              {error && (
-                <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
-                  {error}
-                </div>
-              )}
+                  {error && (
+                    <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+                      <span className="material-symbols-outlined text-base">error</span>
+                      {error}
+                    </div>
+                  )}
 
-              <section className="space-y-4 pt-4">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                    I agree to the{" "}
-                    <Link href="/terms" className="underline underline-offset-2 hover:text-[#3e0074]">
-                      Terms of Service
-                    </Link>
-                  </span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input type="checkbox" required className="sharp-corners h-4 w-4 border border-[#3e0074] text-[#3e0074] accent-[#3e0074] dark:border-[#4c1d95] dark:accent-[#c084fc]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/70 dark:text-[#c084fc]/70">
-                    I agree to the{" "}
-                    <Link href="/privacy" className="underline underline-offset-2 hover:text-[#3e0074]">
-                      Privacy Policy
-                    </Link>
-                  </span>
-                </label>
-              </section>
+                  {/* Checkboxes */}
+                  <div className="space-y-3 pt-1">
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#3e0074] accent-[#3e0074] dark:border-zinc-600 dark:accent-[#c084fc]" />
+                      <span className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                        I agree to the{" "}
+                        <Link href="/terms" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">Terms of Service</Link>
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#3e0074] accent-[#3e0074] dark:border-zinc-600 dark:accent-[#c084fc]" />
+                      <span className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                        I agree to the{" "}
+                        <Link href="/privacy" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">Privacy Policy</Link>
+                      </span>
+                    </label>
+                  </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-press btn-sweep sharp-corners mt-8 w-full bg-[#3e0074] py-6 text-xs font-bold uppercase tracking-[0.3em] text-white transition hover:bg-[#2f0058] disabled:opacity-60"
-              >
-                {loading ? "Creating account…" : "Create account"}
-              </button>
-            </form>
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-2 w-full rounded-xl bg-[#3e0074] py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-[#5b21b6] dark:shadow-[0_4px_16px_rgba(91,33,182,0.3)]"
+                  >
+                    {loading ? "Creating account…" : "Create account"}
+                  </button>
+                </form>
+              </div>
 
-            <div className="border-t border-[#3e0074]/10 dark:border-[#4c1d95]/30 pt-8 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#3e0074]/60 dark:text-[#c084fc]/60">
-                Already have an account?
-                <Link href="/login" className="ml-2 border-b border-[#3e0074] text-[#3e0074] dark:border-[#c084fc] dark:text-[#c084fc]">
-                  Sign in here
+              {/* Footer link */}
+              <p className="mt-6 text-center text-[13px] text-zinc-400 dark:text-zinc-500">
+                Already have an account?{" "}
+                <Link href="/login" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">
+                  Sign in
                 </Link>
               </p>
-            </div>
-          </div>
-          </>
+            </>
           )}
         </div>
       </main>
-
-      <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
-        <LandingFooter />
-      </div>
     </div>
   );
 }

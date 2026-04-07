@@ -3,6 +3,7 @@ import { Raleway } from "next/font/google";
 import "./globals.css";
 import { NavProgress } from "@/components/layout/NavProgress";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PageTransition } from "@/components/PageTransition";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -36,7 +37,9 @@ export default function RootLayout({
       <body className={`${raleway.className} antialiased`}>
         <ThemeProvider>
           <NavProgress />
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </ThemeProvider>
       </body>
     </html>

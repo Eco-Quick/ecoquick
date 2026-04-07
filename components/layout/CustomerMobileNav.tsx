@@ -7,26 +7,22 @@ export function CustomerMobileNav() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const baseClasses =
-    "flex flex-col items-center gap-0.5 text-[10px] font-bold uppercase tracking-widest transition-opacity duration-150";
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-accent/20 bg-primary px-2 text-white dark:border-zinc-800 dark:bg-[#0d0916] lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 md:hidden">
       {CUSTOMER_MOBILE_NAV.map((item) => {
         const isActive = item.match(pathname);
         return (
           <button
             key={item.href}
-            className={`${baseClasses} ${isActive ? "text-accent" : "opacity-70 hover:opacity-90"}`}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold ${
+              isActive
+                ? "text-[#3e0074] dark:text-[#c084fc]"
+                : "text-zinc-400 dark:text-zinc-500"
+            }`}
             onClick={() => router.push(item.href)}
           >
-            <div
-              className="mobile-nav-tap"
-              data-active={isActive ? "true" : "false"}
-            >
-              <span className="material-symbols-outlined text-lg">{item.icon}</span>
-            </div>
-            <span className="transition-colors duration-150">{item.label}</span>
+            <span className="material-symbols-outlined text-xl">{item.icon}</span>
+            {item.label}
           </button>
         );
       })}

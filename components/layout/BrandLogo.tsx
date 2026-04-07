@@ -14,10 +14,10 @@ export function BrandLogo({
   size = "md",
   labelSuffix,
 }: BrandLogoProps) {
-  const iconSize = size === "sm" ? 24 : 32;
+  const iconSize = size === "sm" ? 30 : 36;
 
   const wrapper = (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <Image
         src="/ecoquick-logo.png"
         alt="EcoQuick logo"
@@ -29,7 +29,7 @@ export function BrandLogo({
       {withWordmark && (
         <span
           className={`font-extrabold uppercase tracking-tight text-zinc-950 dark:text-zinc-100 ${
-            size === "sm" ? "text-[11px] sm:text-xs" : "text-sm sm:text-base"
+            size === "sm" ? "text-sm" : "text-base sm:text-lg"
           }`}
         >
           ECOQUICK{labelSuffix ? ` ${labelSuffix}` : ""}

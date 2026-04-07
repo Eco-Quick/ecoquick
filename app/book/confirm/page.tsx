@@ -7,48 +7,35 @@ import { BookingStepper } from "../../../components/book/BookingStepper";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { createClient } from "@/lib/supabase/client";
-import PaymentForm from "@/components/PaymentForm";
 
-const BoltIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="shrink-0" aria-hidden>
-    <path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z" />
-  </svg>
-);
+// Haversine distance in miles between two lat/lng points
+function haversineDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3958.8; // Earth radius in miles
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
-const CalendarIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
-    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-    <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-const ShieldCheckIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
-    <path d="M12 3L5 6v6c0 4.243 2.686 7.657 7 9 4.314-1.343 7-4.757 7-9V6l-7-3Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M9 12.5 11 14.5 15 10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ArrowEastIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
-    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-function calculatePrice(packageSize: string, deliveryType: string) {
-  const base = 8.0;
-  const sizeFees: Record<string, number> = { envelope: 0, small: 3.5, medium: 6.5, large: 12.0 };
-  const sizeFee = sizeFees[packageSize] ?? 6.5;
-  const schedulingFee = deliveryType === "instant" ? 4.0 : 0;
-  const discount = 1.5;
-  return { base, sizeFee, schedulingFee, discount, total: base + sizeFee + schedulingFee - discount };
+function calculatePrice(distanceMiles: number) {
+  // £2.50 for first mile, £0.50 per additional mile
+  const firstMile = 2.50;
+  const extraPerMile = 0.50;
+  const extraMiles = Math.max(0, Math.ceil(distanceMiles) - 1);
+  const total = firstMile + (extraMiles * extraPerMile);
+  return { firstMile, extraMiles, extraPerMile, distanceMiles: Math.round(distanceMiles * 10) / 10, total: Math.round(total * 100) / 100 };
 }
 
 type DeliveryRequest = {
   deliveryType: "instant" | "scheduled";
   pickupAddress: string; pickupPostcode: string; pickupCity: string;
+  pickupLat: number | null; pickupLng: number | null;
   senderName: string; senderPhone: string;
   dropoffAddress: string; dropoffPostcode: string; dropoffCity: string;
+  dropoffLat: number | null; dropoffLng: number | null;
   recipientName: string; recipientPhone: string;
   packageCategory: string; packageSize: string;
   weight: number; totalItems: number; handlingInstructions: string;
@@ -58,10 +45,14 @@ export default function BookConfirmPage() {
   const user = useCustomerAuth();
   const router = useRouter();
   const [order, setOrder] = useState<Partial<DeliveryRequest>>({});
-  const [step, setStep] = useState<"review" | "payment">("review");
-  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVerifyPrompt, setShowVerifyPrompt] = useState(false);
+  const [showAgeRestricted, setShowAgeRestricted] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  const skipVerification = process.env.NEXT_PUBLIC_SKIP_VERIFICATION === "true";
+  const AGE_RESTRICTED_CATEGORIES = ["alcohol", "tobacco"];
 
   useEffect(() => {
     try {
@@ -70,68 +61,55 @@ export default function BookConfirmPage() {
         const parsed = JSON.parse(saved);
         setOrder(parsed);
 
-        // Step gating: confirm requires route + parcel info
-        const hasRoute =
-          parsed.deliveryType &&
-          parsed.pickupAddress &&
-          parsed.pickupPostcode &&
-          parsed.pickupCity &&
-          parsed.senderName &&
-          parsed.senderPhone &&
-          parsed.dropoffAddress &&
-          parsed.dropoffPostcode &&
-          parsed.dropoffCity &&
-          parsed.recipientName &&
-          parsed.recipientPhone;
-        if (!hasRoute) {
-          router.replace("/book/route");
-          return;
-        }
+        const hasRoute = parsed.deliveryType && parsed.pickupAddress && parsed.dropoffAddress;
+        if (!hasRoute) { router.replace("/book/route"); return; }
 
-        const hasParcel =
-          parsed.packageCategory &&
-          parsed.packageSize &&
-          parsed.weight != null &&
-          Number(parsed.weight) > 0;
-        if (!hasParcel) {
-          router.replace("/book/parcel");
-          return;
-        }
+        const hasParcel = parsed.packageCategory && parsed.packageSize && Number(parsed.weight) > 0;
+        if (!hasParcel) { router.replace("/book/parcel"); return; }
       } else {
         router.replace("/book/type");
       }
     } catch {}
+    setHydrated(true);
   }, []);
 
-  const pricing = calculatePrice(order.packageSize ?? "", order.deliveryType ?? "instant");
-  const isInstant = order.deliveryType !== "scheduled";
+  // Calculate distance and price
+  const distanceMiles = (order.pickupLat && order.pickupLng && order.dropoffLat && order.dropoffLng)
+    ? haversineDistanceMiles(order.pickupLat, order.pickupLng, order.dropoffLat, order.dropoffLng)
+    : 2; // Default 2 miles if no coordinates
+  const pricing = calculatePrice(distanceMiles);
 
-  const sizeLabelMap: Record<string, string> = {
-    envelope: "Envelope", small: "Small", medium: "Medium", large: "Large",
-  };
+  function generateVerificationCode() {
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
 
-  // Step 1: Create order as pending, then show payment form
-  async function handleProceedToPayment() {
+  async function handleBookDelivery() {
     if (!user) return;
-    // Hard validation before creating pending order in DB
+
+    if (!skipVerification) {
+      const supabase = createClient();
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      if (freshUser?.user_metadata?.verification_status !== "verified") {
+        setShowVerifyPrompt(true);
+        return;
+      }
+      // Age-restricted check
+      if (AGE_RESTRICTED_CATEGORIES.includes(order.packageCategory ?? "")) {
+        if (!freshUser?.user_metadata?.is_over_18) {
+          setShowAgeRestricted(true);
+          return;
+        }
+      }
+    }
+
     const missing: string[] = [];
     const must: (keyof DeliveryRequest)[] = [
-      "deliveryType",
-      "pickupAddress",
-      "pickupPostcode",
-      "pickupCity",
-      "senderName",
-      "senderPhone",
-      "dropoffAddress",
-      "dropoffPostcode",
-      "dropoffCity",
-      "recipientName",
-      "recipientPhone",
-      "packageCategory",
-      "packageSize",
+      "deliveryType", "pickupAddress", "pickupPostcode", "pickupCity",
+      "senderName", "senderPhone", "dropoffAddress", "dropoffPostcode",
+      "dropoffCity", "recipientName", "recipientPhone", "packageCategory", "packageSize",
     ];
     for (const k of must) {
-      const v = (order as any)[k];
+      const v = (order as Record<string, unknown>)[k];
       if (typeof v !== "string" || !v.trim()) missing.push(k);
     }
     if (!order.weight || Number(order.weight) <= 0) missing.push("weight");
@@ -149,8 +127,9 @@ export default function BookConfirmPage() {
         .insert({
           customer_id: user.id,
           scheduling_type: order.deliveryType ?? "instant",
-          status: "pending",
-          payment_status: "pending",
+          status: "confirmed",
+          payment_status: "paid",
+          verification_code: generateVerificationCode(),
           pickup_address: order.pickupAddress ?? "",
           pickup_postcode: order.pickupPostcode ?? "",
           pickup_city: order.pickupCity ?? "",
@@ -166,18 +145,22 @@ export default function BookConfirmPage() {
           weight: order.weight ?? 0,
           total_items: order.totalItems ?? 1,
           driver_instructions: order.handlingInstructions ?? "",
-          base_price: pricing.base,
-          size_fee: pricing.sizeFee,
-          scheduling_fee: pricing.schedulingFee,
-          discount_amount: pricing.discount,
+          pickup_lat: order.pickupLat ?? null,
+          pickup_lng: order.pickupLng ?? null,
+          delivery_lat: order.dropoffLat ?? null,
+          delivery_lng: order.dropoffLng ?? null,
+          base_price: pricing.firstMile,
+          size_fee: pricing.extraMiles * pricing.extraPerMile,
+          scheduling_fee: 0,
+          discount_amount: 0,
           total_price: pricing.total,
         })
         .select("id")
         .single();
 
       if (err) throw err;
-      setPendingOrderId(data.id);
-      setStep("payment");
+      sessionStorage.removeItem("deliveryRequest");
+      router.push(`/order/confirmed?id=${data.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Could not create order. Please try again.");
     } finally {
@@ -185,229 +168,166 @@ export default function BookConfirmPage() {
     }
   }
 
-  // Step 2: Payment succeeded — clear sessionStorage and go to confirmation
-  function handlePaymentSuccess() {
-    sessionStorage.removeItem("deliveryRequest");
-    router.push(`/order/confirmed?id=${pendingOrderId}`);
-  }
+  if (!user || !hydrated) return null;
 
-  if (!user) return null;
+  const isInstant = order.deliveryType !== "scheduled";
+  const sizeLabelMap: Record<string, string> = { envelope: "Envelope", small: "Small", medium: "Medium", large: "Large" };
 
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
-      <main className="flex flex-1 flex-col items-center py-8 px-4 md:px-6">
-        <div className="w-full max-w-5xl bg-white shadow-[0_20px_50px_-12px_rgba(62,0,116,0.15)] dark:bg-[#161027] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)]">
+      <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
+        <div className="w-full max-w-2xl">
           {/* Stepper */}
-          <div className="border-b border-slate-100 bg-white px-6 pb-12 pt-10 md:px-8 dark:border-[#1e1538] dark:bg-[#161027]">
+          <div className="mb-8">
             <BookingStepper currentStep={4} />
-            <div className="mt-10 text-center">
-              <h1 className="text-3xl font-black uppercase tracking-tight text-primary sm:text-4xl">
-                {step === "review" ? "Review your order" : "Complete payment"}
-              </h1>
-              <div className="mx-auto mt-4 h-1 w-12 bg-primary" aria-hidden />
+          </div>
+
+          <h1 className="mb-6 text-center text-2xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-3xl">
+            Review your order
+          </h1>
+
+          {/* Order summary card */}
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+
+            {/* Delivery type */}
+            <div className="flex items-center gap-4 border-b border-zinc-100 px-6 py-5 dark:border-zinc-800">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3e0074]/10 dark:bg-[#c084fc]/10">
+                <span className="material-symbols-outlined text-lg text-[#3e0074] dark:text-[#c084fc]">
+                  {isInstant ? "bolt" : "calendar_month"}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">
+                  {isInstant ? "Instant Delivery" : "Scheduled Delivery"}
+                </p>
+                <p className="text-[12px] text-emerald-600">Carbon neutral</p>
+              </div>
+            </div>
+
+            {/* Route */}
+            <div className="border-b border-zinc-100 px-6 py-5 dark:border-zinc-800">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="mb-1 text-[11px] font-semibold text-zinc-400">Pickup</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">
+                    {order.pickupCity || order.pickupPostcode}
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-zinc-400 line-clamp-2">{order.pickupAddress}</p>
+                  <p className="mt-1 text-[12px] text-zinc-500">{order.senderName}</p>
+                </div>
+                <div>
+                  <p className="mb-1 text-[11px] font-semibold text-zinc-400">Delivery</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">
+                    {order.dropoffCity || order.dropoffPostcode}
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-zinc-400 line-clamp-2">{order.dropoffAddress}</p>
+                  <p className="mt-1 text-[12px] text-zinc-500">{order.recipientName}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Package */}
+            <div className="border-b border-zinc-100 px-6 py-5 dark:border-zinc-800">
+              <p className="mb-3 text-[11px] font-semibold text-zinc-400">Package</p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <span className="rounded-lg bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  {sizeLabelMap[order.packageSize ?? ""] ?? order.packageSize}
+                </span>
+                <span className="rounded-lg bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  {order.weight} kg
+                </span>
+                <span className="rounded-lg bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  {order.packageCategory}
+                </span>
+              </div>
+              {order.handlingInstructions && (
+                <p className="mt-3 text-[12px] italic text-zinc-400">&ldquo;{order.handlingInstructions}&rdquo;</p>
+              )}
+            </div>
+
+            {/* Pricing */}
+            <div className="px-6 py-5">
+              <p className="mb-3 text-[11px] font-semibold text-zinc-400">Pricing</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+                  <span>First mile</span>
+                  <span>£{pricing.firstMile.toFixed(2)}</span>
+                </div>
+                {pricing.extraMiles > 0 && (
+                  <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+                    <span>{pricing.extraMiles} extra mile{pricing.extraMiles > 1 ? "s" : ""} × £{pricing.extraPerMile.toFixed(2)}</span>
+                    <span>£{(pricing.extraMiles * pricing.extraPerMile).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-[12px] text-zinc-400">
+                  <span>Distance: {pricing.distanceMiles} miles</span>
+                </div>
+                <div className="flex justify-between border-t border-zinc-100 pt-3 text-base font-bold text-zinc-900 dark:border-zinc-800 dark:text-[#ede9f8]">
+                  <span>Total</span>
+                  <span>£{pricing.total.toFixed(2)}</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white px-6 py-10 md:px-10 md:py-12 dark:bg-[#161027]">
+          {/* Errors / Verification prompt */}
+          {error && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+              <span className="material-symbols-outlined text-base">error</span>
+              {error}
+            </div>
+          )}
 
-            {/* ── REVIEW STEP ── */}
-            {step === "review" && (
-              <>
-                {/* Order summary card */}
-                <div className="overflow-hidden bg-white ring-1 ring-slate-200 dark:bg-[#161027] dark:ring-[#2d2050]">
-                  <div className="grid border-b border-slate-200 md:grid-cols-2 dark:border-[#2d2050]">
-                    <div className="border-b border-slate-100 p-8 md:border-r dark:border-[#1e1538]">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                        01. Service mode
-                      </h3>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded border border-primary/10 bg-primary text-white">
-                          {isInstant ? <BoltIcon /> : <CalendarIcon />}
-                        </div>
-                        <div>
-                          <p className="text-sm font-black uppercase tracking-tight text-primary">
-                            {isInstant ? "Instant eco‑delivery" : "Scheduled delivery"}
-                          </p>
-                          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600">
-                            Carbon neutral verified
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+          {showVerifyPrompt && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800/30 dark:bg-amber-900/10">
+              <span className="material-symbols-outlined mb-2 text-3xl text-amber-600">verified_user</span>
+              <h3 className="mb-1 text-sm font-bold text-amber-800 dark:text-amber-300">Identity verification required</h3>
+              <p className="mb-4 text-[12px] text-amber-700/70 dark:text-amber-400/70">
+                UK law requires age verification before booking deliveries.
+              </p>
+              <button
+                onClick={() => router.push("/verify")}
+                className="rounded-lg bg-amber-600 px-6 py-2.5 text-[12px] font-bold text-white transition-all hover:bg-amber-700 active:scale-[0.98]"
+              >
+                Verify Now
+              </button>
+            </div>
+          )}
 
-                    <div className="border-b border-slate-100 p-8 dark:border-[#1e1538]">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                        02. Cargo specs
-                      </h3>
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-[#7c6d99]">Size</p>
-                          <p className="text-xs font-black uppercase text-slate-900 dark:text-[#ede9f8]">
-                            {sizeLabelMap[order.packageSize ?? ""] ?? order.packageSize ?? "—"}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-[#7c6d99]">Weight</p>
-                          <p className="text-xs font-black uppercase text-slate-900 dark:text-[#ede9f8]">
-                            {order.weight ? `${order.weight} kg` : "—"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+          {showAgeRestricted && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800/30 dark:bg-red-900/10">
+              <span className="material-symbols-outlined mb-2 text-3xl text-red-500">block</span>
+              <h3 className="mb-1 text-sm font-bold text-red-800 dark:text-red-300">Age restricted item</h3>
+              <p className="mb-4 text-[12px] text-red-700/70 dark:text-red-400/70">
+                You must be 18 or over to book delivery of {order.packageCategory}. This is a UK legal requirement.
+              </p>
+              <button
+                onClick={() => router.push("/book/parcel")}
+                className="rounded-lg border border-red-300 px-6 py-2.5 text-[12px] font-bold text-red-700 transition-all hover:bg-red-100 active:scale-[0.98] dark:border-red-700 dark:text-red-400"
+              >
+                Change category
+              </button>
+            </div>
+          )}
 
-                    <div className="border-b border-slate-100 p-8 md:border-r dark:border-[#1e1538]">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                        03. Origin
-                      </h3>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-[#ede9f8]">
-                        {[order.pickupPostcode, order.pickupCity].filter(Boolean).join(", ") || "—"}
-                      </p>
-                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500 dark:text-[#8b7aaa]">
-                        {order.pickupAddress || "Address not provided"}
-                      </p>
-                    </div>
-
-                    <div className="border-b border-slate-100 p-8 dark:border-[#1e1538]">
-                      <h3 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                        04. Destination
-                      </h3>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-[#ede9f8]">
-                        {[order.dropoffPostcode, order.dropoffCity].filter(Boolean).join(", ") || "—"}
-                      </p>
-                      <p className="mt-1 text-[10px] font-bold tracking-wide text-slate-500 dark:text-[#8b7aaa]">
-                        {order.dropoffAddress || "Address not provided"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Pricing */}
-                  <div className="bg-slate-900 p-8 text-white">
-                    <div className="flex flex-col items-end justify-between gap-8 md:flex-row">
-                      <div className="hidden w-full max-w-xs md:block">
-                        <div className="border border-white/10 bg-white/5 p-4">
-                          <div className="mb-2 flex items-center gap-2">
-                            <span className="text-sm text-[#ff9b16]">★</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff9b16]">
-                              Eco incentive
-                            </span>
-                          </div>
-                          <p className="text-[10px] font-medium leading-relaxed text-slate-300">
-                            You are saving £{pricing.discount.toFixed(2)} on this shipment with your eco‑credits.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="w-full space-y-3 md:w-auto md:min-w-[320px]">
-                        <div className="flex items-baseline justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300">
-                          <span>Base rate</span>
-                          <span className="text-white">£{pricing.base.toFixed(2)}</span>
-                        </div>
-                        {pricing.sizeFee > 0 && (
-                          <div className="flex items-baseline justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300">
-                            <span>Size fee ({sizeLabelMap[order.packageSize ?? ""] ?? order.packageSize})</span>
-                            <span className="text-white">£{pricing.sizeFee.toFixed(2)}</span>
-                          </div>
-                        )}
-                        {pricing.schedulingFee > 0 && (
-                          <div className="flex items-baseline justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300">
-                            <span>Instant handling</span>
-                            <span className="text-white">£{pricing.schedulingFee.toFixed(2)}</span>
-                          </div>
-                        )}
-                        <div className="flex items-baseline justify-between py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
-                          <span>Eco‑incentive</span>
-                          <span>-£{pricing.discount.toFixed(2)}</span>
-                        </div>
-                        <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-4">
-                          <div className="flex flex-col gap-1">
-                            <span className="w-fit bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                              Total quote
-                            </span>
-                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                              VAT included
-                            </span>
-                          </div>
-                          <span className="text-4xl font-black tracking-tighter md:text-5xl">
-                            £{pricing.total.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="mt-6 border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
-                    {error}
-                  </div>
-                )}
-
-                <div className="mx-auto mt-12 flex max-w-4xl items-center justify-between border-t border-slate-100 pt-6 dark:border-[#1e1538]">
-                  <Link
-                    href="/book/parcel"
-                    className="group flex items-center gap-2 pl-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
-                  >
-                    <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">
-                      arrow_back
-                    </span>
-                    Back
-                  </Link>
-                  <button
-                    onClick={handleProceedToPayment}
-                    disabled={loading}
-                    className="btn-press btn-sweep flex items-center gap-3 bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-black disabled:opacity-60"
-                  >
-                    {loading ? "Please wait…" : "Proceed to payment"}
-                    {!loading && (
-                      <span className="text-accent">
-                        <ArrowEastIcon />
-                      </span>
-                    )}
-                  </button>
-                </div>
-
-                <div className="mt-10 flex flex-col items-center gap-4">
-                  <div className="flex items-center gap-2 border border-slate-200 bg-white px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:border-[#2d2050] dark:bg-[#161027] dark:text-[#8b7aaa]">
-                    <span className="text-primary"><ShieldCheckIcon /></span>
-                    Secure architectural protocol
-                  </div>
-                  <p className="max-w-md text-center text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                    Final valuation is subject to real‑time verification at pickup point. EcoQuick maintains carbon neutrality across all operations.
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* ── PAYMENT STEP ── */}
-            {step === "payment" && pendingOrderId && (
-              <div className="mx-auto max-w-xl">
-                {/* Order amount reminder */}
-                <div className="mb-8 flex items-center justify-between border border-slate-200 bg-slate-50 px-6 py-4 dark:border-[#2d2050] dark:bg-[#0d0916]">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-[#7c6d99]">
-                      Order total
-                    </p>
-                    <p className="text-2xl font-black tracking-tight text-primary">
-                      £{pricing.total.toFixed(2)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => { setStep("review"); setPendingOrderId(null); }}
-                    className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-primary dark:text-[#7c6d99]"
-                  >
-                    ← Edit order
-                  </button>
-                </div>
-
-                <PaymentForm
-                  amount={pricing.total}
-                  orderId={pendingOrderId}
-                  onSuccess={handlePaymentSuccess}
-                />
-              </div>
-            )}
+          {/* Actions */}
+          <div className="mt-6 flex items-center justify-between">
+            <Link
+              href="/book/parcel"
+              className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              Back
+            </Link>
+            <button
+              onClick={handleBookDelivery}
+              disabled={loading}
+              className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
+            >
+              {loading ? "Placing order…" : `Confirm & Book · £${pricing.total.toFixed(2)}`}
+            </button>
           </div>
         </div>
       </main>
