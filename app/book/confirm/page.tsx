@@ -159,6 +159,16 @@ export default function BookConfirmPage() {
         .single();
 
       if (err) throw err;
+
+      // Send notification to customer
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        order_id: data.id,
+        type: "order_confirmed",
+        title: "Order confirmed",
+        body: `Your delivery EQ-${data.id.slice(0, 6).toUpperCase()} has been placed and is awaiting a driver.`,
+      });
+
       sessionStorage.removeItem("deliveryRequest");
       router.push(`/order/confirmed?id=${data.id}`);
     } catch (e: unknown) {

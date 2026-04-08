@@ -21,13 +21,13 @@ export function HeroSection() {
           </span>
         </h1>
 
-        <p className="mt-5 max-w-md text-[15px] font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
+        <p className="mt-5 max-w-md text-[15px] font-medium leading-relaxed text-zinc-700 dark:text-zinc-400">
           Hyperlocal, fast, and carbon-neutral deliveries across London.
           Powered by electric vehicles.
         </p>
 
         {/* Feature chips */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-500">
           {["Live tracking", "Quick delivery", "Zero emissions"].map((label, i) => (
             <span key={label} className="contents">
               {i > 0 && <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>}
@@ -263,7 +263,7 @@ export function HeroSection() {
             <img
               src={theme === "dark" ? "/dark/bike.png" : "/light/bike.png"}
               alt=""
-              className="animate-bike-ride block h-20 w-auto object-contain object-bottom sm:h-24 md:h-32"
+              className="animate-bike-ride block h-20 w-auto object-contain object-bottom sm:h-24 md:h-48"
             />
           </div>
         </div>

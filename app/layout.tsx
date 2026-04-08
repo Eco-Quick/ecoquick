@@ -4,6 +4,7 @@ import "./globals.css";
 import { NavProgress } from "@/components/layout/NavProgress";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PageTransition } from "@/components/PageTransition";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
           <PageTransition>
             {children}
           </PageTransition>
+          <WhatsAppButton />
         </ThemeProvider>
       </body>
     </html>

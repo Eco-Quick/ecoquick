@@ -32,7 +32,7 @@ export function WorkflowSection() {
   return (
     <section id="workflow" className="mt-16 border-t border-zinc-400 pt-12 dark:border-zinc-700">
       <Reveal animation="fade">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-600">
           01 / Workflow
         </p>
       </Reveal>

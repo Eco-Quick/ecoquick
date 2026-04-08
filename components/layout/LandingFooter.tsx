@@ -76,11 +76,11 @@ export function LandingFooter() {
           © {new Date().getFullYear()} EcoQuick
         </p>
         <div className="flex items-center gap-5 font-semibold uppercase tracking-[0.22em]">
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://instagram.com/ecoquickdelivery" target="_blank" rel="noopener noreferrer">
+          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://www.instagram.com/ecoquick_deliveries/" target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://twitter.com/ecoquickdelivery" target="_blank" rel="noopener noreferrer">
-            Twitter
+          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://wa.me/447553683774" target="_blank" rel="noopener noreferrer">
+            WhatsApp
           </a>
           <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="mailto:hello@ecoquick.delivery">
             Email
