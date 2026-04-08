@@ -19,7 +19,7 @@ export function BrandLogo({
   const wrapper = (
     <div className="flex items-center gap-2.5">
       <Image
-        src="/ecoquick-logo.png"
+        src="/ecoquick-logo.webp"
         alt="EcoQuick logo"
         width={iconSize}
         height={iconSize}

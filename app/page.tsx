@@ -1,5 +1,3 @@
-"use client";
-
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 import { HeroSection } from "@/components/landing/Hero";

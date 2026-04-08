@@ -3,6 +3,19 @@ import type { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Public routes that don't need auth — skip Supabase round-trip for faster load
+  const publicRoutes = ["/", "/about", "/business", "/help", "/login", "/signup"];
+  const isPublicRoute =
+    publicRoutes.includes(pathname) ||
+    (pathname.startsWith("/help") && !pathname.startsWith("/help/customer"));
+
+  if (isPublicRoute && !request.cookies.getAll().some(c => c.name.startsWith("sb-"))) {
+    // No Supabase session cookies — anonymous visitor, skip auth entirely
+    return NextResponse.next({ request });
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -33,8 +46,6 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser();
     user = sessionUser;
   }
-
-  const { pathname } = request.nextUrl;
 
   const role = user?.user_metadata?.role as string | undefined;
 

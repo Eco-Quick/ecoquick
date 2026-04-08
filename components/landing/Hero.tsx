@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -260,10 +261,13 @@ export function HeroSection() {
 
           {/* Bike */}
           <div className="absolute bottom-0 left-0 flex items-end">
-            <img
-              src={theme === "dark" ? "/dark/bike.png" : "/light/bike.png"}
+            <Image
+              src={theme === "dark" ? "/dark/bike.webp" : "/light/bike.webp"}
               alt=""
+              width={400}
+              height={192}
               className="animate-bike-ride block h-20 w-auto object-contain object-bottom sm:h-24 md:h-48"
+              priority
             />
           </div>
         </div>

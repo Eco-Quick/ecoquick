@@ -9,19 +9,19 @@ const WORKFLOW_STEPS = [
     k: "01",
     title: "Book instantly",
     body: "Simple interface for immediate dispatch.",
-    image: "ordered.png",
+    image: "ordered.webp",
   },
   {
     k: "02",
     title: "Track live",
     body: "Watch your delivery move across the city in real-time.",
-    image: "livetracking.png",
+    image: "livetracking.webp",
   },
   {
     k: "03",
     title: "Delivered",
     body: "Instant photo confirmation and digital signature.",
-    image: "delivered.png",
+    image: "delivered.webp",
   },
 ] as const;
 
