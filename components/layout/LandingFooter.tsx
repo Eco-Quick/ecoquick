@@ -14,7 +14,7 @@ export function LandingFooter() {
           <p className="text-sm font-extrabold uppercase tracking-[0.22em] text-zinc-950 dark:text-zinc-100">
             ECOQUICK DELIVERY
           </p>
-          <div className="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <div className="space-y-1 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
             <p>Kingston upon Thames, London</p>
             <a href="mailto:hello@ecoquick.delivery" className="hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">hello@ecoquick.delivery</a>
           </div>
@@ -25,7 +25,7 @@ export function LandingFooter() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
               Product
             </p>
-            <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="space-y-2 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
               <Link
                 className="block hover:text-zinc-900 dark:hover:text-zinc-200"
                 href="/#delivery"
@@ -50,7 +50,7 @@ export function LandingFooter() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
               Company
             </p>
-            <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="space-y-2 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
               <Link className="block hover:text-zinc-900 dark:hover:text-zinc-200" href="/">
                 Home
               </Link>
@@ -71,7 +71,7 @@ export function LandingFooter() {
         </div>
       </Reveal>
 
-      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800 pt-6 text-xs text-zinc-500">
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800 pt-6 font-secondary text-xs text-zinc-500">
         <p className="font-semibold uppercase tracking-[0.22em]">
           © {new Date().getFullYear()} EcoQuick
         </p>
@@ -79,7 +79,7 @@ export function LandingFooter() {
           <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://www.instagram.com/ecoquick_deliveries/" target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://wa.me/447553683774" target="_blank" rel="noopener noreferrer">
+          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://wa.me/447393080529" target="_blank" rel="noopener noreferrer">
             WhatsApp
           </a>
           <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="mailto:hello@ecoquick.delivery">

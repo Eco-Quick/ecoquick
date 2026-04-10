@@ -10,7 +10,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <button
       onClick={toggle}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-      className={`relative flex h-9 w-9 items-center justify-center overflow-hidden border border-zinc-200 text-zinc-500 transition-all duration-200 hover:border-[#3f0075]/30 hover:bg-[#3f0075]/5 hover:text-[#3f0075] dark:border-zinc-700 dark:bg-[#161027] dark:text-zinc-400 dark:hover:border-[#c084fc]/40 dark:hover:bg-[#3f0075]/15 dark:hover:text-[#c084fc] ${className}`}
+      className={`relative flex h-9 w-9 items-center justify-center overflow-hidden border border-zinc-200 text-zinc-500 transition-all duration-200 hover:border-[#3f0075]/30 hover:bg-[#3f0075]/5 hover:text-[#3f0075] dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-zinc-400 dark:hover:border-[#c084fc]/40 dark:hover:bg-[#3f0075]/15 dark:hover:text-[#c084fc] ${className}`}
     >
       <span
         key={isDark ? "light" : "dark"}

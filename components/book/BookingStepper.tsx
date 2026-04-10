@@ -22,7 +22,7 @@ const CheckIcon = () => (
 export function BookingStepper({ currentStep }: Props) {
   return (
     <div className="relative mx-auto flex max-w-3xl items-center justify-between">
-      <div className="absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2 bg-gradient-to-r from-slate-200 via-primary/25 to-slate-200 dark:from-[#2d2050] dark:via-[#7c3aed]/25 dark:to-[#2d2050]" aria-hidden />
+      <div className="absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2 bg-gradient-to-r from-slate-200 via-primary/25 to-slate-200 dark:from-[#221d38] dark:via-[#7c3aed]/25 dark:to-[#221d38]" aria-hidden />
       {steps.map((step, index) => {
         const isLast = index === steps.length - 1;
         const isActive = currentStep === step.id;
@@ -31,19 +31,19 @@ export function BookingStepper({ currentStep }: Props) {
         const circleClass = [
           "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors",
           isComplete ? "border-accent bg-accent text-white shadow-sm" : "",
-          isActive && !isComplete ? "border-accent bg-white text-accent dark:bg-[#161027]" : "",
-          !isActive && !isComplete ? "border-slate-300 bg-white text-slate-500 dark:border-[#2d2050] dark:bg-[#161027] dark:text-[#8b7aaa]" : "",
+          isActive && !isComplete ? "border-accent bg-white text-accent dark:bg-[#0c0b14]" : "",
+          !isActive && !isComplete ? "border-slate-300 bg-white text-slate-500 dark:border-[#221d38] dark:bg-[#0c0b14] dark:text-[#9d8ab8]" : "",
         ]
           .filter(Boolean)
           .join(" ");
 
         const labelClass = [
           "text-[10px] font-bold uppercase tracking-[0.2em]",
-          isActive || isComplete ? "text-primary" : "text-slate-400 dark:text-[#7c6d99]",
+          isActive || isComplete ? "text-primary" : "text-slate-400 dark:text-[#8b7aaa]",
         ].join(" ");
 
         const inner = (
-          <div className="flex flex-col items-center gap-3 rounded-md bg-slate-50 px-4 py-3 shadow-sm dark:bg-[#0d0916] dark:shadow-none">
+          <div className="flex flex-col items-center gap-3 rounded-md bg-slate-50 px-4 py-3 shadow-sm dark:bg-[#050507] dark:shadow-none">
             <div className={circleClass}>
               {isComplete && <CheckIcon />}
               {!isComplete && (

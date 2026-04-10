@@ -160,7 +160,7 @@ export default function BookRoutePage() {
   if (!user || !hydrated) return null;
 
   const inputClass = (hasError: boolean) =>
-    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
+    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
       hasError
         ? "border-red-300 focus:border-red-400 focus:ring-red-100 dark:border-red-700 dark:focus:ring-red-900/20"
         : "border-zinc-200 focus:border-[#3e0074] focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
@@ -170,7 +170,7 @@ export default function BookRoutePage() {
   const errorClass = "mt-1 text-[11px] font-medium text-red-500";
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
@@ -188,7 +188,7 @@ export default function BookRoutePage() {
 
           <form className="grid gap-6 lg:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
             {/* Pickup section */}
-            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
                   <span className="material-symbols-outlined text-base text-emerald-600">location_on</span>
@@ -244,7 +244,7 @@ export default function BookRoutePage() {
             </div>
 
             {/* Delivery section */}
-            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
                   <span className="material-symbols-outlined text-base text-blue-600">flag</span>

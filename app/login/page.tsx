@@ -77,13 +77,13 @@ export default function LoginPage() {
   };
 
   const inputClass =
-    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
+    "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10";
 
   const labelClass =
-    "mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400";
+    "mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400";
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916]">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#050507]">
       <div className="px-6 lg:px-8">
         <LandingHeader />
       </div>
@@ -96,13 +96,13 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-4xl">
               Welcome back
             </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-2 font-secondary text-sm text-zinc-500 dark:text-zinc-400">
               Sign in to your EcoQuick account
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14]">
 
             {error && (
               <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
@@ -158,7 +158,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -173,7 +173,7 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="h-4 w-4 rounded border-zinc-300 text-[#3e0074] accent-[#3e0074] dark:border-zinc-600 dark:accent-[#c084fc]"
                   />
-                  <span className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
+                  <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                     Remember me
                   </span>
                 </label>
@@ -181,7 +181,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={forgotLoading}
-                  className="text-[12px] font-semibold text-[#3e0074] transition-colors hover:underline disabled:opacity-50 dark:text-[#c084fc]"
+                  className="text-sm font-semibold text-[#3e0074] transition-colors hover:underline disabled:opacity-50 dark:text-[#c084fc]"
                 >
                   {forgotLoading ? "Sending…" : "Forgot password?"}
                 </button>
@@ -190,7 +190,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-[#3e0074] py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-[#5b21b6] dark:shadow-[0_4px_16px_rgba(91,33,182,0.3)]"
+                className="w-full rounded-xl bg-[#3e0074] py-4 text-base font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-[#5b21b6] dark:shadow-[0_4px_16px_rgba(91,33,182,0.3)]"
               >
                 {loading ? "Signing in…" : "Sign in"}
               </button>
@@ -198,7 +198,7 @@ export default function LoginPage() {
           </div>
 
           {/* Footer link */}
-          <p className="mt-6 text-center text-[13px] text-zinc-400 dark:text-zinc-500">
+          <p className="mt-6 text-center text-sm text-zinc-400 dark:text-zinc-500">
             New to EcoQuick?{" "}
             <Link href="/signup" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">
               Create an account

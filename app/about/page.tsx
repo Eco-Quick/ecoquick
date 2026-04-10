@@ -4,40 +4,30 @@ import { LandingFooter } from "@/components/layout/LandingFooter";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
-      <div className="px-6 lg:px-8">
+    <div className="landing-shell min-h-screen bg-white text-zinc-900 dark:bg-[#050507] dark:text-[#ede9f8]">
+      <div className="landing-grid-layer" />
+
+      <div className="landing-content px-6 lg:px-8">
         <LandingHeader />
       </div>
 
-      <main>
-        {/* Hero */}
-        <section className="px-6 pt-8 pb-12 md:px-10 md:pt-10 md:pb-16">
-          <div className="mx-auto max-w-5xl">
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#3e0074]/50 dark:text-[#c084fc]/50">
+      <main className="landing-content">
+        {/* Hero + Mission — single immersive block */}
+        <section className="border-b border-zinc-100 px-6 pb-14 pt-12 dark:border-zinc-800 md:px-10 md:pb-20 md:pt-20">
+          <div className="mx-auto max-w-5xl text-center">
+            <p className="hero-fade mb-5 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#3e0074]/50 dark:text-zinc-400">
               About EcoQuick
             </p>
-            <h1 className="text-4xl font-bold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-[#ede9f8] md:text-6xl lg:text-7xl">
-              Redefining the pulse
-              <br />
-              <span className="text-[#3e0074] dark:text-[#c084fc]">of the city</span>
+            <h1 className="hero-heading-reveal text-[clamp(2rem,6vw,5rem)] font-bold leading-[1.08] tracking-[-0.03em] text-zinc-900 dark:text-[#ede9f8]">
+            Just Click, Confirm <span className="text-[#3e0074] dark:text-[#c084fc]">and it's Delivered</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-zinc-500 dark:text-zinc-400 md:text-lg">
-              We are building the framework for zero-emission urban logistics.
-              Born from a necessity for speed and a commitment to the planet.
+            <p className="hero-buttons-fade mx-auto mt-8 max-w-2xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+              At EcoQuick, our mission is to make local deliveries fast, simple and sustainable.
+              We aim to eliminate long wait times and unreliable services by providing instant,
+              hyperlocal parcel delivery powered by eco-friendly solutions. Whether for individuals
+              or businesses, we focus on speed, convenience and reducing environmental impact.
             </p>
-          </div>
-        </section>
-
-        {/* Mission */}
-        <section className="border-y border-zinc-100 bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:border-zinc-800 dark:bg-[#161027]">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-              Our Mission
-            </p>
-            <h2 className="text-2xl font-medium leading-relaxed text-zinc-700 italic dark:text-zinc-300 md:text-3xl">
-              &ldquo;To accelerate the transition to sustainable urban distribution
-              by optimizing every meter, ensuring speed never costs the Earth.&rdquo;
-            </h2>
+            
           </div>
         </section>
 
@@ -48,7 +38,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
                 How it works
               </h2>
-              <p className="mt-3 text-sm text-zinc-400 dark:text-zinc-500">
+              <p className="mt-3 text-[15px] text-zinc-600 dark:text-zinc-400">
                 Four stages of seamless, carbon-neutral logistics.
               </p>
             </div>
@@ -60,14 +50,14 @@ export default function AboutPage() {
                 { k: "03", title: "Eco-Delivery", body: "Zero-emission transit via our electric fleet." },
                 { k: "04", title: "Verification", body: "Proof of delivery verified with end-to-end encryption." },
               ].map((step) => (
-                <div key={step.k} className="group rounded-2xl border border-zinc-100 bg-white p-8 transition-all duration-200 hover:border-[#3e0074]/20 hover:shadow-lg dark:border-zinc-800 dark:bg-[#161027] dark:hover:border-[#c084fc]/20">
-                  <span className="text-4xl font-bold text-zinc-200 transition-colors group-hover:text-[#3e0074] dark:text-zinc-700 dark:group-hover:text-[#c084fc]">
+                <div key={step.k} className="group rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-white to-zinc-50 p-8 shadow-[0_4px_12px_rgba(0,0,0,0.08),0_12px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#3e0074]/25 hover:shadow-[0_12px_40px_rgba(62,0,116,0.14),0_4px_12px_rgba(0,0,0,0.08)] dark:border-[#4d4270] dark:from-[#15121f] dark:to-[#0e0c16] dark:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_12px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(192,132,252,0.1)] dark:hover:border-[#c084fc]/40 dark:hover:shadow-[0_12px_40px_rgba(192,132,252,0.15),0_4px_16px_rgba(0,0,0,0.6)]">
+                  <span className="text-4xl font-bold text-zinc-300 transition-colors group-hover:text-[#3e0074] dark:text-[white] dark:group-hover:text-[#c084fc]">
                     {step.k}
                   </span>
-                  <h3 className="mt-4 mb-2 text-base font-bold text-zinc-900 dark:text-[#ede9f8]">
+                  <h3 className="mt-4 mb-2 text-base font-bold text-zinc-900 dark:text-white">
                     {step.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                  <p className="text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-300">
                     {step.body}
                   </p>
                 </div>
@@ -77,13 +67,13 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section className="bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:bg-[#0d0916]">
+        <section className="bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:bg-[#050507]">
           <div className="mx-auto max-w-5xl">
             <h2 className="mb-8 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
               Our values
             </h2>
 
-            <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 sm:grid-cols-2">
+            <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-[#3d3455] sm:grid-cols-2">
               {[
                 { title: "Customer Focus", body: "Your satisfaction is our priority. We go above and beyond to ensure every delivery exceeds expectations.", variant: "white" },
                 { title: "Speed & Reliability", body: "Precision is the heartbeat of our operation, measured in milliseconds.", variant: "purple" },
@@ -94,12 +84,12 @@ export default function AboutPage() {
                   key={value.title}
                   className={`p-10 md:p-12 ${
                     value.variant === "purple"
-                      ? "bg-[#3e0074]/[0.06] dark:bg-[#c084fc]/[0.08]"
-                      : "bg-white dark:bg-[#161027]"
+                      ? "bg-[#3e0074]/[0.06] dark:bg-[#2a1650]"
+                      : "bg-white dark:bg-[#0e0c16]"
                   }`}
                 >
-                  <h4 className="mb-3 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">{value.title}</h4>
-                  <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{value.body}</p>
+                  <h4 className="mb-3 text-lg font-bold text-zinc-900 dark:text-white">{value.title}</h4>
+                  <p className="text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-300">{value.body}</p>
                 </div>
               ))}
             </div>
@@ -133,9 +123,9 @@ export default function AboutPage() {
               ].map((item) => (
                 <div key={item.year} className="relative">
                   <div className="absolute -left-[calc(2rem+5px)] top-1.5 h-2.5 w-2.5 rounded-full bg-[#3e0074] dark:bg-[#c084fc] md:-left-[calc(3rem+5px)]" />
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500">{item.year}</p>
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{item.year}</p>
                   <h4 className="mb-3 text-xl font-bold text-zinc-900 dark:text-[#ede9f8]">{item.title}</h4>
-                  <p className="max-w-lg text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{item.body}</p>
+                  <p className="max-w-lg text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -146,13 +136,13 @@ export default function AboutPage() {
         <section className="px-6 py-12 md:px-10 md:py-16">
           <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
             <h2 className="text-3xl font-bold md:text-5xl">Join the revolution</h2>
-            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/70">
+            <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
               Building the future of urban movement together.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/signup"
-                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
+                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
               >
                 Book your first delivery
               </Link>
@@ -167,7 +157,7 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
+      <div className="landing-content mx-auto w-full max-w-6xl px-6 lg:px-8">
         <LandingFooter />
       </div>
     </div>

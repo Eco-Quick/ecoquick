@@ -101,7 +101,7 @@ export default function DriverJobsPage() {
         </div>
         <button
           onClick={() => fetchJobs()}
-          className="flex items-center gap-2 self-start rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[12px] font-semibold text-zinc-600 transition-all hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.97] dark:border-zinc-700 dark:bg-[#161027] dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="flex items-center gap-2 self-start rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[12px] font-semibold text-zinc-600 transition-all hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.97] dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           <span className="material-symbols-outlined text-base">refresh</span>
           Refresh
@@ -138,7 +138,7 @@ export default function DriverJobsPage() {
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:shadow-md dark:border-zinc-800 dark:bg-[#161027] dark:hover:border-zinc-700 md:p-6"
+              className="rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:shadow-md dark:border-zinc-800 dark:bg-[#0c0b14] dark:hover:border-zinc-700 md:p-6"
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 {/* Left: Route info */}

@@ -163,12 +163,12 @@ export default function AddressAutocomplete({
       {open && predictions.length > 0 && (
         <div
           ref={listRef}
-          className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white dark:bg-[#161027] shadow-[0_8px_24px_rgba(62,0,116,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
+          className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white dark:bg-[#0c0b14] shadow-[0_8px_24px_rgba(62,0,116,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
           style={{ maxHeight: "320px", overflowY: "auto" }}
         >
           {source === "postcode" && (
             <div className="border-b border-slate-100 dark:border-zinc-800 bg-primary/5 dark:bg-primary/10 px-4 py-2">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60 dark:text-zinc-400">
                 {predictions.length} address{predictions.length !== 1 ? "es" : ""} found at {value.trim().toUpperCase()}
               </span>
             </div>
@@ -195,14 +195,14 @@ export default function AddressAutocomplete({
               </div>
             </button>
           ))}
-          <div className="bg-slate-50 dark:bg-[#0d0916] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+          <div className="bg-slate-50 dark:bg-[#050507] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
             {source === "postcode" ? "UK Postcode Lookup" : "Powered by Mapbox"}
           </div>
         </div>
       )}
 
       {open && !loading && predictions.length === 0 && value.length >= 2 && (
-        <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white dark:bg-[#161027] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
+        <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white dark:bg-[#0c0b14] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
           {isLikelyPostcode(value)
             ? "No addresses found for this postcode"
             : "No addresses found — try a postcode (e.g. KT2 6DF)"}

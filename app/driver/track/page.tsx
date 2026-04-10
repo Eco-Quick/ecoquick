@@ -250,7 +250,7 @@ export default function DriverActiveDeliveryPage() {
             )}
 
             {/* Route card */}
-            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex gap-3">
                 <div className="flex flex-col items-center pt-1">
                   <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
@@ -273,7 +273,7 @@ export default function DriverActiveDeliveryPage() {
             </div>
 
             {/* Recipient */}
-            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
@@ -295,15 +295,15 @@ export default function DriverActiveDeliveryPage() {
 
             {/* Package details */}
             <div className="mb-4 grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#050507]">
                 <p className="text-[10px] font-semibold text-zinc-400">Category</p>
                 <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.product_category}</p>
               </div>
-              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#050507]">
                 <p className="text-[10px] font-semibold text-zinc-400">Size</p>
                 <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.package_size}</p>
               </div>
-              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#0d0916]">
+              <div className="rounded-xl bg-zinc-50 p-3 text-center dark:bg-[#050507]">
                 <p className="text-[10px] font-semibold text-zinc-400">Weight</p>
                 <p className="mt-1 text-[12px] font-bold text-zinc-700 dark:text-zinc-300">{order.weight} kg</p>
               </div>
@@ -311,7 +311,7 @@ export default function DriverActiveDeliveryPage() {
 
             {/* Instructions */}
             {order.driver_instructions && (
-              <div className="mb-4 rounded-2xl bg-zinc-50 p-4 dark:bg-[#0d0916]">
+              <div className="mb-4 rounded-2xl bg-zinc-50 p-4 dark:bg-[#050507]">
                 <p className="mb-1 text-[11px] font-semibold text-zinc-400">Instructions</p>
                 <p className="text-[13px] italic text-zinc-600 dark:text-zinc-300">&ldquo;{order.driver_instructions}&rdquo;</p>
               </div>
@@ -340,7 +340,7 @@ export default function DriverActiveDeliveryPage() {
             )}
 
             {/* Earnings preview */}
-            <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-[#0d0916]">
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-[#050507]">
               <span className="text-[12px] text-zinc-400">You earn</span>
               <span className="text-sm font-bold text-[#3e0074] dark:text-[#c084fc]">£{(Number(order.total_price) * 0.8).toFixed(2)}</span>
             </div>
@@ -351,7 +351,7 @@ export default function DriverActiveDeliveryPage() {
         <div className="relative h-[400px] flex-1 lg:h-auto">
           <div ref={mapContainerRef} className="absolute inset-0" />
           {!hasCoords && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#161027]">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#0c0b14]">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800">
                 <span className="material-symbols-outlined text-3xl text-zinc-400">map</span>
               </div>

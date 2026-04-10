@@ -47,7 +47,7 @@ export default function CustomerDashboardPage() {
   const isNewUser = stats && stats.completed === 0 && stats.active === 0;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 md:pb-10 md:pt-8">
@@ -83,7 +83,7 @@ export default function CustomerDashboardPage() {
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-3xl">
               Hey, {firstName}
             </h1>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 font-secondary text-sm text-zinc-500 dark:text-zinc-400">
               {isNewUser ? "Welcome to EcoQuick! Book your first delivery." : "Manage your deliveries and track impact."}
             </p>
           </div>
@@ -102,14 +102,14 @@ export default function CustomerDashboardPage() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-xl font-bold md:text-2xl">Send your first parcel</h2>
-                <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
+                <p className="mt-2 max-w-md font-secondary text-sm leading-relaxed text-white/70">
                   Fast, carbon-neutral delivery across London. Book in under 2 minutes
                   and track your parcel in real-time.
                 </p>
               </div>
               <button
                 onClick={() => router.push("/book/type")}
-                className="shrink-0 rounded-full bg-white px-8 py-3.5 text-[13px] font-bold text-[#3e0074] shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
+                className="shrink-0 rounded-full bg-white px-8 py-3.5 text-[13px] font-bold text-[#3e0074] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555] shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
               >
                 Book a Delivery
               </button>
@@ -119,14 +119,14 @@ export default function CustomerDashboardPage() {
 
         {/* Stats cards */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Active</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <span className="material-symbols-outlined text-base text-blue-600">local_shipping</span>
               </div>
             </div>
-            <p className="mt-3 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
+            <p className="mt-3 font-secondary text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
               {stats?.active ?? "—"}
             </p>
             <p className="mt-0.5 text-[12px] text-zinc-400">in progress</p>
@@ -145,27 +145,27 @@ export default function CustomerDashboardPage() {
             <p className="mt-0.5 text-[12px] text-white/50">carbon saved</p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Spent</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/20">
                 <span className="material-symbols-outlined text-base text-amber-600">payments</span>
               </div>
             </div>
-            <p className="mt-3 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
+            <p className="mt-3 font-secondary text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
               {stats ? `£${stats.totalSpent.toFixed(2)}` : "—"}
             </p>
             <p className="mt-0.5 text-[12px] text-zinc-400">total</p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Completed</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
                 <span className="material-symbols-outlined text-base text-emerald-600">check_circle</span>
               </div>
             </div>
-            <p className="mt-3 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
+            <p className="mt-3 font-secondary text-3xl font-bold text-zinc-900 dark:text-[#ede9f8]">
               {stats?.completed ?? "—"}
             </p>
             <p className="mt-0.5 text-[12px] text-zinc-400">deliveries</p>
@@ -175,7 +175,7 @@ export default function CustomerDashboardPage() {
         {/* Quick actions + Impact */}
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Quick actions */}
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
             <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
               <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Quick Actions</h2>
             </div>
@@ -206,7 +206,7 @@ export default function CustomerDashboardPage() {
           </div>
 
           {/* Impact card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027] lg:col-span-2">
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14] lg:col-span-2">
             <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
               <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Your Impact</h2>
             </div>
@@ -222,7 +222,7 @@ export default function CustomerDashboardPage() {
                   </p>
                   <p className="mt-0.5 text-[12px] text-emerald-600/60">carbon offset</p>
                 </div>
-                <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#0d0916]">
+                <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg text-zinc-500">forest</span>
                     <p className="text-[11px] font-semibold uppercase text-zinc-500">Trees</p>
@@ -232,7 +232,7 @@ export default function CustomerDashboardPage() {
                   </p>
                   <p className="mt-0.5 text-[12px] text-zinc-400">equivalent saplings</p>
                 </div>
-                <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#0d0916]">
+                <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg text-zinc-500">electric_bike</span>
                     <p className="text-[11px] font-semibold uppercase text-zinc-500">Green Trips</p>

@@ -104,13 +104,13 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="page-fade flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 sm:px-6">
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-[#7c6d99]">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-[#8b7aaa]">
               Inbox
             </p>
             <h1 className="text-3xl font-black uppercase tracking-tight text-primary">
@@ -136,8 +136,8 @@ export default function NotificationsPage() {
             <span className="material-symbols-outlined mb-4 text-5xl text-slate-200 dark:text-zinc-700">
               notifications_none
             </span>
-            <p className="text-sm font-semibold text-slate-500 dark:text-[#8b7aaa]">You&apos;re all caught up.</p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-[#7c6d99]">
+            <p className="text-sm font-semibold text-slate-500 dark:text-[#9d8ab8]">You&apos;re all caught up.</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-[#8b7aaa]">
               Order updates and alerts will appear here.
             </p>
             <Link
@@ -157,7 +157,7 @@ export default function NotificationsPage() {
                 }}
                 className={`flex w-full items-start gap-4 border px-6 py-5 text-left transition-colors ${
                   notif.is_read
-                    ? "border-slate-100 bg-white dark:border-zinc-800 dark:bg-[#161027]"
+                    ? "border-slate-100 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]"
                     : "border-primary/20 bg-primary/5 dark:border-primary/30 dark:bg-primary/10"
                 }`}
               >

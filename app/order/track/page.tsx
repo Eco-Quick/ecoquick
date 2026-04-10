@@ -48,7 +48,7 @@ const STATUS_ORDER = ["pending", "confirmed", "assigned", "picked_up", "in_trans
 
 export default function OrderTrackPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0d0916]"><span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#050507]"><span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span></div>}>
       <OrderTrackContent />
     </Suspense>
   );
@@ -233,7 +233,7 @@ function OrderTrackContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#050507]">
         <span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span>
       </div>
     );
@@ -241,7 +241,7 @@ function OrderTrackContent() {
 
   if (error || !order) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-50 dark:bg-[#050507]">
         <span className="material-symbols-outlined text-5xl text-zinc-300">error_outline</span>
         <p className="font-semibold text-zinc-500">{error || "Order not found"}</p>
         <Link href="/orders" className="text-sm font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">View all orders</Link>
@@ -255,9 +255,9 @@ function OrderTrackContent() {
   const hasCoords = order.pickup_lat && order.delivery_lat;
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507]">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/90 px-4 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 sm:px-6">
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/90 px-4 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/90 sm:px-6">
         <button onClick={() => router.push("/orders")} className="flex items-center gap-2 text-[13px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
           <span className="material-symbols-outlined text-lg">arrow_back</span>
           Orders
@@ -276,7 +276,7 @@ function OrderTrackContent() {
           <div className="p-5 sm:p-6">
 
             {/* Status card */}
-            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex items-center justify-between">
                 <div>
                   <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-bold ${
@@ -320,7 +320,7 @@ function OrderTrackContent() {
 
             {/* Driver card */}
             {driver && (
-              <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
                 <p className="mb-3 text-[11px] font-semibold uppercase text-zinc-400">Your driver</p>
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3e0074] text-white dark:bg-[#5b21b6]">
@@ -342,7 +342,7 @@ function OrderTrackContent() {
             )}
 
             {!driver && !isDelivered && (
-              <div className="mb-5 rounded-2xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-[#161027]">
+              <div className="mb-5 rounded-2xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-[#0c0b14]">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined animate-spin text-lg text-amber-500">progress_activity</span>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">Finding a driver nearby...</p>
@@ -351,7 +351,7 @@ function OrderTrackContent() {
             )}
 
             {/* Route */}
-            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="mb-5 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex gap-3">
                 <div className="flex flex-col items-center pt-1">
                   <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
@@ -372,7 +372,7 @@ function OrderTrackContent() {
             </div>
 
             {/* Timeline */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <p className="mb-4 text-[11px] font-semibold uppercase text-zinc-400">Order journey</p>
               <div className="space-y-6">
                 {TIMELINE_STEPS.map((step, i) => {
@@ -388,10 +388,10 @@ function OrderTrackContent() {
                       )}
                       <div className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
                         stepStatus === "completed"
-                          ? "bg-[#3e0074] text-white dark:bg-[#c084fc] dark:text-[#0d0916]"
+                          ? "bg-[#3e0074] text-white dark:bg-[#c084fc] dark:text-[#050507]"
                           : stepStatus === "active"
-                            ? "border-2 border-[#3e0074] bg-white text-[#3e0074] dark:border-[#c084fc] dark:bg-[#0d0916] dark:text-[#c084fc]"
-                            : "border border-zinc-200 bg-white text-zinc-300 dark:border-zinc-700 dark:bg-[#0d0916]"
+                            ? "border-2 border-[#3e0074] bg-white text-[#3e0074] dark:border-[#c084fc] dark:bg-[#050507] dark:text-[#c084fc]"
+                            : "border border-zinc-200 bg-white text-zinc-300 dark:border-zinc-700 dark:bg-[#050507]"
                       }`}>
                         <span className="material-symbols-outlined text-sm">{step.icon}</span>
                       </div>
@@ -416,11 +416,11 @@ function OrderTrackContent() {
 
             {/* Stats */}
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#0c0b14]">
                 <p className="text-[11px] font-semibold text-zinc-400">CO₂ Saved</p>
                 <p className="mt-1 text-lg font-bold text-emerald-600">{co2Saved} kg</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#161027]">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-[#0c0b14]">
                 <p className="text-[11px] font-semibold text-zinc-400">Price</p>
                 <p className="mt-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">£{order.total_price.toFixed(2)}</p>
               </div>
@@ -433,7 +433,7 @@ function OrderTrackContent() {
           <div ref={mapContainerRef} className="absolute inset-0" />
           {/* Fallback overlay when map can't render */}
           {!hasCoords && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#161027]">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-zinc-100 dark:bg-[#0c0b14]">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800">
                 <span className="material-symbols-outlined text-3xl text-zinc-400">map</span>
               </div>
@@ -446,7 +446,7 @@ function OrderTrackContent() {
 
           {/* WhatsApp help button */}
           <a
-            href="https://wa.me/447553683774?text=Hi%20EcoQuick!%20I%20need%20help%20with%20my%20delivery."
+            href="https://wa.me/447393080529?text=Hi%20EcoQuick!%20I%20need%20help%20with%20my%20delivery."
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-6 right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_4px_16px_rgba(37,211,102,0.4)] transition-all hover:scale-105 active:scale-95 lg:bottom-8 lg:right-8"

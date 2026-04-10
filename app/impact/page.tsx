@@ -32,12 +32,12 @@ export default function ImpactReportPage() {
   const treesEquiv = Math.round(co2Offset / 22);
 
   return (
-    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col">
         {/* Hero / heading */}
-        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] px-8 py-16 md:py-20 dark:border-[#2d2050] dark:bg-[rgba(192,132,252,0.08)]">
+        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] px-8 py-16 md:py-20 dark:border-[#221d38] dark:bg-[rgba(192,132,252,0.08)]">
           <div className="mx-auto max-w-screen-2xl">
             <div className="flex flex-col items-end gap-8 md:flex-row md:justify-between">
               <div className="max-w-3xl">
@@ -49,14 +49,14 @@ export default function ImpactReportPage() {
                   <br />
                   Report
                 </h1>
-                <p className="mt-8 max-w-xl text-xl font-medium leading-relaxed text-primary/80">
+                <p className="mt-8 max-w-xl text-xl font-medium leading-relaxed text-primary/80 dark:text-zinc-300">
                   Quantifying the carbon reduction and ecological contribution
                   of our high-efficiency delivery network. Your personal impact
                   from {deliveryCount} deliveries.
                 </p>
               </div>
               <div className="flex w-full flex-col gap-4 border-l-4 border-primary pl-6 md:w-auto md:py-4">
-                <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#8b7aaa]">
+                <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#9d8ab8]">
                   Your Deliveries
                 </span>
                 <span className="text-2xl font-bold uppercase tracking-tight text-primary">
@@ -68,16 +68,16 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Top stats — YOUR personal impact */}
-        <section className="grid grid-cols-1 border-b border-slate-200 md:grid-cols-3 dark:border-[#2d2050]">
-          <div className="flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-white p-8 md:border-b-0 md:border-r dark:border-[#2d2050] dark:bg-[#161027]">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+        <section className="grid grid-cols-1 border-b border-slate-200 md:grid-cols-3 dark:border-[#221d38]">
+          <div className="flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-white p-8 md:border-b-0 md:border-r dark:border-[#221d38] dark:bg-[#0c0b14]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
               Your CO2 Offset
             </span>
             <div>
               <p className="stat-value text-5xl font-black uppercase tracking-[-0.05em] text-primary md:text-6xl">
                 {co2Offset.toFixed(1)}
               </p>
-              <p className="text-sm font-bold uppercase text-primary/60">
+              <p className="text-sm font-bold uppercase text-primary/60 dark:text-zinc-400">
                 Kilograms Carbon
               </p>
             </div>
@@ -87,8 +87,8 @@ export default function ImpactReportPage() {
             </div>
           </div>
 
-          <div className="checkerboard flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-slate-50 p-8 md:border-b-0 md:border-r dark:border-[#2d2050] dark:bg-[#0d0916]">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+          <div className="checkerboard flex min-h-[260px] flex-col justify-between border-b border-slate-200 bg-slate-50 p-8 md:border-b-0 md:border-r dark:border-[#221d38] dark:bg-[#050507]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
               Trees Equivalent
             </span>
             <div>
@@ -100,24 +100,24 @@ export default function ImpactReportPage() {
               </p>
             </div>
             <div className="mt-6">
-              <div className="h-1 w-full overflow-hidden bg-slate-200 sharp-edge dark:bg-[#2d2050]">
+              <div className="h-1 w-full overflow-hidden bg-slate-200 sharp-edge dark:bg-[#221d38]">
                 <div className="h-full bg-accent" style={{ width: `${Math.min((treesEquiv / 100) * 100, 100)}%` }} />
               </div>
-              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
                 Personal Forestry Goal
               </p>
             </div>
           </div>
 
-          <div className="flex min-h-[260px] flex-col justify-between bg-white p-8 dark:bg-[#161027]">
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+          <div className="flex min-h-[260px] flex-col justify-between bg-white p-8 dark:bg-[#0c0b14]">
+            <span className="text-xs font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
               Green Deliveries
             </span>
             <div>
               <p className="stat-value text-5xl font-black uppercase tracking-[-0.05em] text-primary md:text-6xl">
                 {deliveryCount}
               </p>
-              <p className="text-sm font-bold uppercase text-primary/60">
+              <p className="text-sm font-bold uppercase text-primary/60 dark:text-zinc-400">
                 Zero-Emission Deliveries
               </p>
             </div>
@@ -131,18 +131,18 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Chart + efficiency */}
-        <section className="grid grid-cols-1 bg-white lg:grid-cols-2 dark:bg-[#161027]">
-          <div className="border-b border-r border-slate-200 p-8 md:p-12 dark:border-[#2d2050]">
+        <section className="grid grid-cols-1 bg-white lg:grid-cols-2 dark:bg-[#0c0b14]">
+          <div className="border-b border-r border-slate-200 p-8 md:p-12 dark:border-[#221d38]">
             <div className="mb-12 flex items-start justify-between">
               <div>
                 <h3 className="mb-2 text-2xl font-black uppercase tracking-tight text-primary">
                   CO2 Savings Projection
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
                   Temporal Analysis (Metric Tons / Month)
                 </p>
               </div>
-              <div className="flex gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#8b7aaa]">
+              <div className="flex gap-4 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#9d8ab8]">
                 <span className="inline-flex items-center gap-2">
                   <span className="h-3 w-3 bg-primary sharp-edge" /> Actual
                 </span>
@@ -151,7 +151,7 @@ export default function ImpactReportPage() {
                 </span>
               </div>
             </div>
-            <div className="relative h-[340px] w-full border-b border-l border-slate-300 grid-line dark:border-[#3d2d70]">
+            <div className="relative h-[340px] w-full border-b border-l border-slate-300 grid-line dark:border-[#302555]">
               <svg
                 className="absolute inset-0 h-full w-full"
                 preserveAspectRatio="none"
@@ -175,7 +175,7 @@ export default function ImpactReportPage() {
                 <circle cx="750" cy="180" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
                 <circle cx="1000" cy="80" r="6" className="fill-[#3e0074] dark:fill-[#c084fc]" />
               </svg>
-              <div className="absolute -bottom-7 flex w-full justify-between text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+              <div className="absolute -bottom-7 flex w-full justify-between text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
                 <span>JAN</span>
                 <span>MAR</span>
                 <span>MAY</span>
@@ -186,13 +186,13 @@ export default function ImpactReportPage() {
             </div>
           </div>
 
-          <div className="border-b border-slate-200 bg-slate-50 p-8 md:p-12 dark:border-[#2d2050] dark:bg-[#0d0916]">
+          <div className="border-b border-slate-200 bg-slate-50 p-8 md:p-12 dark:border-[#221d38] dark:bg-[#050507]">
             <div className="mb-12 flex items-start justify-between">
               <div>
                 <h3 className="mb-2 text-2xl font-black uppercase tracking-tight text-primary">
                   Network Efficiency
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#7c6d99]">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 dark:text-[#8b7aaa]">
                   Energy Usage per 1000 Deliveries (kWh)
                 </p>
               </div>
@@ -217,7 +217,7 @@ export default function ImpactReportPage() {
                   <span className="w-24 text-[11px] uppercase">
                     {item.label}
                   </span>
-                  <div className="flex flex-1 items-center border border-slate-200 bg-white sharp-edge dark:border-[#2d2050] dark:bg-[#161027]">
+                  <div className="flex flex-1 items-center border border-slate-200 bg-white sharp-edge dark:border-[#221d38] dark:bg-[#0c0b14]">
                     <div className={`h-12 bg-primary ${item.width}`} />
                     <span className="ml-4 text-xs font-bold text-primary">
                       {item.value}
@@ -227,12 +227,12 @@ export default function ImpactReportPage() {
               ))}
 
               <div className="mt-4 flex items-center gap-6 text-xs font-bold">
-                <span className="w-24 text-[11px] uppercase italic text-slate-400 dark:text-[#7c6d99]">
+                <span className="w-24 text-[11px] uppercase italic text-slate-400 dark:text-[#8b7aaa]">
                   Industry Std.
                 </span>
-                <div className="flex flex-1 items-center border border-dashed border-slate-300 bg-white sharp-edge dark:border-[#3d2d70] dark:bg-[#161027]">
-                  <div className="h-12 w-full bg-slate-200 dark:bg-[#2d2050]" />
-                  <span className="ml-4 text-xs font-bold text-slate-400 dark:text-[#7c6d99]">
+                <div className="flex flex-1 items-center border border-dashed border-slate-300 bg-white sharp-edge dark:border-[#302555] dark:bg-[#0c0b14]">
+                  <div className="h-12 w-full bg-slate-200 dark:bg-[#221d38]" />
+                  <span className="ml-4 text-xs font-bold text-slate-400 dark:text-[#8b7aaa]">
                     210.0 kWh
                   </span>
                 </div>
@@ -242,7 +242,7 @@ export default function ImpactReportPage() {
         </section>
 
         {/* Telemetry table */}
-        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] p-8 md:p-12 dark:border-[#2d2050] dark:bg-[rgba(192,132,252,0.08)]">
+        <section className="border-b border-slate-200 bg-[rgba(62,0,116,0.15)] p-8 md:p-12 dark:border-[#221d38] dark:bg-[rgba(192,132,252,0.08)]">
           <h3 className="mb-10 text-2xl font-black uppercase tracking-tight text-primary">
             System Telemetry Log
           </h3>
@@ -311,7 +311,7 @@ export default function ImpactReportPage() {
               {["terminal", "data_object", "lan"].map((icon) => (
                 <button
                   key={icon}
-                  className="border border-white/20 p-2 sharp-edge transition-colors hover:bg-white hover:text-primary"
+                  className="border border-white/20 p-2 sharp-edge transition-colors hover:bg-white/20"
                 >
                   <span className="material-symbols-outlined text-sm">
                     {icon}

@@ -91,14 +91,14 @@ export default function BookParcelPage() {
   if (!user || !hydrated) return null;
 
   const inputClass = (hasError: boolean) =>
-    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
+    `w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:outline-none focus:ring-2 dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 ${
       hasError
         ? "border-red-300 focus:border-red-400 focus:ring-red-100 dark:border-red-700"
         : "border-zinc-200 focus:border-[#3e0074] focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
     }`;
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
@@ -114,7 +114,7 @@ export default function BookParcelPage() {
             Tell us about what you&apos;re sending.
           </p>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
             <form className="space-y-6 p-6" onSubmit={(e) => e.preventDefault()}>
 
               {/* Category — selectable pills */}
@@ -216,7 +216,7 @@ export default function BookParcelPage() {
                 </label>
                 <textarea
                   rows={3}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:placeholder:text-zinc-600 dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
                   placeholder="E.g. fragile, gate codes, specific instructions..."
                   value={form.handlingInstructions}
                   onChange={(e) => setForm((f) => ({ ...f, handlingInstructions: e.target.value }))}

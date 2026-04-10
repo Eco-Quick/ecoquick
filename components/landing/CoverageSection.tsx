@@ -14,7 +14,7 @@ export function CoverageSection() {
               coverage
             </h2>
           </div>
-          <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <p className="font-secondary text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             Operating at the core of Kingston upon Thames and expanding through
             Richmond, Twickenham, and the surrounding London territories.
           </p>
@@ -38,7 +38,7 @@ export function CoverageSection() {
               className={[
                 "group flex items-center justify-center gap-2 px-4 py-5 text-xs font-semibold uppercase tracking-[0.22em]",
                 "border-zinc-200",
-                idx % 2 === 0 ? "bg-white dark:bg-[#0d0916]" : "bg-zinc-50 dark:bg-[#161027]",
+                idx % 2 === 0 ? "bg-white dark:bg-[#050507]" : "bg-zinc-50 dark:bg-[#0c0b14]",
                 "border-b md:border-b-0",
                 "transition-all duration-200 hover:scale-[1.03] hover:bg-[#3f0075]/8 hover:border-[#3f0075]/30 hover:text-[#3f0075] cursor-default",
               ].join(" ")}

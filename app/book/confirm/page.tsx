@@ -184,7 +184,7 @@ export default function BookConfirmPage() {
   const sizeLabelMap: Record<string, string> = { envelope: "Envelope", small: "Small", medium: "Medium", large: "Large" };
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
@@ -199,7 +199,7 @@ export default function BookConfirmPage() {
           </h1>
 
           {/* Order summary card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
 
             {/* Delivery type */}
             <div className="flex items-center gap-4 border-b border-zinc-100 px-6 py-5 dark:border-zinc-800">

@@ -94,21 +94,21 @@ export default function DriverEarningsPage() {
 
       {/* Stats grid */}
       <section className="mb-12 grid grid-cols-2 gap-0 border-2 border-primary lg:grid-cols-4">
-        <div className="flex flex-col justify-between border-r border-b border-primary/20 bg-white p-8 dark:bg-[#161027]">
+        <div className="flex flex-col justify-between border-r border-b border-primary/20 bg-white p-8 dark:bg-[#0c0b14]">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Today&apos;s Earnings</p>
-          <p className="mt-4 text-4xl font-black text-primary">£{todayEarnings.toFixed(2)}</p>
+          <p className="mt-4 font-secondary text-4xl font-black text-primary">£{todayEarnings.toFixed(2)}</p>
         </div>
         <div className="flex flex-col justify-between border-b border-primary/20 bg-primary p-8 text-white">
           <p className="text-xs font-bold uppercase tracking-widest opacity-60">Week Deliveries</p>
-          <p className="mt-4 text-4xl font-black">{weekDeliveries}</p>
+          <p className="mt-4 font-secondary text-4xl font-black">{weekDeliveries}</p>
         </div>
         <div className="flex flex-col justify-between border-r border-primary/20 bg-primary p-8 text-white">
           <p className="text-xs font-bold uppercase tracking-widest opacity-60">Week Earnings</p>
-          <p className="mt-4 text-4xl font-black">£{weekEarnings.toFixed(2)}</p>
+          <p className="mt-4 font-secondary text-4xl font-black">£{weekEarnings.toFixed(2)}</p>
         </div>
-        <div className="flex flex-col justify-between bg-white p-8 dark:bg-[#161027]">
+        <div className="flex flex-col justify-between bg-white p-8 dark:bg-[#0c0b14]">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Avg. Per Trip</p>
-          <p className="mt-4 text-4xl font-black text-primary">£{avgPerTrip.toFixed(2)}</p>
+          <p className="mt-4 font-secondary text-4xl font-black text-primary">£{avgPerTrip.toFixed(2)}</p>
         </div>
       </section>
 
@@ -132,16 +132,16 @@ export default function DriverEarningsPage() {
           </div>
         </div>
         <div className="flex flex-col justify-end gap-6">
-          <div className="border border-primary/20 bg-white p-8 dark:bg-[#161027]">
+          <div className="border border-primary/20 bg-white p-8 dark:bg-[#0c0b14]">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Carbon Saved</p>
-            <p className="text-4xl font-black text-emerald-600">{co2Saved.toFixed(1)}kg</p>
+            <p className="font-secondary text-4xl font-black text-emerald-600">{co2Saved.toFixed(1)}kg</p>
             <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-accent">
               Equivalent to {Math.round(co2Saved / 22)} trees
             </p>
           </div>
-          <div className="border border-primary/20 bg-white p-8 dark:bg-[#161027]">
+          <div className="border border-primary/20 bg-white p-8 dark:bg-[#0c0b14]">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Deliveries</p>
-            <p className="text-4xl font-black text-primary">{orders.length}</p>
+            <p className="font-secondary text-4xl font-black text-primary">{orders.length}</p>
           </div>
         </div>
       </section>

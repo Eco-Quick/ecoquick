@@ -127,7 +127,7 @@ export default function VerifyPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916]">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#050507]">
       <CustomerTopBar />
 
       <main className="flex justify-center px-4 py-10 md:py-16">
@@ -139,7 +139,7 @@ export default function VerifyPage() {
             </div>
           ) : status === "verified" ? (
             /* ── Verified ── */
-            <div className="flex flex-col items-center gap-6 rounded-2xl border border-zinc-200 bg-white px-8 py-16 text-center dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="flex flex-col items-center gap-6 rounded-2xl border border-zinc-200 bg-white px-8 py-16 text-center dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20">
                 <span className="material-symbols-outlined text-3xl text-emerald-600">verified</span>
               </div>
@@ -156,7 +156,7 @@ export default function VerifyPage() {
             </div>
           ) : status === "pending" ? (
             /* ── Pending review ── */
-            <div className="flex flex-col items-center gap-6 rounded-2xl border border-zinc-200 bg-white px-8 py-16 text-center dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="flex flex-col items-center gap-6 rounded-2xl border border-zinc-200 bg-white px-8 py-16 text-center dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20">
                 <span className="material-symbols-outlined text-3xl text-amber-600">hourglass_top</span>
               </div>
@@ -206,7 +206,7 @@ export default function VerifyPage() {
 
               {/* Option 1: Auto verification via Stripe Identity */}
               {method !== "manual_upload" && (
-                <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-[#161027]">
+                <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-[#0c0b14]">
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3e0074]/10 dark:bg-[#c084fc]/10">
                       <span className="material-symbols-outlined text-lg text-[#3e0074] dark:text-[#c084fc]">document_scanner</span>
@@ -245,7 +245,7 @@ export default function VerifyPage() {
 
               {/* Option 2: Manual upload */}
               {method === "manual_upload" && (
-                <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-[#161027]">
+                <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-[#0c0b14]">
                   <div className="mb-6 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3e0074]/10 dark:bg-[#c084fc]/10">
                       <span className="material-symbols-outlined text-lg text-[#3e0074] dark:text-[#c084fc]">upload_file</span>
@@ -288,7 +288,7 @@ export default function VerifyPage() {
                       type="date"
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#161027] dark:text-[#ede9f8] dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-sm text-zinc-900 transition-all duration-200 focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:focus:border-[#c084fc] dark:focus:ring-[#c084fc]/10"
                     />
                   </div>
 
@@ -305,7 +305,7 @@ export default function VerifyPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 px-6 py-8 transition-colors hover:border-[#3e0074]/30 hover:bg-[#3e0074]/[0.02] dark:border-zinc-700 dark:bg-[#0d0916] dark:hover:border-[#c084fc]/30"
+                      className="flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 px-6 py-8 transition-colors hover:border-[#3e0074]/30 hover:bg-[#3e0074]/[0.02] dark:border-zinc-700 dark:bg-[#050507] dark:hover:border-[#c084fc]/30"
                     >
                       {preview ? (
                         <img src={preview} alt="Preview" className="max-h-40 rounded-lg object-contain" />
@@ -337,6 +337,16 @@ export default function VerifyPage() {
                     Back to instant verification
                   </button>
                 </div>
+              )}
+
+              {/* Do it later */}
+              {status === "unverified" && (
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="mt-6 w-full py-3 text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                >
+                  Do it later
+                </button>
               )}
 
               {/* Dev skip button */}

@@ -71,7 +71,7 @@ export default function AdminVerificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">ID Verifications</h1>
         <p className="mb-8 text-sm text-zinc-500 dark:text-zinc-400">
@@ -90,7 +90,7 @@ export default function AdminVerificationsPage() {
         ) : (
           <div className="space-y-4">
             {verifications.map((v) => (
-              <div key={v.id} className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+              <div key={v.id} className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
                 <div className="flex flex-col gap-6 md:flex-row">
                   {/* Document preview */}
                   <div className="shrink-0">

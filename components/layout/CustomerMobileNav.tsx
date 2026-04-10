@@ -8,7 +8,7 @@ export function CustomerMobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/90 md:hidden">
       {CUSTOMER_MOBILE_NAV.map((item) => {
         const isActive = item.match(pathname);
         return (

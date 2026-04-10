@@ -156,7 +156,7 @@ function OrderConfirmedContent() {
 
   if (fetchError) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507]">
         <CustomerTopBar />
         <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-20">
           <span className="material-symbols-outlined text-5xl text-zinc-300">error_outline</span>
@@ -169,7 +169,7 @@ function OrderConfirmedContent() {
 
   if (!order) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916]">
+      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507]">
         <CustomerTopBar />
         <main className="flex flex-1 items-center justify-center">
           <span className="material-symbols-outlined animate-spin text-3xl text-[#3e0074] dark:text-[#c084fc]">progress_activity</span>
@@ -184,7 +184,7 @@ function OrderConfirmedContent() {
   const isDelivered = order.status === "delivered";
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="flex flex-1 justify-center px-4 py-8 md:py-12">
@@ -205,7 +205,7 @@ function OrderConfirmedContent() {
           </div>
 
           {/* Main card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
 
             {/* Order ID + Verification Code */}
             <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
@@ -312,7 +312,7 @@ function OrderConfirmedContent() {
 
           {/* Rating — only after delivery */}
           {isDelivered && driver && (
-            <div className="mt-4 rounded-2xl border border-zinc-200 bg-white px-6 py-6 text-center dark:border-zinc-800 dark:bg-[#161027]">
+            <div className="mt-4 rounded-2xl border border-zinc-200 bg-white px-6 py-6 text-center dark:border-zinc-800 dark:bg-[#0c0b14]">
               {ratingSubmitted ? (
                 <div className="flex flex-col items-center gap-2">
                   <span className="material-symbols-outlined text-2xl text-emerald-500">thumb_up</span>
@@ -370,7 +370,7 @@ function OrderConfirmedContent() {
             )}
             <Link
               href="/orders"
-              className="flex-1 rounded-xl border border-zinc-200 bg-white py-4 text-center text-[13px] font-bold text-zinc-700 transition-all hover:-translate-y-0.5 active:scale-[0.98] dark:border-zinc-700 dark:bg-[#161027] dark:text-zinc-300"
+              className="flex-1 rounded-xl border border-zinc-200 bg-white py-4 text-center text-[13px] font-bold text-zinc-700 transition-all hover:-translate-y-0.5 active:scale-[0.98] dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-zinc-300"
             >
               All Orders
             </Link>

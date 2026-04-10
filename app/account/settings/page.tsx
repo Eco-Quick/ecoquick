@@ -63,7 +63,7 @@ export default function AccountSettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="page-fade min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="page-fade min-h-screen bg-slate-50 text-slate-900 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-8 md:py-12">
@@ -72,14 +72,14 @@ export default function AccountSettingsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">
               Account settings
             </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-[#8b7aaa]">
+            <p className="mt-1 font-secondary text-sm text-slate-500 dark:text-[#9d8ab8]">
               Update your personal details and notification preferences.
             </p>
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="btn-press btn-sweep mt-2 inline-flex items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-black disabled:opacity-60 md:mt-0"
+            className="btn-press btn-sweep mt-2 inline-flex items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-black dark:hover:bg-[#5b21b6] disabled:opacity-60 md:mt-0"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -97,7 +97,7 @@ export default function AccountSettingsPage() {
         )}
 
         {/* Verification status */}
-        <section className="mb-8 flex items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2d2050] dark:bg-[#161027]">
+        <section className="mb-8 flex items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#221d38] dark:bg-[#0c0b14]">
           <div className="flex items-center gap-3">
             <span className={`material-symbols-outlined text-xl ${
               verificationStatus === "verified" ? "text-emerald-500" : verificationStatus === "pending" ? "text-amber-500" : "text-zinc-400"
@@ -106,7 +106,7 @@ export default function AccountSettingsPage() {
             </span>
             <div>
               <p className="text-sm font-semibold text-slate-900 dark:text-[#ede9f8]">Identity verification</p>
-              <p className="text-[12px] text-slate-500 dark:text-[#8b7aaa]">
+              <p className="text-[12px] text-slate-500 dark:text-[#9d8ab8]">
                 {verificationStatus === "verified" ? "Your identity has been verified" : verificationStatus === "pending" ? "Under review" : "Not yet verified"}
               </p>
             </div>
@@ -121,48 +121,48 @@ export default function AccountSettingsPage() {
         </section>
 
         {/* Personal information */}
-        <section className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2d2050] dark:bg-[#161027]">
+        <section className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#221d38] dark:bg-[#0c0b14]">
           <h2 className="text-base font-semibold text-slate-900 dark:text-[#ede9f8]">Personal information</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-[#8b7aaa]">
+          <p className="mt-1 text-sm text-slate-500 dark:text-[#9d8ab8]">
             This is how we’ll address you in your dashboard and delivery updates.
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#a78bbd]">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#b8a0d0]">
                 First name
               </label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#3d2d70] dark:bg-[#0d0916] dark:text-[#ede9f8]"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#302555] dark:bg-[#050507] dark:text-[#ede9f8]"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#a78bbd]">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#b8a0d0]">
                 Last name
               </label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#3d2d70] dark:bg-[#0d0916] dark:text-[#ede9f8]"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#302555] dark:bg-[#050507] dark:text-[#ede9f8]"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#a78bbd]">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#b8a0d0]">
                 Email
               </label>
               <input
                 type="email"
                 value={user.email ?? ""}
                 disabled
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-[#2d2050] dark:bg-[#0d0916] dark:text-[#8b7aaa]"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-[#221d38] dark:bg-[#050507] dark:text-[#9d8ab8]"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#a78bbd]">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-[#b8a0d0]">
                 Phone number
               </label>
               <input
@@ -170,16 +170,16 @@ export default function AccountSettingsPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+44 000 000 0000"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#3d2d70] dark:bg-[#0d0916] dark:text-[#ede9f8]"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-[#302555] dark:bg-[#050507] dark:text-[#ede9f8]"
               />
             </div>
           </div>
         </section>
 
         {/* Notifications */}
-        <section className="mb-10 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#2d2050] dark:bg-[#161027]">
+        <section className="mb-10 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#221d38] dark:bg-[#0c0b14]">
           <h2 className="text-base font-semibold text-slate-900 dark:text-[#ede9f8]">Notifications</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-[#8b7aaa]">
+          <p className="mt-1 text-sm text-slate-500 dark:text-[#9d8ab8]">
             Choose how you’d like to hear from us.
           </p>
 
@@ -203,11 +203,11 @@ export default function AccountSettingsPage() {
             ] as const).map((item) => (
               <div
                 key={item.key}
-                className="flex items-center justify-between gap-4 rounded-md border border-slate-100 px-4 py-3 dark:border-[#1e1538]"
+                className="flex items-center justify-between gap-4 rounded-md border border-slate-100 px-4 py-3 dark:border-[#1a1525]"
               >
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-[#ede9f8]">{item.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-[#8b7aaa]">{item.body}</p>
+                  <p className="text-xs text-slate-500 dark:text-[#9d8ab8]">{item.body}</p>
                 </div>
                 <label className="inline-flex cursor-pointer items-center">
                   <input
@@ -220,7 +220,7 @@ export default function AccountSettingsPage() {
                   />
                   <div
                     className={`relative h-5 w-9 rounded-full transition-colors ${
-                      notifs[item.key] ? "bg-primary" : "bg-slate-300 dark:bg-[#2d2050]"
+                      notifs[item.key] ? "bg-primary" : "bg-slate-300 dark:bg-[#221d38]"
                     }`}
                   >
                     <span

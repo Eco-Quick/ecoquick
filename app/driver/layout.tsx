@@ -26,9 +26,9 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="flex min-h-screen flex-col bg-zinc-50 text-slate-900 dark:bg-[#050507] dark:text-[#ede9f8]">
       {/* Top navbar */}
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/85">
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/85">
         <div className="relative mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
           {/* Left: logo */}
           <div className="flex items-center">
@@ -72,7 +72,7 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
       <main className="flex-1">{children}</main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/90 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/90 md:hidden">
         {NAV_ITEMS.map((item) => (
           <button
             key={item.href}

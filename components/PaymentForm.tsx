@@ -9,6 +9,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { createClient } from "@/lib/supabase/client";
+import { useTheme } from "@/components/ThemeProvider";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
@@ -64,7 +65,7 @@ function PaymentFormContent({ amount, onSuccess }: Omit<PaymentFormProps, "order
       )}
 
       <div className="border border-primary/20 bg-primary/5 p-1">
-        <div className="border border-primary/10 bg-white dark:bg-[#161027] p-6">
+        <div className="border border-primary/10 bg-white dark:bg-[#0c0b14] p-6">
           <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
             <span className="material-symbols-outlined text-xl text-accent">
               credit_card
@@ -101,7 +102,7 @@ function PaymentFormContent({ amount, onSuccess }: Omit<PaymentFormProps, "order
       <button
         type="submit"
         disabled={processing || !stripe || !elements}
-        className="flex w-full items-center justify-center gap-3 bg-primary px-8 py-4 text-sm font-black uppercase tracking-[0.22em] text-white transition-all hover:bg-black disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-3 bg-primary px-8 py-4 text-sm font-black uppercase tracking-[0.22em] text-white transition-all hover:bg-black dark:hover:bg-[#5b21b6] disabled:opacity-60"
       >
         <span className="material-symbols-outlined text-base text-accent">
           lock
@@ -118,6 +119,7 @@ function PaymentFormContent({ amount, onSuccess }: Omit<PaymentFormProps, "order
 }
 
 export default function PaymentForm({ amount, orderId, onSuccess }: PaymentFormProps) {
+  const { theme } = useTheme();
   const [clientSecret, setClientSecret] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -180,12 +182,12 @@ export default function PaymentForm({ amount, orderId, onSuccess }: PaymentFormP
       options={{
         clientSecret,
         appearance: {
-          theme: "stripe",
+          theme: theme === "dark" ? "night" : "stripe",
           variables: {
-            colorPrimary: "#3f0075",
-            colorBackground: "#ffffff",
-            colorText: "#1e293b",
-            colorDanger: "#dc2626",
+            colorPrimary: theme === "dark" ? "#c084fc" : "#3f0075",
+            colorBackground: theme === "dark" ? "#0c0b14" : "#ffffff",
+            colorText: theme === "dark" ? "#ede9f8" : "#1e293b",
+            colorDanger: theme === "dark" ? "#fca5a5" : "#dc2626",
             fontFamily: "system-ui, -apple-system, sans-serif",
             borderRadius: "0px",
           },

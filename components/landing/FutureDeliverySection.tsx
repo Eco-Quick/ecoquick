@@ -8,7 +8,7 @@ export function FutureDeliverySection() {
       <Reveal animation="fade">
         <div className="flex items-end justify-between gap-6">
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-600">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-600 dark:text-zinc-400">
               02 / The future of delivery
             </p>
           </div>
@@ -72,7 +72,7 @@ export function FutureDeliverySection() {
         ].map((card) => (
           <div
             key={card.title}
-            className="reveal-up group rounded-none border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3f0075]/20 hover:shadow-lg dark:border-zinc-700 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
+            className="reveal-up group rounded-none border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3f0075]/20 hover:shadow-lg dark:border-zinc-700 dark:bg-[#0c0b14] dark:hover:border-[#c084fc]/20"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-accent group-hover:text-white">
@@ -82,7 +82,7 @@ export function FutureDeliverySection() {
                 {card.title}
               </h3>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <p className="mt-3 font-secondary text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {card.body}
             </p>
           </div>

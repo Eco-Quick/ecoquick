@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
-import { NavProgress } from "@/components/layout/NavProgress";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PageTransition } from "@/components/PageTransition";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -9,6 +9,11 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 const raleway = Raleway({
   subsets: ["latin"],
   variable: "--font-raleway",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -35,9 +40,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${raleway.className} antialiased`}>
+      <body className={`${raleway.variable} ${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <NavProgress />
           <PageTransition>
             {children}
           </PageTransition>

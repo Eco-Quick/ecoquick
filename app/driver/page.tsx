@@ -148,7 +148,7 @@ export default function DriverDashboardPage() {
         </div>
 
         {/* Deliveries */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Deliveries</span>
             <span className="material-symbols-outlined text-lg text-zinc-300 dark:text-zinc-600">local_shipping</span>
@@ -158,7 +158,7 @@ export default function DriverDashboardPage() {
         </div>
 
         {/* Rating */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Rating</span>
             <span className="material-symbols-outlined text-lg text-zinc-300 dark:text-zinc-600">star</span>
@@ -174,7 +174,7 @@ export default function DriverDashboardPage() {
         </div>
 
         {/* Active */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#161027]">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Active Now</span>
             {stats.activeOrders > 0 && <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
@@ -222,7 +222,7 @@ export default function DriverDashboardPage() {
             </div>
             <button
               onClick={() => router.push("/driver/jobs")}
-              className="shrink-0 rounded-full bg-white px-8 py-3.5 text-[13px] font-bold text-[#3e0074] shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
+              className="shrink-0 rounded-full bg-white px-8 py-3.5 text-[13px] font-bold text-[#3e0074] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555] shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
             >
               Find your first job
             </button>
@@ -233,7 +233,7 @@ export default function DriverDashboardPage() {
       {/* Main grid: Quick actions + Summary */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Quick actions */}
-        <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027]">
+        <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
           <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Quick Actions</h2>
           </div>
@@ -264,19 +264,19 @@ export default function DriverDashboardPage() {
         </div>
 
         {/* Today's summary */}
-        <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#161027] lg:col-span-2">
+        <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14] lg:col-span-2">
           <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Today&apos;s Summary</h2>
           </div>
           <div className="p-6">
             {/* Summary metrics */}
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#0d0916]">
+              <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                 <p className="text-[11px] font-semibold uppercase text-zinc-400">Completed</p>
                 <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">{stats.todayDeliveries}</p>
                 <p className="mt-0.5 text-[12px] text-zinc-400">deliveries today</p>
               </div>
-              <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#0d0916]">
+              <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                 <p className="text-[11px] font-semibold uppercase text-zinc-400">Avg Earning</p>
                 <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">
                   £{stats.todayDeliveries > 0 ? (stats.todayEarnings / stats.todayDeliveries).toFixed(2) : "0.00"}

@@ -29,7 +29,7 @@ export function CustomerTopBar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/85">
+    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/85">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
         {/* Left: logo */}
         <div className="flex items-center">

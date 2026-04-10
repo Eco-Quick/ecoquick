@@ -35,7 +35,7 @@ export function LandingHeader() {
     const className = `${linkBase} ${
       isActive
         ? "nav-tab-active text-primary"
-        : "text-zinc-600 hover:text-primary"
+        : "text-zinc-600 hover:text-primary dark:text-zinc-400 dark:hover:text-[#c084fc]"
     }`;
 
     if (isActive) {
@@ -54,7 +54,7 @@ export function LandingHeader() {
   };
 
   return (
-    <header className="border-b border-zinc-200 bg-white/80 py-3 backdrop-blur dark:border-zinc-800 dark:bg-[#0d0916]/85 md:py-4">
+    <header className="border-b border-zinc-200 bg-white/80 py-3 backdrop-blur dark:border-zinc-800 dark:bg-[#050507]/85 md:py-4">
       <div className="relative flex items-center gap-4">
         {/* Left: logo */}
         <div className="flex items-center">
@@ -103,7 +103,7 @@ export function LandingHeader() {
 
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-[#161027] dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 md:hidden"
             aria-label="Toggle navigation"
             onClick={() => setIsOpen((prev) => !prev)}
           >

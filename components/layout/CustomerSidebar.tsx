@@ -9,7 +9,7 @@ export function CustomerSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-primary bg-white dark:bg-[#0d0916] dark:border-[#4c1d95] lg:flex">
+    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-primary bg-white dark:bg-[#050507] dark:border-[#4c1d95] lg:flex">
       <div className="border-b border-primary dark:border-[#4c1d95] p-6">
         <BrandLogo size="sm" />
       </div>

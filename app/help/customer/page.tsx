@@ -98,14 +98,14 @@ export default function CustomerHelpPage() {
   }
 
   return (
-    <div className="page-fade min-h-screen bg-white dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="page-fade min-h-screen bg-white dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto max-w-4xl px-5 pb-24 pt-10 sm:px-6 lg:pb-16 lg:pt-14">
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/40 dark:text-[#c084fc]/40">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/40 dark:text-zinc-500">
             Customer help
           </p>
           <h1 className="mt-3 text-3xl font-black uppercase tracking-tight text-primary dark:text-[#c084fc] sm:text-4xl">
@@ -119,7 +119,7 @@ export default function CustomerHelpPage() {
         {/* Quick action — book now */}
         <div className="mb-12 flex items-center justify-between gap-4 border border-primary/10 bg-primary/[0.03] p-5 dark:border-[#4c1d95]/30 dark:bg-[#3f0075]/10">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 dark:text-[#c084fc]/50">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 dark:text-zinc-400">
               Ready to send?
             </p>
             <p className="mt-1 text-sm font-semibold text-primary dark:text-[#c084fc]">
@@ -144,7 +144,7 @@ export default function CustomerHelpPage() {
             {BOOKING_STEPS.map((s) => (
               <div
                 key={s.step}
-                className="group relative border border-zinc-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_4px_16px_rgba(63,0,117,0.08)] dark:border-zinc-800 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
+                className="group relative border border-zinc-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_4px_16px_rgba(63,0,117,0.08)] dark:border-zinc-800 dark:bg-[#0c0b14] dark:hover:border-[#c084fc]/20"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <span className="material-symbols-outlined text-xl text-accent">{s.icon}</span>
@@ -184,7 +184,7 @@ export default function CustomerHelpPage() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runSearch()}
               placeholder="Search help articles…"
-              className="flex-1 bg-white py-3 pl-3 pr-4 text-sm text-primary placeholder:text-zinc-400 focus:outline-none dark:bg-[#161027] dark:text-[#ede9f8] dark:placeholder:text-zinc-600"
+              className="flex-1 bg-white py-3 pl-3 pr-4 text-sm text-primary placeholder:text-zinc-400 focus:outline-none dark:bg-[#0c0b14] dark:text-[#ede9f8] dark:placeholder:text-zinc-600"
             />
             {query.trim() && (
               <button
@@ -223,7 +223,7 @@ export default function CustomerHelpPage() {
               filteredFaqs.map((faq, i) => (
                 <div key={faq.q}>
                   <button
-                    className="flex w-full items-center justify-between gap-4 bg-white px-5 py-4 text-left transition-colors hover:bg-zinc-50 dark:bg-[#161027] dark:hover:bg-[#1e1538]"
+                    className="flex w-full items-center justify-between gap-4 bg-white px-5 py-4 text-left transition-colors hover:bg-zinc-50 dark:bg-[#0c0b14] dark:hover:bg-[#1e1538]"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
                     <span className="text-sm font-semibold text-primary dark:text-[#c084fc]">
@@ -234,7 +234,7 @@ export default function CustomerHelpPage() {
                     </span>
                   </button>
                   {openFaq === i && (
-                    <div className="bg-white px-5 pb-5 text-sm leading-relaxed text-zinc-600 dark:bg-[#161027] dark:text-zinc-400">
+                    <div className="bg-white px-5 pb-5 text-sm leading-relaxed text-zinc-600 dark:bg-[#0c0b14] dark:text-zinc-400">
                       {faq.a}
                     </div>
                   )}
@@ -247,14 +247,14 @@ export default function CustomerHelpPage() {
         {/* Contact strip */}
         <section className="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: "chat", label: "WhatsApp", sub: "Chat with us instantly", href: "https://wa.me/447553683774?text=Hi%20EcoQuick!%20I%20need%20help." },
-            { icon: "call", label: "Call support", sub: "Mon–Fri, 9am–6pm GMT", href: "tel:+447553683774" },
+            { icon: "chat", label: "WhatsApp", sub: "Chat with us instantly", href: "https://wa.me/447393080529?text=Hi%20EcoQuick!%20I%20need%20help." },
+            { icon: "call", label: "Call support", sub: "Mon–Fri, 9am–6pm GMT", href: "tel:+447393080529" },
             { icon: "mail", label: "Email us", sub: "Reply within 24 hours", href: "mailto:hello@ecoquick.delivery?subject=Support Request" },
           ].map((c) => (
             <a
               key={c.label}
               href={c.href}
-              className="flex items-center gap-3 border border-zinc-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_4px_12px_rgba(63,0,117,0.08)] dark:border-zinc-800 dark:bg-[#161027] dark:hover:border-[#c084fc]/20"
+              className="flex items-center gap-3 border border-zinc-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_4px_12px_rgba(63,0,117,0.08)] dark:border-zinc-800 dark:bg-[#0c0b14] dark:hover:border-[#c084fc]/20"
             >
               <span className="material-symbols-outlined text-xl text-accent">{c.icon}</span>
               <div>

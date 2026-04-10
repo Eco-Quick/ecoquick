@@ -98,7 +98,7 @@ export default function OrderHistoryPage() {
   ];
 
   return (
-    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#0d0916] dark:text-[#ede9f8]">
+    <div className="page-fade min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-[#050507] dark:text-[#ede9f8]">
       <CustomerTopBar />
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-10 sm:px-6 lg:py-12">
@@ -121,7 +121,7 @@ export default function OrderHistoryPage() {
               </span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur dark:border-[#2d2050] dark:bg-[#161027]/80 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur dark:border-[#221d38] dark:bg-[#0c0b14]/80 dark:text-zinc-400">
             {filters.map((f, i) => (
               <button
                 key={f.key}
@@ -145,7 +145,7 @@ export default function OrderHistoryPage() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <span className="material-symbols-outlined mb-4 animate-spin text-4xl text-primary/30">
+            <span className="material-symbols-outlined mb-4 animate-spin text-4xl text-primary/30 dark:text-zinc-600">
               progress_activity
             </span>
             <p className="text-sm font-semibold text-slate-400">Loading your orders…</p>
@@ -194,8 +194,8 @@ export default function OrderHistoryPage() {
           <>
             {/* Desktop table */}
             <div className="hidden md:block">
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#161027]/90">
-                <div className="grid grid-cols-12 border-b border-slate-100 bg-slate-50/80 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-zinc-800 dark:bg-[#0d0916]/80 dark:text-zinc-500">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#0c0b14]/90">
+                <div className="grid grid-cols-12 border-b border-slate-100 bg-slate-50/80 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-zinc-800 dark:bg-[#050507]/80 dark:text-zinc-500">
                   <div className="col-span-2">Order ID</div>
                   <div className="col-span-2">Date &amp; time</div>
                   <div className="col-span-5">Destination</div>
@@ -206,7 +206,7 @@ export default function OrderHistoryPage() {
                   {filteredOrders.map((order) => (
                     <div
                       key={order.id}
-                      className="grid grid-cols-12 items-center bg-white/80 px-6 py-4 text-sm transition-colors hover:bg-slate-50 dark:bg-[#161027]/80 dark:hover:bg-[#1e1538]"
+                      className="grid grid-cols-12 items-center bg-white/80 px-6 py-4 text-sm transition-colors hover:bg-slate-50 dark:bg-[#0c0b14]/80 dark:hover:bg-[#1e1538]"
                     >
                       <div className="col-span-2 font-semibold tracking-tight text-slate-900 dark:text-[#ede9f8]">
                         {displayId(order.id)}
@@ -246,7 +246,7 @@ export default function OrderHistoryPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 dark:border-[#1e1538] dark:bg-[#0d0916]/60 px-6 py-3 text-[11px] text-slate-500">
+                <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 dark:border-[#1a1525] dark:bg-[#050507]/60 px-6 py-3 text-[11px] text-slate-500">
                   <span>
                     Showing {filteredOrders.length} of {orders.length} order{orders.length !== 1 ? "s" : ""}
                   </span>
@@ -259,7 +259,7 @@ export default function OrderHistoryPage() {
               {filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="card-hover rounded-2xl border border-slate-200 bg-white/80 p-4 text-xs shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#161027]/80"
+                  className="card-hover rounded-2xl border border-slate-200 bg-white/80 p-4 text-xs shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#0c0b14]/80"
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <div>
