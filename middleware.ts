@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if (user && (pathname === "/login" || pathname === "/signup")) {
-    const dest = role === "driver" ? "/driver" : "/dashboard";
+    const dest = role === "admin" ? "/admin" : role === "driver" ? "/driver" : "/dashboard";
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
     publicLandingRoutes.includes(pathname) ||
     (pathname.startsWith("/help") && !pathname.startsWith("/help/customer"));
   if (user && isPublicLanding) {
-    const dest = role === "driver" ? "/driver" : "/dashboard";
+    const dest = role === "admin" ? "/admin" : role === "driver" ? "/driver" : "/dashboard";
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
@@ -84,6 +84,11 @@ export async function middleware(request: NextRequest) {
 
   // Protect driver routes
   if (pathname.startsWith("/driver") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Protect admin routes (layout enforces the admin role check)
+  if (pathname.startsWith("/admin") && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

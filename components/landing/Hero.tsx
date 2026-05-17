@@ -9,7 +9,7 @@ export function HeroSection() {
   const { theme } = useTheme();
 
   return (
-    <section className="relative flex flex-col items-center justify-center overflow-hidden text-center" style={{ minHeight: "calc(100vh - 80px)" }}>
+    <section className="relative flex min-h-[640px] flex-col items-center justify-center overflow-hidden text-center md:min-h-[calc(100vh-80px)]">
 
       {/* Headline */}
       <div className="hero-fade relative z-10 flex-1 flex flex-col items-center justify-center px-4">
@@ -22,10 +22,16 @@ export function HeroSection() {
           </span>
         </h1>
 
-        <p className="mt-5 max-w-md font-secondary text-[15px] font-medium leading-relaxed text-zinc-700 dark:text-zinc-400">
-          Hyperlocal, fast, and carbon-neutral deliveries across London.
-          Powered by electric vehicles.
-        </p>
+        <div className="mt-6 flex max-w-xl flex-col items-center gap-2.5">
+          <p className="font-secondary text-[18px] font-medium leading-relaxed text-zinc-700 dark:text-zinc-300">
+            <span className="font-semibold text-[#3f0075] dark:text-[#c084fc]">Hyperlocal</span>,{" "}
+            <span className="font-semibold text-[#3f0075] dark:text-[#c084fc]">fast</span>, and{" "}
+            <span className="font-semibold text-[#3f0075] dark:text-[#c084fc]">secure</span> deliveries for all your parcels.
+          </p>
+          <p className="font-secondary text-[15px] italic font-bold leading-relaxed text-zinc-600 dark:text-zinc-300">
+            Just click, confirm — and it&apos;s delivered.
+          </p>
+        </div>
 
         {/* Feature chips */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-500">

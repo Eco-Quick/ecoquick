@@ -72,11 +72,11 @@ export default function BusinessPage() {
               For Business
             </p>
             <h1 className="hero-heading-reveal text-[clamp(2rem,6vw,5rem)] font-bold leading-[1.08] tracking-[-0.03em] text-zinc-900 dark:text-[#ede9f8]">
-              Scale with <span className="text-[#3e0074] dark:text-[#c084fc]">eco-friendly delivery</span>
+              Scale smarter, <span className="text-[#3e0074] dark:text-[#c084fc]">grow faster</span> with EcoQuick.
             </h1>
             <p className="hero-buttons-fade mx-auto mt-8 max-w-2xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Comprehensive delivery infrastructure for enterprise. Reduce your
-              carbon footprint without sacrificing speed or reliability.
+              Deliver faster, serve better, and build lasting customer relationships
+              with a seamless, hyperlocal delivery network.
             </p>
             <div className="hero-buttons-fade mt-8 flex flex-wrap justify-center gap-4">
               <Link
@@ -93,113 +93,125 @@ export default function BusinessPage() {
               </a>
             </div>
 
-            {/* Stats */}
-            <div className="mx-auto mt-12 grid max-w-3xl gap-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-8 sm:grid-cols-3 dark:border-[#3d3455] dark:bg-gradient-to-br dark:from-[#15121f] dark:to-[#0e0c16]">
-              {[
-                { value: "99.8%", label: "On-time delivery" },
-                { value: "45min", label: "Average delivery time" },
-                { value: "24/7", label: "Availability" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="font-secondary text-3xl font-bold text-[#3e0074] dark:text-[#c084fc]">{stat.value}</p>
-                  <p className="mt-1 text-[15px] text-zinc-600 dark:text-zinc-400">{stat.label}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
-        {/* Why EcoQuick */}
+        {/* Why EcoQuick — benefits + solutions, no symbols */}
         <section id="solutions" className="px-6 py-12 md:px-10 md:py-16">
           <div className="mx-auto max-w-5xl">
-            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
-              Why EcoQuick
-            </h2>
-            <p className="mb-8 text-[15px] text-zinc-600 dark:text-zinc-400">
-              Enterprise-grade infrastructure, carbon-neutral.
-            </p>
-            <div className="grid gap-8 sm:grid-cols-3">
+            <div className="mb-10 text-center md:mb-12">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#3e0074]/60 dark:text-[#c084fc]/70">
+                Why us
+              </p>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
+                Why EcoQuick for{" "}
+                <span className="text-[#3e0074] dark:text-[#c084fc]">your business</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                Everything your local business needs to grow — and the features that make it happen.
+              </p>
+            </div>
+
+            {/* Benefits — 2x2 grid */}
+            <div className="grid gap-4 sm:grid-cols-2 md:gap-6">
               {[
-                { k: "01", title: "Cost Optimization", body: "AI-driven routing cuts operational overhead by up to 40%." },
-                { k: "02", title: "Seamless Integration", body: "Plug-and-play architecture. 99.9% uptime for mission-critical logistics." },
-                { k: "03", title: "Enterprise Support", body: "24/7 access to specialized logistics experts for immediate resolution." },
+                { k: "01", title: "Go beyond walk-in customers", body: "Turn your local presence into a wider reach with instant delivery." },
+                { k: "02", title: "Pay as you grow", body: "Flexible pricing that scales with your business—no unnecessary costs." },
+                { k: "03", title: "Support that has your back", body: "Dedicated assistance to keep your deliveries running smoothly." },
+                { k: "04", title: "Deliver an experience, not just parcels", body: "Reliable, seamless delivery that keeps your customers coming back." },
               ].map((item) => (
-                <div key={item.k} className="group rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-white to-zinc-50 p-8 shadow-[0_4px_12px_rgba(0,0,0,0.08),0_12px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#3e0074]/25 hover:shadow-[0_12px_40px_rgba(62,0,116,0.14),0_4px_12px_rgba(0,0,0,0.08)] dark:border-[#3d3455] dark:from-[#15121f] dark:to-[#0e0c16] dark:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_12px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(192,132,252,0.08)] dark:hover:border-[#c084fc]/30 dark:hover:shadow-[0_12px_40px_rgba(192,132,252,0.12),0_4px_16px_rgba(0,0,0,0.6)]">
-                  <span className="text-4xl font-bold text-zinc-300 transition-colors group-hover:text-[#3e0074] dark:text-[white] dark:group-hover:text-[#c084fc]">
+                <div
+                  key={item.k}
+                  className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#3e0074]/25 hover:shadow-[0_12px_40px_rgba(62,0,116,0.12)] md:p-7 dark:border-[#3d3455] dark:bg-[#0e0c16] dark:hover:border-[#c084fc]/30"
+                >
+                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#3e0074]/[0.04] blur-2xl transition-opacity duration-300 group-hover:bg-[#3e0074]/[0.08] dark:bg-[#c084fc]/[0.08] dark:group-hover:bg-[#c084fc]/[0.15]" />
+
+                  <span className="font-secondary text-2xl font-bold text-zinc-300 transition-colors duration-300 group-hover:text-[#3e0074] dark:text-zinc-700 dark:group-hover:text-[#c084fc]">
                     {item.k}
                   </span>
-                  <h3 className="mt-4 mb-2 text-base font-bold text-zinc-900 dark:text-[#ede9f8]">{item.title}</h3>
-                  <p className="text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">{item.body}</p>
+                  <h3 className="relative mt-3 text-lg font-bold leading-snug text-zinc-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="relative mt-2 text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
 
-        {/* Solutions */}
-        <section className="px-6 py-12 md:px-10 md:py-16">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">Solutions</h2>
-            <p className="mb-8 text-[15px] text-zinc-600 dark:text-zinc-400">Tailored for scale and complexity.</p>
-            <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-[#3d3455] sm:grid-cols-2">
+            {/* Divider with label */}
+            <div className="mx-auto mt-12 mb-6 flex max-w-xs items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500 md:mt-16">
+              <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+              <span>What we offer</span>
+              <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+
+            {/* Solutions — 1x3 grid, simpler styling */}
+            <div className="grid gap-4 sm:grid-cols-3 md:gap-5">
               {[
-                { title: "Bulk Delivery", body: "High-volume orders with consolidated pickup and drop-off points designed for scale.", variant: "white" },
-                { title: "Account Management", body: "Dedicated account managers to optimize your logistics strategy quarterly.", variant: "purple" },
-                { title: "API Automation", body: "Full webhook support and RESTful API to automate your entire logistics workflow.", variant: "purple" },
-                { title: "White-Label", body: "Custom branding for tracking pages and notifications. Enterprise-grade.", variant: "white" },
+                { title: "Bulk Deliveries", body: "Handle high order volumes without the stress." },
+                { title: "Dedicated Support", body: "Your own account manager to keep everything running smoothly." },
+                { title: "On-Demand or Scheduled", body: "Deliver instantly or plan ahead—flexibility built around your business." },
               ].map((item) => (
                 <div
                   key={item.title}
-                  className={`p-10 md:p-12 ${
-                    item.variant === "purple"
-                      ? "bg-[#3e0074]/[0.06] dark:bg-[#2a1650]"
-                      : "bg-white dark:bg-[#0e0c16]"
-                  }`}
+                  className="group rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 p-5 transition-all duration-300 hover:border-solid hover:border-[#3e0074]/30 hover:bg-white dark:border-zinc-700 dark:bg-[#0a0712]/50 dark:hover:border-[#c084fc]/30 dark:hover:bg-[#0e0c16]"
                 >
-                  <h4 className="mb-3 text-lg font-bold text-zinc-900 dark:text-white">{item.title}</h4>
-                  <p className="text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-300">{item.body}</p>
+                  <h4 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#3e0074] dark:text-[#c084fc]">
+                    {item.title}
+                  </h4>
+                  <p className="mt-2 text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Pricing */}
+        {/* Plans */}
         <section id="pricing" className="bg-zinc-50 px-6 py-12 md:px-10 md:py-16 dark:bg-[#050507]">
           <div className="mx-auto max-w-5xl">
-            <h2 className="mb-4 text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">Pricing</h2>
-            <p className="mb-8 text-[15px] text-zinc-600 dark:text-zinc-400">Choose the plan that fits your scale.</p>
+            <div className="mb-10 text-center md:mb-12">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#3e0074]/60 dark:text-[#c084fc]/70">
+                Plans
+              </p>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-[#ede9f8] md:text-5xl">
+                Pick the plan that fits
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                Three ways to work with EcoQuick — start small, scale up, or go all in.
+              </p>
+            </div>
+
             <div className="grid gap-6 md:grid-cols-3">
               {[
                 {
                   title: "Starter",
-                  price: "£0",
-                  period: "/ month",
-                  features: ["Pay-as-you-go rates", "Standard 9–5 support", "Basic analytics"],
+                  tagline: "For small businesses just getting started.",
+                  features: ["Pay-as-you-go deliveries", "Standard support", "Basic analytics"],
                   cta: "Start free",
                   featured: false,
                 },
                 {
                   title: "Professional",
-                  price: "£499",
-                  period: "/ month",
-                  features: ["Priority 24/7 support", "Advanced analytics", "5 team seats"],
-                  cta: "Upgrade now",
+                  tagline: "For growing businesses with regular delivery needs.",
+                  features: ["Priority 24/7 support", "Advanced analytics", "Multiple team seats"],
+                  cta: "Get in touch",
                   featured: true,
                   badge: "Popular",
                 },
                 {
                   title: "Enterprise",
-                  price: "Custom",
-                  period: "",
-                  features: ["30%+ shipping discount", "Dedicated account manager", "Custom API & SLA"],
+                  tagline: "For high-volume operations that need it all.",
+                  features: ["Volume discounts", "Dedicated account manager", "Custom API & SLA"],
                   cta: "Contact sales",
                   featured: false,
                 },
               ].map((plan) => (
                 <div
                   key={plan.title}
-                  className={`relative rounded-2xl border p-8 transition-all duration-300 hover:-translate-y-1 md:p-10 ${
+                  className={`relative rounded-2xl border p-7 transition-all duration-300 hover:-translate-y-1 md:p-8 ${
                     plan.featured
                       ? "border-[#3e0074]/30 bg-gradient-to-br from-white to-zinc-50 shadow-[0_4px_12px_rgba(0,0,0,0.08),0_12px_32px_rgba(62,0,116,0.1)] dark:border-[#c084fc]/30 dark:from-[#15121f] dark:to-[#0e0c16] dark:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_12px_32px_rgba(192,132,252,0.08),inset_0_1px_0_rgba(192,132,252,0.1)]"
                       : "border-zinc-200 bg-gradient-to-br from-white to-zinc-50 shadow-[0_4px_12px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.04)] dark:border-[#3d3455] dark:from-[#15121f] dark:to-[#0e0c16] dark:shadow-[0_4px_16px_rgba(0,0,0,0.6),0_12px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(192,132,252,0.06)]"
@@ -210,22 +222,21 @@ export default function BusinessPage() {
                       {plan.badge}
                     </span>
                   )}
-                  <h4 className="text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">{plan.title}</h4>
-                  <div className="mt-4 mb-6 flex items-baseline">
-                    <span className="font-secondary text-4xl font-bold text-[#3e0074] dark:text-[#c084fc]">{plan.price}</span>
-                    <span className="ml-1 text-sm text-zinc-500">{plan.period}</span>
-                  </div>
-                  <ul className="mb-8 space-y-3">
+                  <h4 className="text-xl font-bold text-zinc-900 dark:text-[#ede9f8]">{plan.title}</h4>
+                  <p className="mt-2 mb-6 text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    {plan.tagline}
+                  </p>
+                  <ul className="mb-8 space-y-3 border-t border-zinc-200 pt-6 dark:border-zinc-700">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-3 text-[15px] text-zinc-600 dark:text-zinc-400">
-                        <span className="material-symbols-outlined text-sm text-emerald-500">check</span>
+                      <li key={f} className="flex items-start gap-3 text-[14px] text-zinc-700 dark:text-zinc-300">
+                        <span className="material-symbols-outlined mt-0.5 text-base text-emerald-500">check_circle</span>
                         {f}
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={plan.cta === "Contact sales" ? "#contact" : "/signup"}
-                    className={`block w-full rounded-xl py-3.5 text-center text-[12px] font-bold transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${
+                    className={`block w-full rounded-xl py-3.5 text-center text-[12px] font-bold uppercase tracking-[0.18em] transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${
                       plan.featured
                         ? "bg-[#3e0074] text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] dark:bg-[#5b21b6]"
                         : "border border-zinc-200 text-zinc-700 hover:border-[#3e0074]/30 hover:text-[#3e0074] dark:border-[#3d3455] dark:text-zinc-300 dark:hover:border-[#c084fc]/40 dark:hover:text-[#c084fc]"

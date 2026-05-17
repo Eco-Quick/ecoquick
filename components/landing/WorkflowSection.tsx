@@ -30,21 +30,21 @@ export function WorkflowSection() {
   const imgDir = theme === "dark" ? "/dark" : "/light";
 
   return (
-    <section id="workflow" className="mt-16 border-t border-zinc-400 pt-12 dark:border-zinc-700">
+    <section id="workflow" className="mt-10 border-t border-zinc-400 pt-8 md:mt-16 md:pt-12 dark:border-zinc-700">
       <Reveal animation="fade">
         <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-zinc-600 dark:text-zinc-400">
           01 / Workflow
         </p>
       </Reveal>
 
-      <Reveal animation="up" stagger className="mt-8 grid gap-6 md:grid-cols-3">
+      <Reveal animation="up" stagger className="mt-6 grid gap-4 md:mt-8 md:gap-6 md:grid-cols-3">
         {WORKFLOW_STEPS.map((step) => (
           <div
             key={step.k}
-            className="reveal-up group space-y-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-[0_8px_24px_rgba(192,132,252,0.1)]"
+            className="reveal-up group space-y-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:space-y-4 dark:hover:shadow-[0_8px_24px_rgba(192,132,252,0.1)]"
           >
-            <div className="overflow-hidden border border-zinc-300 bg-white transition-colors duration-300 group-hover:border-[#3f0075]/30 dark:border-zinc-700 dark:bg-[#0c0b14] dark:group-hover:border-[#c084fc]/30">
-              <div className="relative aspect-[4/3] bg-white">
+            <div className="mx-auto max-w-[220px] overflow-hidden border border-zinc-300 bg-white transition-colors duration-300 group-hover:border-[#3f0075]/30 md:max-w-none dark:border-zinc-700 dark:bg-[#0c0b14] dark:group-hover:border-[#c084fc]/30">
+              <div className="relative aspect-[16/10] bg-white md:aspect-[4/3]">
                 <Image
                   src={`${imgDir}/${step.image}`}
                   alt={step.title}

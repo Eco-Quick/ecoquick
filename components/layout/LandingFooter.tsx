@@ -1,93 +1,62 @@
 "use client";
 
-import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 
 export function LandingFooter() {
   return (
     <footer
       id="contact"
-      className="mt-20 border-t border-zinc-200 pb-14 pt-12 dark:border-zinc-800"
+      className="mt-20 border-t border-zinc-200 pb-10 pt-12 dark:border-zinc-800"
     >
-      <Reveal animation="up" className="grid gap-10 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div className="space-y-4">
+      <Reveal animation="up" className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-3">
           <p className="text-sm font-extrabold uppercase tracking-[0.22em] text-zinc-950 dark:text-zinc-100">
             ECOQUICK DELIVERY
           </p>
           <div className="space-y-1 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
             <p>Kingston upon Thames, London</p>
-            <a href="mailto:hello@ecoquick.delivery" className="hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">hello@ecoquick.delivery</a>
+            <a
+              href="mailto:hello@ecoquickdelivery.co.uk"
+              className="hover:text-zinc-900 transition-colors dark:hover:text-zinc-200"
+            >
+              hello@ecoquickdelivery.co.uk
+            </a>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8">
-          <div className="space-y-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
-              Product
-            </p>
-            <div className="space-y-2 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
-              <Link
-                className="block hover:text-zinc-900 dark:hover:text-zinc-200"
-                href="/#delivery"
-              >
-                Services
-              </Link>
-              <Link
-                className="block hover:text-zinc-900 dark:hover:text-zinc-200"
-                href="/#workflow"
-              >
-                Workflow
-              </Link>
-              <Link
-                className="block hover:text-zinc-900 dark:hover:text-zinc-200"
-                href="/#coverage"
-              >
-                Coverage
-              </Link>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
-              Company
-            </p>
-            <div className="space-y-2 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
-              <Link className="block hover:text-zinc-900 dark:hover:text-zinc-200" href="/">
-                Home
-              </Link>
-              <Link
-                className="block hover:text-zinc-900 dark:hover:text-zinc-200"
-                href="/login"
-              >
-                Log in
-              </Link>
-              <Link
-                className="block hover:text-zinc-900 dark:hover:text-zinc-200"
-                href="/signup"
-              >
-                Get started
-              </Link>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-5 font-secondary text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+          <a
+            className="hover:text-zinc-900 dark:hover:text-zinc-200"
+            href="https://www.instagram.com/ecoquick_deliveries/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
+          <a
+            className="hover:text-zinc-900 dark:hover:text-zinc-200"
+            href="https://www.linkedin.com/company/ecoquick-delivery/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+          <a
+            className="hover:text-zinc-900 dark:hover:text-zinc-200"
+            href="https://wa.me/447393080529"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
         </div>
       </Reveal>
 
-      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800 pt-6 font-secondary text-xs text-zinc-500">
-        <p className="font-semibold uppercase tracking-[0.22em]">
+      <div className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <p className="font-secondary text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
           © {new Date().getFullYear()} EcoQuick
         </p>
-        <div className="flex items-center gap-5 font-semibold uppercase tracking-[0.22em]">
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://www.instagram.com/ecoquick_deliveries/" target="_blank" rel="noopener noreferrer">
-            Instagram
-          </a>
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="https://wa.me/447393080529" target="_blank" rel="noopener noreferrer">
-            WhatsApp
-          </a>
-          <a className="hover:text-zinc-900 dark:hover:text-zinc-200" href="mailto:hello@ecoquick.delivery">
-            Email
-          </a>
-        </div>
       </div>
     </footer>
   );
 }
-

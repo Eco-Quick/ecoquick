@@ -35,8 +35,8 @@ export function FutureDeliverySection() {
             ),
           },
           {
-            title: "Eco‑friendly",
-            body: "100% carbon-neutral operations using a fully electric fleet for cleaner cities.",
+            title: "Eco‑friendly packaging",
+            body: "Reusable, recyclable, and plastic-free packaging options to keep every delivery kind to the planet.",
             icon: (
               <svg
                 viewBox="0 0 24 24"
@@ -52,8 +52,8 @@ export function FutureDeliverySection() {
             ),
           },
           {
-            title: "Secure & tracked",
-            body: "Real-time GPS tracking with secure digital handover and proof of delivery.",
+            title: "Secure handover",
+            body: "OTP-based verification and proof of delivery on every parcel — so your package only reaches the right hands.",
             icon: (
               <svg
                 viewBox="0 0 24 24"

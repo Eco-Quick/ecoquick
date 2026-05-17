@@ -103,46 +103,64 @@ export function LandingHeader() {
 
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center border border-zinc-200 text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100 md:hidden"
+            className="inline-flex h-9 items-center gap-1.5 border border-zinc-300 bg-white px-3 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-800 transition hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-[#0c0b14] dark:text-zinc-100 dark:hover:border-zinc-400 md:hidden"
             aria-label="Toggle navigation"
+            aria-expanded={isOpen}
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            <span className="material-symbols-outlined text-[20px] leading-none">
-              menu
+            <span className="material-symbols-outlined text-[18px] leading-none">
+              {isOpen ? "close" : "menu"}
             </span>
+            <span>{isOpen ? "Close" : "Menu"}</span>
           </button>
         </div>
       </div>
 
       {isOpen && (
-        <nav className="mt-3 flex flex-col gap-2 text-[11px] font-medium tracking-[0.05em] text-zinc-600 dark:text-zinc-400 md:hidden">
-          <Link href="/" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
-            Home
-          </Link>
-          <Link href="/about" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
-            About
-          </Link>
-          <Link
-            href="/business"
-            className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200"
-          >
-            Business
-          </Link>
-          <Link href="/help" className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200">
-            Help
-          </Link>
-          <Link
-            href="/login"
-            className="py-0.5 transition hover:text-zinc-900 dark:hover:text-zinc-200"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="py-0.5 text-[#3f0075] dark:text-[#c084fc] transition hover:text-zinc-900 dark:hover:text-zinc-200"
-          >
-            Get started
-          </Link>
+        <nav className="mt-4 md:hidden">
+          <div className="divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            {[
+              { href: "/", label: "Home", icon: "home" },
+              { href: "/about", label: "About", icon: "info" },
+              { href: "/business", label: "Business", icon: "business_center" },
+              { href: "/help", label: "Help", icon: "help_outline" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="group flex items-center justify-between py-3.5 text-sm font-semibold text-zinc-800 transition hover:text-[#3f0075] dark:text-zinc-200 dark:hover:text-[#c084fc]"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[20px] text-zinc-500 transition group-hover:text-[#3f0075] dark:text-zinc-500 dark:group-hover:text-[#c084fc]">
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </span>
+                <span className="material-symbols-outlined text-[18px] text-zinc-300 transition group-hover:translate-x-1 group-hover:text-[#3f0075] dark:text-zinc-700 dark:group-hover:text-[#c084fc]">
+                  arrow_forward
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <Link
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              className="rounded-full border border-zinc-300 py-3 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-800 transition hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-900"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 rounded-full bg-[#3f0075] py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white shadow-[0_4px_12px_rgba(63,0,117,0.25)] transition hover:bg-[#360069] hover:shadow-[0_6px_18px_rgba(63,0,117,0.35)] dark:bg-[#5b21b6]"
+            >
+              Get started
+              <span className="text-[14px]">→</span>
+            </Link>
+          </div>
         </nav>
       )}
     </header>

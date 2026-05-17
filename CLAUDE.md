@@ -32,6 +32,7 @@ No test suite is configured. There is no `test` script.
 |------|-------|--------|
 | Customer | `/login` → `/dashboard` | `app/layout.tsx` + `CustomerTopBar` + `CustomerSidebar`/`CustomerMobileNav` |
 | Driver | `/login` → `/driver` | `app/driver/layout.tsx` (self-contained — no shared nav components) |
+| Admin | `/login` → `/admin` | `app/admin/layout.tsx` (server-gated via `requireAdmin()`) + `AdminSidebar` |
 
 ### Route map
 ```
@@ -47,6 +48,7 @@ app/
   order/confirmed/      # Post-booking confirmation page (?id=<uuid>)
   orders/               # Customer order history
   driver/               # Driver dashboard + sub-pages (jobs, track, earnings)
+  admin/                # Admin console — page.tsx (KPIs), orders/, drivers/, customers/, verifications/
   account/ notifications/ about/ business/ impact/ help/
 ```
 
@@ -54,9 +56,10 @@ app/
 - **Customer pages**: call `useCustomerAuth()` (from `hooks/useCustomerAuth.ts`) at component top. Returns `{ id, name, email } | null`; redirects to `/login` if unauthenticated. Never call `supabase.auth.getUser()` directly in customer pages — use the hook.
 - **Supabase client**: always use `createClient()` from `lib/supabase/client.ts` (wraps `createBrowserClient` from `@supabase/ssr`).
 - **Driver pages**: auth handled inline in `app/driver/layout.tsx`.
+- **Admin pages**: server components only. Call `await requireAdmin()` from `lib/admin-auth.ts` at the top of any admin server component or API route. It redirects unauthenticated users to `/login`, non-admins to their own area. Admin API routes additionally re-check `user_metadata.role === "admin"` before using the service client. Admin role is set via Supabase `user_metadata.role = "admin"` — there is no hardcoded credential.
 
 ### Navigation config
-`lib/nav-config.ts` is the single source of truth for all three customer nav structures: `CUSTOMER_TOP_NAV`, `CUSTOMER_SIDEBAR_NAV`, `CUSTOMER_MOBILE_NAV`. Each item has `href`, `label`, `icon`, and a `match(pathname)` function. Do not hardcode nav items in layout components.
+`lib/nav-config.ts` is the single source of truth for all customer + admin nav structures: `CUSTOMER_TOP_NAV`, `CUSTOMER_SIDEBAR_NAV`, `CUSTOMER_MOBILE_NAV`, `ADMIN_SIDEBAR_NAV`. Each item has `href`, `label`, `icon`, and a `match(pathname)` function. Do not hardcode nav items in layout components.
 
 ---
 
@@ -109,6 +112,26 @@ function calculatePrice(packageSize: string, deliveryType: string) {
   return { base, sizeFee, schedulingFee, discount, total: base + sizeFee + schedulingFee - discount };
 }
 ```
+
+---
+
+## Admin Console
+
+Server-rendered admin area under `/admin/*`. All pages are React Server Components that fetch directly via the service-role client — no client-side data layer.
+
+**Pages**
+- `/admin` — KPI overview (revenue, orders today, active orders, drivers online, pending verifications, status breakdown)
+- `/admin/orders` + `/admin/orders/[id]` — list with status/text filters, full detail with timeline, customer/driver links, cancellation
+- `/admin/drivers` + `/admin/drivers/[id]` — list with online/active filters, profile + recent jobs, suspend/unsuspend
+- `/admin/customers` + `/admin/customers/[id]` — paginated list (50/page) via `auth.admin.listUsers` excluding drivers/admins, profile + lifetime stats, suspend/unsuspend
+- `/admin/verifications` — pending ID-verification queue with document preview, approve/reject
+
+**API routes**
+- `POST /api/admin/verify-user` — approve/reject pending verification (existing)
+- `POST /api/admin/cancel-order` — set status='cancelled', free driver slot, notify both parties
+- `POST /api/admin/suspend-user` — Supabase Auth `ban_duration` + `user_metadata.suspended` flag (blocks own account)
+
+**Auth gate**: every admin server component must call `await requireAdmin()` from `lib/admin-auth.ts` (the admin layout already does so). API routes re-check `user_metadata.role === "admin"` before using the service client. Suspension uses `auth.admin.updateUserById({ ban_duration })` — "876000h" to suspend, "none" to lift.
 
 ---
 

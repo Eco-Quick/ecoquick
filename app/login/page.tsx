@@ -58,7 +58,18 @@ export default function LoginPage() {
     const role = data.user?.user_metadata?.role;
     // Small delay to ensure localStorage write completes before navigation
     await new Promise((r) => setTimeout(r, 50));
-    router.push(role === "driver" ? "/driver" : "/dashboard");
+
+    if (role === "driver") {
+      router.push("/driver");
+    } else {
+      // Check verification status — redirect unverified customers to /verify
+      const verificationStatus = data.user?.user_metadata?.verification_status;
+      if (verificationStatus === "verified") {
+        router.push("/dashboard");
+      } else {
+        router.push("/verify");
+      }
+    }
   };
 
   const handleForgotPassword = async () => {
