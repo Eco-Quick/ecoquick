@@ -29,7 +29,7 @@ export function HeroSection() {
             <span className="font-semibold text-[#3f0075] dark:text-[#c084fc]">secure</span> deliveries for all your parcels.
           </p>
           <p className="font-secondary text-[15px] italic font-bold leading-relaxed text-zinc-600 dark:text-zinc-300">
-            Just click, confirm — and it&apos;s delivered.
+            Just click, confirm and it&apos;s delivered.
           </p>
         </div>
 
