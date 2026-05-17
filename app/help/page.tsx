@@ -1,25 +1,73 @@
 "use client";
 
 import { useState, useRef } from "react";
+import type { ReactNode } from "react";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 
+function highlight(text: string, query: string): ReactNode {
+  const q = query.trim();
+  if (!q) return text;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "ig"));
+  return parts.map((part, i) =>
+    part.toLowerCase() === q.toLowerCase() ? (
+      <mark
+        key={i}
+        className="bg-[#c084fc]/30 text-[#3e0074] dark:bg-[#c084fc]/40 dark:text-white"
+      >
+        {part}
+      </mark>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 const faqs = [
   {
+    q: "How quickly can you deliver my package?",
+    a: "Our instant delivery service aims to dispatch a driver as soon as possible within our service area. Actual delivery times depend on driver availability, distance, traffic and weather. If you need certainty, you can also book a scheduled delivery for a specific time window.",
+  },
+  {
+    q: "What areas do you cover?",
+    a: "We currently serve Kingston upon Thames and the surrounding boroughs — including Richmond upon Thames, Twickenham, Teddington, Hampton, Surbiton, New Malden and Wimbledon. We're expanding to new areas regularly. If your postcode is outside our zone you'll see a clear message at booking.",
+  },
+  {
+    q: "How much does delivery cost?",
+    a: "Pricing is distance-based and shown upfront: £2.50 for the first mile and £0.50 for every additional mile, calculated from your pickup point to the drop-off. Scheduled deliveries incur a small scheduling fee. There are no hidden charges — what you see in the quote is what you pay.",
+  },
+  {
+    q: "Are my packages insured?",
+    a: "Yes — every delivery is insured, but coverage depends on the product category and delivery type you select at booking. High-value or fragile items may require additional declarations. For full terms please refer to our policy or contact support before booking.",
+  },
+  {
+    q: "Can I track my delivery in real time?",
+    a: "Yes. Once a driver is assigned, you'll get a live tracking page showing the driver's location on a map plus a status timeline (Confirmed → Driver assigned → Picked up → On the way → Delivered). Each status change pushes a notification to your account, and the map updates as the driver moves — no refresh required.",
+  },
+  {
+    q: "What payment methods do you accept?",
+    a: "We accept all major credit and debit cards (Visa, Mastercard, American Express) through our secure Stripe payment gateway. Where available, Apple Pay and Google Pay are supported at checkout. Payment is taken at the time of booking and you'll receive a receipt by email.",
+  },
+  {
+    q: "What if my package is lost or damaged?",
+    a: "Report any issues within 24 hours of delivery through your customer dashboard or by contacting support directly. We'll investigate with the driver, review the case under our insurance policy, and provide compensation accordingly. Keep any photos of the package and packaging — they help us resolve cases faster.",
+  },
+  {
+    q: "Can I schedule a delivery for later?",
+    a: "Yes — you can schedule deliveries up to 7 days in advance. Choose from morning (8 AM – 12 PM), afternoon (12 PM – 6 PM), or evening (6 PM – 10 PM) windows. A small £2.50 scheduling fee applies to lock in your preferred time slot.",
+  },
+  {
+    q: "What items can I send (and what's prohibited)?",
+    a: "We deliver most everyday parcels — documents, gifts, groceries, retail goods, and age-restricted items where the driver verifies ID at handover. We do not transport hazardous materials, illegal substances, firearms, live animals, or items above our published weight/size limits. The booking flow will warn you if your item category needs special handling.",
+  },
+  {
     q: "How do I change my delivery address after booking?",
-    a: "You can change the delivery address within the first 15 minutes of booking directly through the app. After this grace period, please contact our support team immediately. Additional fees may apply based on the new distance.",
+    a: "If the driver hasn't picked up the package yet, contact support via WhatsApp or phone and we'll do our best to update the drop-off — fees may apply depending on the new distance. Once a parcel is in transit, address changes aren't possible for the driver's safety and route integrity.",
   },
   {
-    q: "What items are prohibited from shipping?",
-    a: "We strictly prohibit the transport of hazardous materials, illegal substances, firearms, and live animals. Please refer to our complete Terms of Service for a detailed list of restricted items to ensure compliance and safety.",
-  },
-  {
-    q: "How does the eco-friendly delivery option work?",
-    a: 'Our "Eco-Saver" option utilises electric vehicles and optimised batch routing to minimise carbon emissions. While delivery times may be slightly longer, this option reduces the carbon footprint of your shipment by up to 45%.',
-  },
-  {
-    q: "Can I schedule a recurring pickup for my business?",
-    a: "Yes! Business accounts have access to the Recurring Routes feature. You can set weekly, daily, or monthly pickup schedules. Contact our sales team to set up a business account with volume discounts.",
+    q: "Do you offer business or recurring delivery accounts?",
+    a: "Yes — business accounts include recurring pickup schedules, volume pricing, dedicated support and consolidated invoicing. Visit our business page or email hello@ecoquick.delivery and our team will set you up.",
   },
 ];
 
@@ -85,9 +133,30 @@ export default function HelpPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
-                placeholder="Search for articles, topics, or keywords..."
-                className="block w-full border-0 bg-white dark:bg-[#0c0b14] py-4 pl-12 pr-24 text-lg text-[#3e0074] dark:text-[#ede9f8] placeholder:text-[#3e0074]/30 dark:placeholder:text-[#8b7aaa] transition-all focus:border-0 focus:outline-none focus:ring-1 focus:ring-[#3e0074] dark:focus:ring-[#c084fc]"
+                placeholder="Search by keyword: tracking, payment, insurance…"
+                className="block w-full border-0 bg-white dark:bg-[#0c0b14] py-4 pl-12 pr-32 text-lg text-[#3e0074] dark:text-[#ede9f8] placeholder:text-[#3e0074]/30 dark:placeholder:text-[#8b7aaa] transition-all focus:border-0 focus:outline-none focus:ring-1 focus:ring-[#3e0074] dark:focus:ring-[#c084fc]"
               />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="absolute inset-y-0 right-24 flex items-center pr-3 text-[#3e0074]/40 hover:text-[#3e0074] dark:text-[#c4b5d8]/60 dark:hover:text-white"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
               <button
                 onClick={runSearch}
                 className="absolute inset-y-0 right-0 bg-[#3e0074] dark:bg-[#c084fc] px-6 text-sm font-bold text-white dark:text-[#050507] transition-colors hover:bg-[#2f005a] dark:hover:bg-[#d8b4fe]"
@@ -206,188 +275,6 @@ export default function HelpPage() {
           </div>
         </section>
 
-        {/* Topics grid */}
-        <section className="mx-auto max-w-7xl border-t border-gray-100 dark:border-[#1a1525] px-6 py-12 lg:px-8">
-          <div className="mb-10">
-            <h2 className="font-display text-3xl font-bold text-[#3e0074] dark:text-white">
-              Browse topics
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-px overflow-hidden border border-gray-200 dark:border-[#221d38] bg-gray-200 dark:bg-[#221d38] md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: "Booking",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                ),
-                items: [
-                  "How to schedule a pickup",
-                  "Modifying a booking",
-                  "Cancel a reservation",
-                ],
-              },
-              {
-                title: "Tracking",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="7" width="10" height="10" rx="2" />
-                    <path d="M13 9h3l3 3v5h-6Z" />
-                    <circle cx="7.5" cy="18" r="1.5" />
-                    <circle cx="17.5" cy="18" r="1.5" />
-                  </svg>
-                ),
-                items: [
-                  "Where is my package?",
-                  "Tracking status explained",
-                  "Report missing items",
-                ],
-              },
-              {
-                title: "Payments",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                    <line x1="3" y1="9" x2="21" y2="9" />
-                    <line x1="8" y1="15" x2="12" y2="15" />
-                  </svg>
-                ),
-                items: [
-                  "Payment methods",
-                  "Request a refund",
-                  "Invoice help",
-                ],
-              },
-              {
-                title: "Safety",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 3 5 5v6c0 4.3 2.7 7.4 7 9 4.3-1.6 7-4.7 7-9V5Z" />
-                    <path d="m9.5 12.5 1.5 1.5 3.5-3.5" />
-                  </svg>
-                ),
-                items: [
-                  "Package insurance",
-                  "Driver verification",
-                  "Contactless delivery",
-                ],
-              },
-              {
-                title: "Areas",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6 9 4l6 2 6-2v14l-6 2-6-2-6 2Z" />
-                    <path d="M9 4v14" />
-                    <path d="M15 6v14" />
-                  </svg>
-                ),
-                items: [
-                  "Service coverage map",
-                  "International shipping",
-                  "Local zone rates",
-                ],
-              },
-              {
-                title: "Account",
-                icon: (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="8" r="3.5" />
-                    <path d="M5 20c1.5-3 3.8-4.5 7-4.5s5.5 1.5 7 4.5" />
-                  </svg>
-                ),
-                items: [
-                  "Reset password",
-                  "Update profile",
-                  "Business accounts",
-                ],
-              },
-            ].map((topic) => (
-              <div
-                key={topic.title}
-                className="bg-white dark:bg-[#0c0b14] p-8 transition-colors hover:bg-gray-50 dark:hover:bg-[#050507]"
-              >
-                <div className="mb-6 flex items-center gap-3">
-                  <span className="text-3xl text-accent">{topic.icon}</span>
-                  <h3 className="font-display text-lg font-bold text-[#3e0074] dark:text-white">
-                    {topic.title}
-                  </h3>
-                </div>
-                <ul className="space-y-3">
-                  {topic.items.map((item) => (
-                    <li key={item}>
-                      <a
-                        href={`mailto:hello@ecoquick.delivery?subject=Help: ${encodeURIComponent(item)}`}
-                        className="flex items-center text-sm text-[#3e0074]/60 dark:text-[#d8d0f0] transition-colors hover:text-[#3e0074] dark:hover:text-[#c084fc]"
-                      >
-                        <span className="mr-3 h-1.5 w-1.5 rounded-full bg-[#3e0074]/30 dark:bg-[#c084fc]/50" />
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* FAQ */}
         <section id="faq" ref={faqRef} className="mx-auto max-w-4xl px-6 py-16 lg:px-8">
           <h2 className="mb-10 text-center font-display text-3xl font-bold text-[#3e0074] dark:text-white">
@@ -406,18 +293,19 @@ export default function HelpPage() {
               {filteredFaqs.map((item) => (
                 <details
                   key={item.q}
+                  open={!!query.trim()}
                   className="group cursor-pointer border-b border-gray-100 dark:border-[#1a1525] pb-6 open:pb-6"
                 >
                   <summary className="flex list-none items-start justify-between gap-4 text-[#3e0074] dark:text-white transition-colors group-hover:text-[#3e0074]/70 dark:group-hover:text-white/70">
                     <span className="font-display text-xl font-bold leading-tight md:text-2xl">
-                      {item.q}
+                      {highlight(item.q, query)}
                     </span>
                     <span className="transition-transform duration-300 group-open:rotate-180">
                       ▼
                     </span>
                   </summary>
                   <div className="mt-4 max-w-2xl leading-relaxed text-[#3e0074]/70 dark:text-[#c4b5d8]">
-                    {item.a}
+                    {highlight(item.a, query)}
                   </div>
                 </details>
               ))}
