@@ -101,17 +101,23 @@ estimated_pickup · estimated_delivery · created_at
 
 RLS policy: `auth.uid() = customer_id` (customers see only their own rows).
 
-**Pricing function** (inlined in `app/book/confirm/page.tsx` — not a separate file):
+**Pricing function** (inlined in `app/book/confirm/page.tsx` — not a separate file). Distance-banded; straight-line miles from pickup → dropoff. Beyond 8 miles falls into the top band.
+
 ```typescript
-function calculatePrice(packageSize: string, deliveryType: string) {
-  const base = 8.00;
-  const sizeFees = { envelope: 0, small: 3.50, medium: 6.50, large: 12.00 };
-  const sizeFee = sizeFees[packageSize] ?? 6.50;
-  const schedulingFee = deliveryType === 'instant' ? 4.00 : 0;
-  const discount = 1.50; // eco-incentive
-  return { base, sizeFee, schedulingFee, discount, total: base + sizeFee + schedulingFee - discount };
+const DISTANCE_BANDS = [
+  { upTo: 1, price: 3.20, label: "0–1 mile" },
+  { upTo: 3, price: 4.90, label: "1–3 miles" },
+  { upTo: 6, price: 7.10, label: "3–6 miles" },
+  { upTo: 8, price: 9.60, label: "6–8 miles" },
+] as const;
+
+function calculatePrice(distanceMiles: number) {
+  const band = DISTANCE_BANDS.find(b => distanceMiles <= b.upTo) ?? DISTANCE_BANDS.at(-1)!;
+  return { distanceMiles, bandLabel: band.label, total: band.price };
 }
 ```
+
+DB write: `base_price = total`, all other fee columns set to 0 (banded model has no fee breakdown).
 
 ---
 

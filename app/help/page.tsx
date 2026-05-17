@@ -35,7 +35,7 @@ const faqs = [
   },
   {
     q: "How much does delivery cost?",
-    a: "Pricing is distance-based and shown upfront: £2.50 for the first mile and £0.50 for every additional mile, calculated from your pickup point to the drop-off. Scheduled deliveries incur a small scheduling fee. There are no hidden charges — what you see in the quote is what you pay.",
+    a: "Pricing is distance-banded and shown upfront before you pay: 0–1 mile £3.20, 1–3 miles £4.90, 3–6 miles £7.10, 6–8 miles £9.60. We measure the straight-line distance from your pickup to your drop-off. There are no hidden charges — what you see in the quote is what you pay.",
   },
   {
     q: "Are my packages insured?",

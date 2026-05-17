@@ -36,11 +36,14 @@ type Order = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
+  pending_payment: { label: "Processing payment", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20", icon: "hourglass_top" },
+  payment_failed: { label: "Payment failed", color: "text-red-600 bg-red-50 dark:bg-red-900/20", icon: "error" },
   confirmed: { label: "Looking for driver", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20", icon: "search" },
   assigned: { label: "Driver assigned", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/20", icon: "person" },
   picked_up: { label: "Picked up", color: "text-purple-600 bg-purple-50 dark:bg-purple-900/20", icon: "local_mall" },
   in_transit: { label: "On the way", color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20", icon: "local_shipping" },
   delivered: { label: "Delivered", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20", icon: "check_circle" },
+  cancelled: { label: "Cancelled", color: "text-zinc-500 bg-zinc-100 dark:bg-zinc-800", icon: "cancel" },
 };
 
 export default function OrderConfirmedPage() {
@@ -182,6 +185,16 @@ function OrderConfirmedContent() {
   const statusConf = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.confirmed;
   const driver = order.driver_profiles;
   const isDelivered = order.status === "delivered";
+  const isPendingPayment = order.status === "pending_payment";
+  const isPaymentFailed = order.status === "payment_failed";
+
+  const headerTitle = isDelivered
+    ? "Delivery Complete"
+    : isPendingPayment
+    ? "Finalising your payment"
+    : isPaymentFailed
+    ? "Payment didn't go through"
+    : "Order Placed";
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
@@ -196,12 +209,25 @@ function OrderConfirmedContent() {
               <span className="material-symbols-outlined text-3xl text-[#3e0074] dark:text-[#c084fc]">{statusConf.icon}</span>
             </div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">
-              {isDelivered ? "Delivery Complete" : "Order Placed"}
+              {headerTitle}
             </h1>
             <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-semibold ${statusConf.color}`}>
-              {order.status === "confirmed" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />}
+              {(order.status === "confirmed" || isPendingPayment) && (
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
+              )}
               {statusConf.label}
             </div>
+            {isPendingPayment && (
+              <p className="mt-3 max-w-sm mx-auto text-[12px] text-zinc-500 dark:text-zinc-400">
+                We&apos;re confirming your payment with Stripe — this usually takes a few seconds. The page will update automatically.
+              </p>
+            )}
+            {isPaymentFailed && (
+              <p className="mt-3 max-w-sm mx-auto text-[12px] text-red-600 dark:text-red-400">
+                Your card was declined or the payment was cancelled. You can retry from your{" "}
+                <Link href="/orders" className="font-semibold underline">orders page</Link> or contact support.
+              </p>
+            )}
           </div>
 
           {/* Main card */}

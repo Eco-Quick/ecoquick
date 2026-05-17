@@ -7,9 +7,6 @@ export const dynamic = "force-dynamic";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
-// In-memory idempotency store (good enough for single-instance; swap for Redis in production)
-const processedEvents = new Set<string>();
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -29,16 +26,6 @@ export async function POST(request: NextRequest) {
       event = Stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch {
       return NextResponse.json({ error: "Signature verification failed" }, { status: 400 });
-    }
-
-    // Idempotency check
-    if (processedEvents.has(event.id)) {
-      return NextResponse.json({ received: true, status: "already_processed" });
-    }
-    processedEvents.add(event.id);
-    if (processedEvents.size > 1000) {
-      const first = processedEvents.values().next().value;
-      if (first) processedEvents.delete(first);
     }
 
     switch (event.type) {
@@ -66,29 +53,54 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
   const supabase = createServiceClient();
 
-  await supabase
+  // Idempotency: if a completed payments row already exists for this PI, the
+  // handler has already run. Stripe retries on any non-2xx so this is critical.
+  const { data: existingPayment } = await supabase
+    .from("payments")
+    .select("id, status")
+    .eq("stripe_payment_intent_id", paymentIntent.id)
+    .maybeSingle();
+
+  if (existingPayment?.status === "completed") return;
+
+  const now = new Date().toISOString();
+
+  // Flip the order — gated on still being unpaid so we don't reverse a later state.
+  const { data: updatedOrder } = await supabase
     .from("delivery_orders")
-    .update({ status: "confirmed", payment_status: "paid", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .update({ status: "confirmed", payment_status: "paid", updated_at: now })
+    .eq("id", orderId)
+    .in("status", ["pending_payment", "payment_failed"])
+    .select("id, customer_id")
+    .maybeSingle();
 
-  await supabase.from("payments").insert({
-    order_id: orderId,
-    customer_id: paymentIntent.metadata.customerId ?? null,
-    amount: paymentIntent.amount / 100,
-    currency: paymentIntent.currency,
-    payment_method: typeof paymentIntent.payment_method === "string"
-      ? paymentIntent.payment_method
-      : "card",
-    status: "completed",
-    stripe_payment_intent_id: paymentIntent.id,
-    processed_at: new Date().toISOString(),
-  });
+  // Insert payments row only if missing (the finalize-payment route may have inserted it first).
+  if (!existingPayment) {
+    await supabase.from("payments").insert({
+      order_id: orderId,
+      customer_id: paymentIntent.metadata.customerId ?? null,
+      amount: paymentIntent.amount / 100,
+      currency: paymentIntent.currency,
+      payment_method: typeof paymentIntent.payment_method === "string"
+        ? paymentIntent.payment_method
+        : "card",
+      status: "completed",
+      stripe_payment_intent_id: paymentIntent.id,
+      processed_at: now,
+    });
+  } else {
+    // Existing row but not completed (e.g. previously failed); flip to completed.
+    await supabase
+      .from("payments")
+      .update({ status: "completed", processed_at: now })
+      .eq("id", existingPayment.id);
+  }
 
-  // Notify customer that order is confirmed
-  const customerId = paymentIntent.metadata.customerId;
-  if (customerId) {
+  // Only send the notification if we actually advanced the order in this run —
+  // prevents duplicate inbox spam when finalize-payment beats the webhook.
+  if (updatedOrder) {
     await supabase.from("notifications").insert({
-      user_id: customerId,
+      user_id: updatedOrder.customer_id,
       order_id: orderId,
       type: "order_confirmed",
       title: "Order confirmed",
@@ -103,23 +115,37 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
   const supabase = createServiceClient();
 
+  const { data: existingPayment } = await supabase
+    .from("payments")
+    .select("id, status")
+    .eq("stripe_payment_intent_id", paymentIntent.id)
+    .maybeSingle();
+
+  // Already terminally recorded — nothing to do.
+  if (existingPayment?.status === "failed" || existingPayment?.status === "completed") return;
+
+  const now = new Date().toISOString();
+
   await supabase
     .from("delivery_orders")
-    .update({ status: "payment_failed", payment_status: "failed", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .update({ status: "payment_failed", payment_status: "failed", updated_at: now })
+    .eq("id", orderId)
+    .eq("status", "pending_payment");
 
-  await supabase.from("payments").insert({
-    order_id: orderId,
-    customer_id: paymentIntent.metadata.customerId ?? null,
-    amount: paymentIntent.amount / 100,
-    currency: paymentIntent.currency,
-    payment_method: typeof paymentIntent.payment_method === "string"
-      ? paymentIntent.payment_method
-      : "card",
-    status: "failed",
-    stripe_payment_intent_id: paymentIntent.id,
-    processed_at: new Date().toISOString(),
-  });
+  if (!existingPayment) {
+    await supabase.from("payments").insert({
+      order_id: orderId,
+      customer_id: paymentIntent.metadata.customerId ?? null,
+      amount: paymentIntent.amount / 100,
+      currency: paymentIntent.currency,
+      payment_method: typeof paymentIntent.payment_method === "string"
+        ? paymentIntent.payment_method
+        : "card",
+      status: "failed",
+      stripe_payment_intent_id: paymentIntent.id,
+      processed_at: now,
+    });
+  }
 }
 
 async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
@@ -131,5 +157,6 @@ async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
   await supabase
     .from("delivery_orders")
     .update({ status: "cancelled", payment_status: "cancelled", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .in("status", ["pending_payment"]);
 }

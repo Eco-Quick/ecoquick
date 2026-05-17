@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
+import { PaymentForm } from "@/components/book/PaymentForm";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { createClient } from "@/lib/supabase/client";
 
@@ -20,13 +21,23 @@ function haversineDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+const DISTANCE_BANDS = [
+  { upTo: 1, price: 3.20, label: "0–1 mile" },
+  { upTo: 3, price: 4.90, label: "1–3 miles" },
+  { upTo: 6, price: 7.10, label: "3–6 miles" },
+  { upTo: 8, price: 9.60, label: "6–8 miles" },
+] as const;
+
 function calculatePrice(distanceMiles: number) {
-  // £2.50 for first mile, £0.50 per additional mile
-  const firstMile = 2.50;
-  const extraPerMile = 0.50;
-  const extraMiles = Math.max(0, Math.ceil(distanceMiles) - 1);
-  const total = firstMile + (extraMiles * extraPerMile);
-  return { firstMile, extraMiles, extraPerMile, distanceMiles: Math.round(distanceMiles * 10) / 10, total: Math.round(total * 100) / 100 };
+  const rounded = Math.round(distanceMiles * 10) / 10;
+  const band =
+    DISTANCE_BANDS.find((b) => distanceMiles <= b.upTo) ??
+    DISTANCE_BANDS[DISTANCE_BANDS.length - 1];
+  return {
+    distanceMiles: rounded,
+    bandLabel: band.label,
+    total: band.price,
+  };
 }
 
 type DeliveryRequest = {
@@ -50,6 +61,9 @@ export default function BookConfirmPage() {
   const [showVerifyPrompt, setShowVerifyPrompt] = useState(false);
   const [showAgeRestricted, setShowAgeRestricted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [step, setStep] = useState<"review" | "payment">("review");
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const skipVerification = process.env.NEXT_PUBLIC_SKIP_VERIFICATION === "true";
   const AGE_RESTRICTED_CATEGORIES = ["alcohol", "tobacco"];
@@ -127,8 +141,8 @@ export default function BookConfirmPage() {
         .insert({
           customer_id: user.id,
           scheduling_type: order.deliveryType ?? "instant",
-          status: "confirmed",
-          payment_status: "paid",
+          status: "pending_payment",
+          payment_status: "pending",
           verification_code: generateVerificationCode(),
           pickup_address: order.pickupAddress ?? "",
           pickup_postcode: order.pickupPostcode ?? "",
@@ -149,8 +163,8 @@ export default function BookConfirmPage() {
           pickup_lng: order.pickupLng ?? null,
           delivery_lat: order.dropoffLat ?? null,
           delivery_lng: order.dropoffLng ?? null,
-          base_price: pricing.firstMile,
-          size_fee: pricing.extraMiles * pricing.extraPerMile,
+          base_price: pricing.total,
+          size_fee: 0,
           scheduling_fee: 0,
           discount_amount: 0,
           total_price: pricing.total,
@@ -160,22 +174,36 @@ export default function BookConfirmPage() {
 
       if (err) throw err;
 
-      // Send notification to customer
-      await supabase.from("notifications").insert({
-        user_id: user.id,
-        order_id: data.id,
-        type: "order_confirmed",
-        title: "Order confirmed",
-        body: `Your delivery EQ-${data.id.slice(0, 6).toUpperCase()} has been placed and is awaiting a driver.`,
+      const piRes = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: pricing.total,
+          currency: "gbp",
+          orderId: data.id,
+        }),
       });
+      const piJson = await piRes.json();
+
+      if (!piRes.ok || !piJson.clientSecret) {
+        throw new Error(piJson.error ?? "Could not start payment. Please try again.");
+      }
 
       sessionStorage.removeItem("deliveryRequest");
-      router.push(`/order/confirmed?id=${data.id}`);
+      setOrderId(data.id);
+      setClientSecret(piJson.clientSecret);
+      setStep("payment");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Could not create order. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function cancelPayment() {
+    // User wants to go back and edit. Keep the unpaid order row — they can retry from /orders or abandon.
+    setStep("review");
+    setClientSecret(null);
   }
 
   if (!user || !hydrated) return null;
@@ -262,15 +290,9 @@ export default function BookConfirmPage() {
               <p className="mb-3 text-[11px] font-semibold text-zinc-400">Pricing</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
-                  <span>First mile</span>
-                  <span>£{pricing.firstMile.toFixed(2)}</span>
+                  <span>Delivery fee ({pricing.bandLabel})</span>
+                  <span>£{pricing.total.toFixed(2)}</span>
                 </div>
-                {pricing.extraMiles > 0 && (
-                  <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
-                    <span>{pricing.extraMiles} extra mile{pricing.extraMiles > 1 ? "s" : ""} × £{pricing.extraPerMile.toFixed(2)}</span>
-                    <span>£{(pricing.extraMiles * pricing.extraPerMile).toFixed(2)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between text-[12px] text-zinc-400">
                   <span>Distance: {pricing.distanceMiles} miles</span>
                 </div>
@@ -322,23 +344,42 @@ export default function BookConfirmPage() {
             </div>
           )}
 
-          {/* Actions */}
-          <div className="mt-6 flex items-center justify-between">
-            <Link
-              href="/book/parcel"
-              className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
-            >
-              <span className="material-symbols-outlined text-base">arrow_back</span>
-              Back
-            </Link>
-            <button
-              onClick={handleBookDelivery}
-              disabled={loading}
-              className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
-            >
-              {loading ? "Placing order…" : `Confirm & Book · £${pricing.total.toFixed(2)}`}
-            </button>
-          </div>
+          {/* Actions / Payment */}
+          {step === "review" ? (
+            <div className="mt-6 flex items-center justify-between">
+              <Link
+                href="/book/parcel"
+                className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+              >
+                <span className="material-symbols-outlined text-base">arrow_back</span>
+                Back
+              </Link>
+              <button
+                onClick={handleBookDelivery}
+                disabled={loading}
+                className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
+              >
+                {loading ? "Preparing payment…" : `Continue to payment · £${pricing.total.toFixed(2)}`}
+              </button>
+            </div>
+          ) : (
+            clientSecret && orderId ? (
+              <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14]">
+                <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">
+                  Payment
+                </h2>
+                <p className="mb-5 text-[12px] text-zinc-500 dark:text-zinc-400">
+                  Pay £{pricing.total.toFixed(2)} to confirm your delivery.
+                </p>
+                <PaymentForm
+                  clientSecret={clientSecret}
+                  orderId={orderId}
+                  amount={pricing.total}
+                  onCancel={cancelPayment}
+                />
+              </div>
+            ) : null
+          )}
         </div>
       </main>
     </div>

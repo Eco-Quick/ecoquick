@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
 import { CustomerMobileNav } from "@/components/layout/CustomerMobileNav";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -58,6 +59,7 @@ function applyFilter(orders: Order[], filter: FilterKey): Order[] {
 
 export default function OrderHistoryPage() {
   const user = useCustomerAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,9 +206,10 @@ export default function OrderHistoryPage() {
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-[#1e1538]">
                   {filteredOrders.map((order) => (
-                    <div
+                    <Link
                       key={order.id}
-                      className="grid grid-cols-12 items-center bg-white/80 px-6 py-4 text-sm transition-colors hover:bg-slate-50 dark:bg-[#0c0b14]/80 dark:hover:bg-[#1e1538]"
+                      href={`/order/confirmed?id=${order.id}`}
+                      className="grid cursor-pointer grid-cols-12 items-center bg-white/80 px-6 py-4 text-sm transition-colors hover:bg-slate-50 dark:bg-[#0c0b14]/80 dark:hover:bg-[#1e1538]"
                     >
                       <div className="col-span-2 font-semibold tracking-tight text-slate-900 dark:text-[#ede9f8]">
                         {displayId(order.id)}
@@ -235,15 +238,23 @@ export default function OrderHistoryPage() {
                       <div className="col-span-2 flex items-center justify-end gap-3">
                         <span className="font-black text-primary">£{order.total_price.toFixed(2)}</span>
                         {["confirmed", "assigned", "picked_up", "in_transit"].includes(order.status) && (
-                          <Link
-                            href={`/order/track?id=${order.id}`}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              router.push(`/order/track?id=${order.id}`);
+                            }}
                             className="text-[9px] font-black uppercase tracking-[0.2em] text-accent hover:underline"
                           >
                             Track
-                          </Link>
+                          </button>
                         )}
+                        <span className="material-symbols-outlined text-sm text-slate-300 dark:text-zinc-600">
+                          chevron_right
+                        </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
                 <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 dark:border-[#1a1525] dark:bg-[#050507]/60 px-6 py-3 text-[11px] text-slate-500">
@@ -257,9 +268,10 @@ export default function OrderHistoryPage() {
             {/* Mobile cards */}
             <div className="mt-6 space-y-4 md:hidden">
               {filteredOrders.map((order) => (
-                <div
+                <Link
                   key={order.id}
-                  className="card-hover rounded-2xl border border-slate-200 bg-white/80 p-4 text-xs shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#0c0b14]/80"
+                  href={`/order/confirmed?id=${order.id}`}
+                  className="card-hover block rounded-2xl border border-slate-200 bg-white/80 p-4 text-xs shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-[#0c0b14]/80"
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <div>
@@ -282,7 +294,25 @@ export default function OrderHistoryPage() {
                   <p className="text-[10px] font-medium text-slate-400">
                     {formatDate(order.created_at)} • {formatTime(order.created_at)}
                   </p>
-                </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-[#1e1538]">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                      View details
+                    </span>
+                    {["confirmed", "assigned", "picked_up", "in_transit"].includes(order.status) && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          router.push(`/order/track?id=${order.id}`);
+                        }}
+                        className="text-[10px] font-black uppercase tracking-[0.2em] text-accent hover:underline"
+                      >
+                        Track →
+                      </button>
+                    )}
+                  </div>
+                </Link>
               ))}
             </div>
           </>
