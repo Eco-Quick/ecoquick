@@ -150,7 +150,7 @@ export default async function AdminOrderDetailPage({
             )}
           </div>
         </div>
-        {isCancellable && <CancelOrderButton orderId={o.id} />}
+        {isCancellable && <CancelOrderButton orderId={o.id} paymentStatus={o.payment_status} />}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -17,8 +17,56 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EcoQuick",
-  description: "Eco-friendly urban delivery",
+  metadataBase: new URL("https://www.ecoquickdelivery.co.uk"),
+  title: {
+    default: "EcoQuick — Hyperlocal carbon-neutral delivery",
+    template: "%s · EcoQuick",
+  },
+  description:
+    "Fast, eco-friendly parcel delivery across Kingston and surrounding London boroughs. Carbon-neutral by default, powered by electric vehicles.",
+  applicationName: "EcoQuick",
+  keywords: [
+    "parcel delivery",
+    "same day delivery",
+    "Kingston upon Thames",
+    "London delivery",
+    "electric vehicle delivery",
+    "carbon neutral courier",
+    "eco delivery",
+  ],
+  authors: [{ name: "EcoQuick" }],
+  creator: "EcoQuick",
+  publisher: "EcoQuick",
+  formatDetection: { email: false, telephone: false, address: false },
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    url: "https://www.ecoquickdelivery.co.uk",
+    siteName: "EcoQuick",
+    title: "EcoQuick — Hyperlocal carbon-neutral delivery",
+    description:
+      "Fast, eco-friendly parcel delivery across Kingston and surrounding London boroughs. Carbon-neutral by default, powered by electric vehicles.",
+    images: [
+      {
+        url: "/ecoquick-hero-overlay.png",
+        width: 1200,
+        height: 630,
+        alt: "EcoQuick — carbon-neutral delivery across London",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EcoQuick — Hyperlocal carbon-neutral delivery",
+    description:
+      "Fast, eco-friendly parcel delivery across Kingston and surrounding London boroughs.",
+    images: ["/ecoquick-hero-overlay.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({

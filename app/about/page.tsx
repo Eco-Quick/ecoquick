@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 import CoverageMap from "@/components/about/CoverageMap";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Meet the team behind EcoQuick — a hyperlocal, carbon-neutral delivery service for Kingston and surrounding London boroughs, founded by Preeti Misal.",
+  openGraph: {
+    title: "About EcoQuick",
+    description:
+      "Meet the team behind EcoQuick — a hyperlocal, carbon-neutral delivery service for Kingston and surrounding London boroughs.",
+    url: "/about",
+  },
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
