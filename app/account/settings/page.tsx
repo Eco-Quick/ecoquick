@@ -17,8 +17,6 @@ export default function AccountSettingsPage() {
   const [lastName, setLastName] = useState(nameParts.slice(1).join(" ") ?? "");
   const [phone, setPhone] = useState("");
 
-  const [verificationStatus, setVerificationStatus] = useState<string>("unverified");
-
   const [notifs, setNotifs] = useState({
     deliveryUpdates: true,
     marketingEmails: false,
@@ -35,7 +33,6 @@ export default function AccountSettingsPage() {
       setPhone(data.user?.user_metadata?.phone_number ?? "");
       const prefs = data.user?.user_metadata?.notification_preferences;
       if (prefs) setNotifs(prefs);
-      setVerificationStatus(data.user?.user_metadata?.verification_status || "unverified");
     });
   }, [user]);
 
@@ -95,30 +92,6 @@ export default function AccountSettingsPage() {
             {saveError}
           </div>
         )}
-
-        {/* Verification status */}
-        <section className="mb-8 flex items-center justify-between rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#221d38] dark:bg-[#0c0b14]">
-          <div className="flex items-center gap-3">
-            <span className={`material-symbols-outlined text-xl ${
-              verificationStatus === "verified" ? "text-emerald-500" : verificationStatus === "pending" ? "text-amber-500" : "text-zinc-400"
-            }`}>
-              {verificationStatus === "verified" ? "verified" : verificationStatus === "pending" ? "hourglass_top" : "shield"}
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-[#ede9f8]">Identity verification</p>
-              <p className="text-[12px] text-slate-500 dark:text-[#9d8ab8]">
-                {verificationStatus === "verified" ? "Your identity has been verified" : verificationStatus === "pending" ? "Under review" : "Not yet verified"}
-              </p>
-            </div>
-          </div>
-          {verificationStatus === "verified" ? (
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Verified</span>
-          ) : (
-            <a href="/verify" className="rounded-lg bg-[#3e0074] px-4 py-2 text-[11px] font-bold text-white transition hover:-translate-y-0.5 dark:bg-[#5b21b6]">
-              {verificationStatus === "pending" ? "Check status" : "Verify now"}
-            </a>
-          )}
-        </section>
 
         {/* Personal information */}
         <section className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-[#221d38] dark:bg-[#0c0b14]">

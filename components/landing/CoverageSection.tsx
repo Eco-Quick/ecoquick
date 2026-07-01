@@ -23,7 +23,7 @@ export function CoverageSection() {
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
-              href="/signup"
+              href="/book/type"
               className="group inline-flex items-center gap-3 rounded-full bg-[#3e0074] px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_20px_rgba(62,0,116,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(62,0,116,0.4)] active:scale-[0.97] dark:bg-[#5b21b6] dark:shadow-[0_4px_20px_rgba(91,33,182,0.35)]"
             >
               <span>Book your first delivery</span>

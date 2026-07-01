@@ -18,16 +18,12 @@ export default function CustomerDashboardPage() {
   const router = useRouter();
   const user = useCustomerAuth();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
     if (!user) return;
     setFirstName(user.name?.split(" ")[0] || "there");
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      setVerificationStatus(u?.user_metadata?.verification_status || "unverified");
-    });
     supabase
       .from("delivery_orders")
       .select("status, weight, total_price")
@@ -51,31 +47,6 @@ export default function CustomerDashboardPage() {
       <CustomerTopBar />
 
       <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 md:pb-10 md:pt-8">
-
-        {/* Verification banner */}
-        {verificationStatus && verificationStatus !== "verified" && (
-          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800/30 dark:bg-amber-900/10 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-xl text-amber-600">verified_user</span>
-              <div>
-                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                  {verificationStatus === "pending" ? "Verification under review" : "Verify your identity"}
-                </p>
-                <p className="text-[12px] text-amber-700/70 dark:text-amber-400/70">
-                  {verificationStatus === "pending" ? "We're reviewing your ID." : "Required before you can book deliveries."}
-                </p>
-              </div>
-            </div>
-            {verificationStatus !== "pending" && (
-              <button
-                onClick={() => router.push("/verify")}
-                className="shrink-0 rounded-lg bg-amber-600 px-5 py-2 text-[12px] font-bold text-white transition-all hover:bg-amber-700 active:scale-[0.98]"
-              >
-                Verify Now
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Greeting */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
-import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
+import { BookingTopBar } from "@/components/layout/BookingTopBar";
 import { PaymentForm } from "@/components/book/PaymentForm";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useBookingAuth } from "@/hooks/useBookingAuth";
+import { BookingAuthError } from "@/components/book/BookingAuthError";
 import { createClient } from "@/lib/supabase/client";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_RE = /^\+?[\d\s\-()]{7,20}$/;
 
 // Haversine distance in miles between two lat/lng points
 function haversineDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -53,20 +57,31 @@ type DeliveryRequest = {
 };
 
 export default function BookConfirmPage() {
-  const user = useCustomerAuth();
+  const { user, error: authError } = useBookingAuth();
   const router = useRouter();
   const [order, setOrder] = useState<Partial<DeliveryRequest>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showVerifyPrompt, setShowVerifyPrompt] = useState(false);
-  const [showAgeRestricted, setShowAgeRestricted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [step, setStep] = useState<"review" | "payment">("review");
+  const [step, setStep] = useState<"review" | "account" | "payment">("review");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  // Set once a guest finishes creating their account — flips the page out of the
+  // "guest" state (reveals the price) without waiting for the auth hook to re-run.
+  const [accountReady, setAccountReady] = useState(false);
 
-  const skipVerification = process.env.NEXT_PUBLIC_SKIP_VERIFICATION === "true";
-  const AGE_RESTRICTED_CATEGORIES = ["alcohol", "tobacco"];
+  // Guest → permanent account form (shown at checkout for anonymous users)
+  const [acctName, setAcctName] = useState("");
+  const [acctEmail, setAcctEmail] = useState("");
+  const [acctPhone, setAcctPhone] = useState("");
+  const [acctPassword, setAcctPassword] = useState("");
+  const [acctError, setAcctError] = useState<string | null>(null);
+  const [acctLoading, setAcctLoading] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
+
+  // A visitor is a "guest" until they've created a permanent account. Guests can
+  // build the order but don't see the price until they sign up.
+  const isGuest = !!user?.isAnonymous && !accountReady;
 
   useEffect(() => {
     try {
@@ -97,24 +112,84 @@ export default function BookConfirmPage() {
     return String(Math.floor(1000 + Math.random() * 9000));
   }
 
-  async function handleBookDelivery() {
-    if (!user) return;
+  // Review CTA: anonymous guests must create an account first; everyone else books directly.
+  function handleReviewContinue() {
+    if (isGuest) {
+      // Pre-fill from the sender details they already entered.
+      setAcctName((prev) => prev || order.senderName?.trim() || "");
+      setAcctPhone((prev) => prev || order.senderPhone?.trim() || "");
+      setEmailTaken(false);
+      setAcctError(null);
+      setStep("account");
+    } else {
+      handleBookDelivery();
+    }
+  }
 
-    if (!skipVerification) {
-      const supabase = createClient();
-      const { data: { user: freshUser } } = await supabase.auth.getUser();
-      if (freshUser?.user_metadata?.verification_status !== "verified") {
-        setShowVerifyPrompt(true);
-        return;
-      }
-      // Age-restricted check
-      if (AGE_RESTRICTED_CATEGORIES.includes(order.packageCategory ?? "")) {
-        if (!freshUser?.user_metadata?.is_over_18) {
-          setShowAgeRestricted(true);
+  async function handleCreateAccount(event: { preventDefault(): void }) {
+    event.preventDefault();
+    setAcctError(null);
+    setEmailTaken(false);
+
+    const name = acctName.trim();
+    if (name.length < 2 || !/\s/.test(name)) {
+      setAcctError("Please enter your first and last name.");
+      return;
+    }
+    const email = acctEmail.trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+      setAcctError("Enter a valid email address.");
+      return;
+    }
+    if (acctPhone.trim() && !PHONE_RE.test(acctPhone.trim())) {
+      setAcctError("Enter a valid phone number.");
+      return;
+    }
+    if (acctPassword.length < 8 || !/[A-Za-z]/.test(acctPassword) || !/\d/.test(acctPassword)) {
+      setAcctError("Password must be at least 8 characters and include letters and numbers.");
+      return;
+    }
+
+    setAcctLoading(true);
+    try {
+      const res = await fetch("/api/auth/convert-guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password: acctPassword,
+          full_name: name,
+          phone_number: acctPhone.trim(),
+        }),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        if (json.error === "EMAIL_TAKEN") {
+          setEmailTaken(true);
           return;
         }
+        throw new Error(json.error ?? "Could not create your account. Please try again.");
       }
+
+      // Refresh the session so is_anonymous flips false and the new metadata is in
+      // the token before we continue to payment.
+      const supabase = createClient();
+      await supabase.auth.refreshSession();
+
+      // Back to the review — now that they have an account the price is revealed
+      // and they can continue to payment.
+      setAccountReady(true);
+      setStep("review");
+    } catch (e: unknown) {
+      setAcctError(e instanceof Error ? e.message : "Could not create your account. Please try again.");
+    } finally {
+      setAcctLoading(false);
     }
+  }
+
+  async function handleBookDelivery() {
+    if (!user) return;
 
     const missing: string[] = [];
     const must: (keyof DeliveryRequest)[] = [
@@ -206,6 +281,7 @@ export default function BookConfirmPage() {
     setClientSecret(null);
   }
 
+  if (authError) return <BookingAuthError message={authError} />;
   if (!user || !hydrated) return null;
 
   const isInstant = order.deliveryType !== "scheduled";
@@ -213,7 +289,7 @@ export default function BookConfirmPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
-      <CustomerTopBar />
+      <BookingTopBar isAnonymous={isGuest} />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
         <div className="w-full max-w-2xl">
@@ -285,22 +361,36 @@ export default function BookConfirmPage() {
               )}
             </div>
 
-            {/* Pricing */}
+            {/* Pricing — locked for guests until they create an account */}
             <div className="px-6 py-5">
               <p className="mb-3 text-[11px] font-semibold text-zinc-400">Pricing</p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
-                  <span>Delivery fee ({pricing.bandLabel})</span>
-                  <span>£{pricing.total.toFixed(2)}</span>
+              {isGuest ? (
+                <div className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-700 dark:bg-[#050507]">
+                  <span className="material-symbols-outlined text-xl text-[#3e0074] dark:text-[#c084fc]">lock</span>
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">
+                      Sign up to book your first order
+                    </p>
+                    <p className="text-[12px] text-zinc-400">
+                      It takes a few seconds — then your delivery quote is revealed.
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-between text-[12px] text-zinc-400">
-                  <span>Distance: {pricing.distanceMiles} miles</span>
+              ) : (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+                    <span>Delivery fee ({pricing.bandLabel})</span>
+                    <span>£{pricing.total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-[12px] text-zinc-400">
+                    <span>Distance: {pricing.distanceMiles} miles</span>
+                  </div>
+                  <div className="flex justify-between border-t border-zinc-100 pt-3 text-base font-bold text-zinc-900 dark:border-zinc-800 dark:text-[#ede9f8]">
+                    <span>Total</span>
+                    <span>£{pricing.total.toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between border-t border-zinc-100 pt-3 text-base font-bold text-zinc-900 dark:border-zinc-800 dark:text-[#ede9f8]">
-                  <span>Total</span>
-                  <span>£{pricing.total.toFixed(2)}</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -312,40 +402,8 @@ export default function BookConfirmPage() {
             </div>
           )}
 
-          {showVerifyPrompt && (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800/30 dark:bg-amber-900/10">
-              <span className="material-symbols-outlined mb-2 text-3xl text-amber-600">verified_user</span>
-              <h3 className="mb-1 text-sm font-bold text-amber-800 dark:text-amber-300">Identity verification required</h3>
-              <p className="mb-4 text-[12px] text-amber-700/70 dark:text-amber-400/70">
-                UK law requires age verification before booking deliveries.
-              </p>
-              <button
-                onClick={() => router.push("/verify")}
-                className="rounded-lg bg-amber-600 px-6 py-2.5 text-[12px] font-bold text-white transition-all hover:bg-amber-700 active:scale-[0.98]"
-              >
-                Verify Now
-              </button>
-            </div>
-          )}
-
-          {showAgeRestricted && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800/30 dark:bg-red-900/10">
-              <span className="material-symbols-outlined mb-2 text-3xl text-red-500">block</span>
-              <h3 className="mb-1 text-sm font-bold text-red-800 dark:text-red-300">Age restricted item</h3>
-              <p className="mb-4 text-[12px] text-red-700/70 dark:text-red-400/70">
-                You must be 18 or over to book delivery of {order.packageCategory}. This is a UK legal requirement.
-              </p>
-              <button
-                onClick={() => router.push("/book/parcel")}
-                className="rounded-lg border border-red-300 px-6 py-2.5 text-[12px] font-bold text-red-700 transition-all hover:bg-red-100 active:scale-[0.98] dark:border-red-700 dark:text-red-400"
-              >
-                Change category
-              </button>
-            </div>
-          )}
-
-          {/* Actions / Payment */}
-          {step === "review" ? (
+          {/* Actions / Account / Payment */}
+          {step === "review" && (
             <div className="mt-6 flex items-center justify-between">
               <Link
                 href="/book/parcel"
@@ -355,30 +413,134 @@ export default function BookConfirmPage() {
                 Back
               </Link>
               <button
-                onClick={handleBookDelivery}
+                onClick={handleReviewContinue}
                 disabled={loading}
                 className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
               >
-                {loading ? "Preparing payment…" : `Continue to payment · £${pricing.total.toFixed(2)}`}
+                {loading
+                  ? "Preparing payment…"
+                  : isGuest
+                  ? "Sign up to book your first order"
+                  : `Continue to payment · £${pricing.total.toFixed(2)}`}
               </button>
             </div>
-          ) : (
-            clientSecret && orderId ? (
-              <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14]">
-                <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">
-                  Payment
-                </h2>
-                <p className="mb-5 text-[12px] text-zinc-500 dark:text-zinc-400">
-                  Pay £{pricing.total.toFixed(2)} to confirm your delivery.
-                </p>
-                <PaymentForm
-                  clientSecret={clientSecret}
-                  orderId={orderId}
-                  amount={pricing.total}
-                  onCancel={cancelPayment}
-                />
-              </div>
-            ) : null
+          )}
+
+          {step === "account" && (
+            <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14] sm:p-8">
+              <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">
+                Create your account
+              </h2>
+              <p className="mb-6 text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                One quick step so you can track this delivery and book again — no email confirmation needed.
+              </p>
+
+              <form className="space-y-4" onSubmit={handleCreateAccount} noValidate>
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Full name</label>
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    value={acctName}
+                    onChange={(e) => setAcctName(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Email address</label>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      placeholder="john@email.com"
+                      value={acctEmail}
+                      onChange={(e) => { setAcctEmail(e.target.value); setEmailTaken(false); }}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Phone number</label>
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder="+44 7000 000000"
+                      value={acctPhone}
+                      onChange={(e) => setAcctPhone(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Password</label>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Min. 8 chars, letters + numbers"
+                    value={acctPassword}
+                    onChange={(e) => setAcctPassword(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
+                  />
+                </div>
+
+                {acctError && (
+                  <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400">
+                    <span className="material-symbols-outlined text-base">error</span>
+                    {acctError}
+                  </div>
+                )}
+
+                {emailTaken && (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/20 dark:text-amber-300">
+                    <span>An account with this email already exists.</span>
+                    <Link href="/login" className="shrink-0 font-bold underline underline-offset-2">Log in</Link>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setStep("review")}
+                    className="flex items-center gap-2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                  >
+                    <span className="material-symbols-outlined text-base">arrow_back</span>
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={acctLoading || loading}
+                    className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
+                  >
+                    {acctLoading || loading ? "Creating account…" : "Continue"}
+                  </button>
+                </div>
+              </form>
+
+              <p className="mt-5 text-center text-[12px] text-zinc-400 dark:text-zinc-500">
+                Already have an account?{" "}
+                <Link href="/login" className="font-semibold text-[#3e0074] hover:underline dark:text-[#c084fc]">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
+
+          {step === "payment" && clientSecret && orderId && (
+            <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14]">
+              <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-[#ede9f8]">
+                Payment
+              </h2>
+              <p className="mb-5 text-[12px] text-zinc-500 dark:text-zinc-400">
+                Pay £{pricing.total.toFixed(2)} to confirm your delivery.
+              </p>
+              <PaymentForm
+                clientSecret={clientSecret}
+                orderId={orderId}
+                amount={pricing.total}
+                onCancel={cancelPayment}
+              />
+            </div>
           )}
         </div>
       </main>

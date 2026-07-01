@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
-import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { BookingTopBar } from "@/components/layout/BookingTopBar";
+import { useBookingAuth } from "@/hooks/useBookingAuth";
+import { BookingAuthError } from "@/components/book/BookingAuthError";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 
 export default function BookRoutePage() {
-  const user = useCustomerAuth();
+  const { user, error: authError } = useBookingAuth();
   const router = useRouter();
   const [form, setForm] = useState({
     pickupAddress: "",
@@ -157,6 +158,7 @@ export default function BookRoutePage() {
     router.push("/book/parcel");
   }
 
+  if (authError) return <BookingAuthError message={authError} />;
   if (!user || !hydrated) return null;
 
   const inputClass = (hasError: boolean) =>
@@ -171,7 +173,7 @@ export default function BookRoutePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
-      <CustomerTopBar />
+      <BookingTopBar isAnonymous={!!user?.isAnonymous} />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
         <div className="w-full max-w-5xl">
@@ -211,10 +213,16 @@ export default function BookRoutePage() {
                         pickupLng: p.geometry?.location.lng ?? f.pickupLng,
                       }))
                     }
-                    placeholder="Start typing address or postcode"
+                    placeholder="e.g. 12 Acre Road, Kingston"
                     className={inputClass(!!errors.pickupAddress)}
                   />
-                  {errors.pickupAddress && <p className={errorClass}>{errors.pickupAddress}</p>}
+                  {errors.pickupAddress ? (
+                    <p className={errorClass}>{errors.pickupAddress}</p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                      Start with the house number for an exact match (e.g. 12 Acre Road).
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -267,10 +275,16 @@ export default function BookRoutePage() {
                         dropoffLng: p.geometry?.location.lng ?? f.dropoffLng,
                       }))
                     }
-                    placeholder="Start typing address or postcode"
+                    placeholder="e.g. 12 Acre Road, Kingston"
                     className={inputClass(!!errors.dropoffAddress)}
                   />
-                  {errors.dropoffAddress && <p className={errorClass}>{errors.dropoffAddress}</p>}
+                  {errors.dropoffAddress ? (
+                    <p className={errorClass}>{errors.dropoffAddress}</p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                      Start with the house number for an exact match (e.g. 12 Acre Road).
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>

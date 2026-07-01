@@ -4,17 +4,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
-import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { BookingTopBar } from "@/components/layout/BookingTopBar";
+import { useBookingAuth } from "@/hooks/useBookingAuth";
+import { BookingAuthError } from "@/components/book/BookingAuthError";
 
 const CATEGORIES = [
-  { value: "documents", label: "Documents", icon: "description", ageRestricted: false },
-  { value: "electronics", label: "Electronics", icon: "devices", ageRestricted: false },
-  { value: "food", label: "Food & Groceries", icon: "restaurant", ageRestricted: false },
-  { value: "clothing", label: "Clothing", icon: "checkroom", ageRestricted: false },
-  { value: "alcohol", label: "Alcohol", icon: "liquor", ageRestricted: true },
-  { value: "tobacco", label: "Tobacco", icon: "smoking_rooms", ageRestricted: true },
-  { value: "other", label: "Other", icon: "inventory_2", ageRestricted: false },
+  { value: "documents", label: "Documents", icon: "description" },
+  { value: "electronics", label: "Electronics", icon: "devices" },
+  { value: "food", label: "Food & Groceries", icon: "restaurant" },
+  { value: "clothing", label: "Clothing", icon: "checkroom" },
+  { value: "other", label: "Other", icon: "inventory_2" },
 ];
 
 const SIZES = [
@@ -25,7 +24,7 @@ const SIZES = [
 ];
 
 export default function BookParcelPage() {
-  const user = useCustomerAuth();
+  const { user, error: authError } = useBookingAuth();
   const router = useRouter();
   const [form, setForm] = useState({
     packageCategory: "",
@@ -88,6 +87,7 @@ export default function BookParcelPage() {
     router.push("/book/confirm");
   }
 
+  if (authError) return <BookingAuthError message={authError} />;
   if (!user || !hydrated) return null;
 
   const inputClass = (hasError: boolean) =>
@@ -99,7 +99,7 @@ export default function BookParcelPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050507] dark:text-[#ede9f8]">
-      <CustomerTopBar />
+      <BookingTopBar isAnonymous={!!user?.isAnonymous} />
 
       <main className="flex flex-1 flex-col items-center px-4 py-6 md:py-10">
         <div className="w-full max-w-2xl">
@@ -136,9 +136,6 @@ export default function BookParcelPage() {
                     >
                       <span className="material-symbols-outlined text-base">{cat.icon}</span>
                       {cat.label}
-                      {cat.ageRestricted && (
-                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:bg-red-900/20 dark:text-red-400">18+</span>
-                      )}
                     </button>
                   ))}
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 
@@ -352,6 +353,24 @@ export default function HelpPage() {
                 </span>
               </div>
             </a>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
+            <h2 className="text-3xl font-bold md:text-5xl">Ready to send something?</h2>
+            <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
+              Skip the queue — book a carbon-neutral delivery in under two minutes.
+            </p>
+            <div className="mt-10 flex justify-center">
+              <Link
+                href="/book/type"
+                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555]"
+              >
+                Send a Parcel
+              </Link>
+            </div>
           </div>
         </section>
       </main>

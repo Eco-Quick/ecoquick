@@ -48,7 +48,7 @@ export function HeroSection() {
 
         {/* CTA */}
         <button
-          onClick={() => router.push("/signup")}
+          onClick={() => router.push("/book/type")}
           className="group mt-8 flex items-center gap-3 rounded-full bg-[#3f0075] px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_20px_rgba(63,0,117,0.35)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(63,0,117,0.45)] hover:-translate-y-0.5 active:scale-[0.97] dark:bg-[#5b21b6] dark:shadow-[0_4px_20px_rgba(91,33,182,0.35)]"
         >
           <span>Send a Parcel</span>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { LandingFooter } from "@/components/layout/LandingFooter";
 import CoverageMap from "@/components/about/CoverageMap";
@@ -321,6 +322,24 @@ export default function AboutPage() {
                 <span className="h-2 w-2 rounded-full bg-[#fb923c]" />
                 5–8 mi
               </span>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
+            <h2 className="text-3xl font-bold md:text-5xl">Send a parcel today</h2>
+            <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
+              Fast, carbon-neutral delivery across Kingston and South West London. Book in under two minutes.
+            </p>
+            <div className="mt-10 flex justify-center">
+              <Link
+                href="/book/type"
+                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555]"
+              >
+                Send a Parcel
+              </Link>
             </div>
           </div>
         </section>

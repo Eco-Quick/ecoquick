@@ -54,6 +54,7 @@ app/
 
 ### Auth pattern
 - **Customer pages**: call `useCustomerAuth()` (from `hooks/useCustomerAuth.ts`) at component top. Returns `{ id, name, email } | null`; redirects to `/login` if unauthenticated. Never call `supabase.auth.getUser()` directly in customer pages — use the hook.
+- **Booking wizard pages** (`/book/*`): call `useBookingAuth()` (from `hooks/useBookingAuth.ts`) instead — it NEVER redirects; if there's no session it silently mints a **Supabase anonymous session** (`signInAnonymously()`) so a guest can build an order without signing up. Returns `{ id, isAnonymous, name, email }`. See **Guest Booking** below. Requires **Anonymous Sign-Ins enabled** in the Supabase dashboard.
 - **Supabase client**: always use `createClient()` from `lib/supabase/client.ts` (wraps `createBrowserClient` from `@supabase/ssr`).
 - **Driver pages**: auth handled inline in `app/driver/layout.tsx`.
 - **Admin pages**: server components only. Call `await requireAdmin()` from `lib/admin-auth.ts` at the top of any admin server component or API route. It redirects unauthenticated users to `/login`, non-admins to their own area. Admin API routes additionally re-check `user_metadata.role === "admin"` before using the service client. Admin role is set via Supabase `user_metadata.role = "admin"` — there is no hardcoded credential.
@@ -66,6 +67,17 @@ app/
 ## Booking Wizard
 
 Multi-step form (`/book/type` → `/book/route` → `/book/parcel` → `/book/confirm`) uses **sessionStorage** to persist state across steps — no React Context, no layout wrapper.
+
+### Guest Booking (no upfront signup)
+The funnel is designed for a fast new-user experience — there is **no signup wall before booking**:
+1. Landing CTAs ("Send a Parcel", "Book your first delivery") route straight to `/book/type`, NOT `/signup`.
+2. Wizard pages use `useBookingAuth()`, which mints a **Supabase anonymous session** on entry (no form, no email). They also render **`<BookingTopBar isAnonymous={…} />`** (not `CustomerTopBar` directly): guests keep the public **`LandingHeader`** navbar, and only flip to the customer navbar (dashboard / orders / notifications / sign-out) once they have a real account. On `/book/confirm` the flag is `isGuest`, so the navbar switches the moment the guest finishes account creation.
+3. **Price is gated behind signup for guests** (decision): on `/book/confirm`, a guest (`isGuest = user.isAnonymous && !accountReady`) sees the full order review but the **Pricing block is locked** ("Create your account to see the price") and the CTA reads "Create account to see price". The review CTA branches on `isGuest`: guests get an inline **"Create your account"** step (name/email/phone/password — **no DOB**) before the price is revealed; returning logged-in users see the price immediately and go straight to payment.
+4. That step POSTs to **`/api/auth/convert-guest`**, which upgrades the anonymous user to a permanent account via the Auth Admin API with `email_confirm: true` — so **NO confirmation email/link is ever sent**. The `auth.uid()` is preserved, so the order's `customer_id` and all `auth.uid() = customer_id` RLS keep working. Email-already-registered returns `409 EMAIL_TAKEN` → UI shows "Log in instead". On success the confirm page sets `accountReady = true` and returns to the review, which **now reveals the price**; the user then clicks "Continue to payment".
+5. **No identity verification** (decision): the ID-verification gate has been **removed from the entire customer flow** — booking, signup, and login no longer route customers to `/verify`, and the dashboard/account verification banners are gone. The `/verify` page and `/api/verification/*` routes still exist and are used by the **driver** onboarding flow only.
+6. **Middleware**: `/book/*` is edge-public so logged-out visitors can enter (the page creates the session; payment/convert API routes enforce real auth server-side). Anonymous users (`user.is_anonymous === true`) are treated like visitors on landing/auth pages and are **blocked from permanent-only routes** (`/dashboard`, `/orders`, `/account`, `/impact`, `/notifications`, `/order`, `/help/customer`) → redirected to `/login`.
+
+`/signup` remains for explicit account creation and the **driver** path (`?profile=driver`); drivers are unaffected by the guest flow.
 
 **Key**: `"deliveryRequest"` (matches ecoquick-platform for future compatibility)
 
@@ -83,6 +95,22 @@ Multi-step form (`/book/type` → `/book/route` → `/book/parcel` → `/book/co
 ```
 
 **Pattern per step**: read sessionStorage on mount (preserves state on back-nav) → controlled inputs → merge updated fields on Continue → navigate forward. Clear the key after successful Supabase INSERT.
+
+### Address autocomplete (route step)
+`components/AddressAutocomplete.tsx` powers the pickup/delivery address fields with a **hybrid** of two providers, chosen per keystroke:
+
+**Postcode path → Ordnance Survey Places API** (precise door list):
+- When the input is a **full UK postcode**, `GET /api/places/postcode` calls OS Places `/postcode` (AddressBase/PAF) and returns **every delivery-point address** at that postcode, each already carrying precise coordinates (so no retrieve step).
+- Requires `OS_PLACES_API_KEY` (OS Data Hub, free monthly allowance). **Without the key the route returns `NO_KEY` and the component falls back to Mapbox** — nothing breaks.
+
+**Free-text path → Mapbox Search Box API**:
+- `GET /api/places/autocomplete` → Search Box **`/suggest`** (typeahead, `types=address` only, Kingston `proximity` bias; returns a `mapbox_id` as `place_id`, **no coordinates**).
+- `GET /api/places/retrieve` → Search Box **`/retrieve/{id}`** on select (precise coords — prefers the rooftop **routable point** — plus postcode/city). Uses a **session token** (1 session = N suggests + 1 retrieve) for correct billing.
+- Mapbox needs a **number + street** (a bare street/postcode returns nothing), so placeholder/helper text nudge "start with the house number (e.g. 12 Acre Road)".
+
+**Selection**: OS predictions arrive with `geometry`, so `select()` skips the Mapbox retrieve and uses them directly; Mapbox suggestions (no geometry) trigger `/retrieve`. The `onSelect` contract is `{ description, postcode, city, geometry.location.{lat,lng} }` — `app/book/route/page.tsx` maps these to `pickup*/dropoff*`. Keep this shape stable.
+
+Env: `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (required), `OS_PLACES_API_KEY` (optional — enables the postcode→door list). `GETADDRESS_API_KEY` is **no longer used** (dead key; postcodes.io only returned centroids) — safe to remove.
 
 ---
 
@@ -177,9 +205,14 @@ Server-rendered admin area under `/admin/*`. All pages are React Server Componen
 ### New API Routes
 - `POST /api/driver/accept-job` — atomic job claim (sets driver_id, notifies customer)
 - `POST /api/driver/update-status` — status progression (assigned→picked_up→in_transit→delivered)
+- `POST /api/auth/convert-guest` — upgrades an anonymous guest session to a permanent customer account (service-role Admin API, `email_confirm: true`, no email sent). See **Guest Booking**.
 
 ### New Hook
 - `hooks/useNotificationCount.ts` — realtime unread notification count
+- `hooks/useBookingAuth.ts` — booking-only auth; mints a Supabase anonymous session instead of redirecting. See **Guest Booking**.
+
+### Manual prerequisite (Supabase dashboard)
+Enable **Authentication → Providers → Anonymous Sign-Ins** — the guest booking flow's `signInAnonymously()` 422s without it.
 
 ### Key Data Flows
 1. Customer books → pays via Stripe → webhook sets status='confirmed' + sends notification

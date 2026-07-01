@@ -16,7 +16,6 @@ type FieldErrors = Partial<
     | "phone"
     | "password"
     | "confirmPassword"
-    | "dob"
     | "licenseExpiry"
     | "form",
     string
@@ -35,16 +34,6 @@ function passwordStrength(pw: string): { score: 0 | 1 | 2 | 3; label: string } {
     score: clamped,
     label: ["Too short", "Weak", "Fair", "Strong"][clamped],
   };
-}
-
-function yearsBetween(isoDate: string): number {
-  const d = new Date(isoDate);
-  if (Number.isNaN(d.getTime())) return -1;
-  const now = new Date();
-  let years = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) years--;
-  return years;
 }
 
 function mapAuthError(message: string): string {
@@ -103,7 +92,6 @@ function SignupPageContent() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [dob, setDob] = useState("");
   const [licenseExpiry, setLicenseExpiry] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
@@ -151,17 +139,8 @@ function SignupPageContent() {
       e.confirmPassword = "Passwords don't match.";
     }
 
-    // DOB / license expiry
-    if (profile === "customer") {
-      if (!dob) {
-        e.dob = "Date of birth is required.";
-      } else {
-        const age = yearsBetween(dob);
-        if (age < 0) e.dob = "Enter a valid date.";
-        else if (age < 18) e.dob = "You must be 18 or older to use EcoQuick.";
-        else if (age > 120) e.dob = "Enter a valid date of birth.";
-      }
-    } else {
+    // License expiry — drivers only
+    if (profile === "driver") {
       if (!licenseExpiry) {
         e.licenseExpiry = "License expiry date is required.";
       } else {
@@ -210,9 +189,7 @@ function SignupPageContent() {
           role: profile,
           phone_number: cleanPhone,
           verification_status: "unverified",
-          ...(profile === "customer"
-            ? { date_of_birth: dob, is_over_18: yearsBetween(dob) >= 18 }
-            : { license_expiry: licenseExpiry }),
+          ...(profile === "driver" ? { license_expiry: licenseExpiry } : {}),
         },
       },
     });
@@ -260,7 +237,7 @@ function SignupPageContent() {
       return;
     }
 
-    router.push(profile === "driver" ? "/driver" : "/verify");
+    router.push(profile === "driver" ? "/driver" : "/dashboard");
   };
 
   const inputClass =
@@ -442,34 +419,27 @@ function SignupPageContent() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className={labelClass}>
-                      {profile === "customer" ? "Date of birth" : "License expiry"} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name={profile === "customer" ? "dob" : "licenseExpiry"}
-                      value={profile === "customer" ? dob : licenseExpiry}
-                      onChange={(e) =>
-                        profile === "customer"
-                          ? setDob(e.target.value)
-                          : setLicenseExpiry(e.target.value)
-                      }
-                      max={profile === "customer" ? new Date().toISOString().split("T")[0] : undefined}
-                      min={profile === "driver" ? new Date().toISOString().split("T")[0] : undefined}
-                      className={`${inputClass} ${
-                        (profile === "customer" ? errors.dob : errors.licenseExpiry) ? errorInputClass : ""
-                      }`}
-                    />
-                    {profile === "customer" ? fieldError("dob") : fieldError("licenseExpiry")}
-                    {!errors.dob && !errors.licenseExpiry && (
-                      <p className="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
-                        {profile === "customer"
-                          ? "You must be 18 or older to use EcoQuick."
-                          : "Your license must be valid for the duration of your work with us."}
-                      </p>
-                    )}
-                  </div>
+                  {profile === "driver" && (
+                    <div>
+                      <label className={labelClass}>
+                        License expiry <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        name="licenseExpiry"
+                        value={licenseExpiry}
+                        onChange={(e) => setLicenseExpiry(e.target.value)}
+                        min={new Date().toISOString().split("T")[0]}
+                        className={`${inputClass} ${errors.licenseExpiry ? errorInputClass : ""}`}
+                      />
+                      {fieldError("licenseExpiry")}
+                      {!errors.licenseExpiry && (
+                        <p className="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                          Your license must be valid for the duration of your work with us.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Verification note */}
                   <div className="flex gap-3 rounded-xl bg-zinc-50 p-4 dark:bg-[#050507]">

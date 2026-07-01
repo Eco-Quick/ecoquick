@@ -2,93 +2,82 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-interface MapboxFeature {
-  id: string;
-  text: string;
-  place_name: string;
-  center: [number, number];
-  properties: { address?: string };
-  context?: Array<{ id: string; text: string; short_code?: string }>;
+// Mapbox Search Box API — /suggest. Returns address-level suggestions; precise
+// coordinates are fetched separately via /retrieve (see retrieve/route.ts).
+interface SearchBoxContext {
+  postcode?: { name: string };
+  place?: { name: string };
+  locality?: { name: string };
+  region?: { name: string };
+}
+
+interface SearchBoxSuggestion {
+  name: string;
+  name_preferred?: string;
+  mapbox_id: string;
+  feature_type: string;
+  address?: string;
+  full_address?: string;
+  place_formatted?: string;
+  context?: SearchBoxContext;
+}
+
+// Bias results toward the Kingston-upon-Thames service area.
+const PROXIMITY = "-0.3007,51.4123";
+
+function stripCountry(s: string | undefined): string {
+  if (!s) return "";
+  return s.replace(/,?\s*United Kingdom\s*$/i, "").trim();
 }
 
 export async function GET(request: NextRequest) {
-  const input = new URL(request.url).searchParams.get("input");
+  const params = new URL(request.url).searchParams;
+  const input = params.get("input");
+  const sessionToken = params.get("session_token");
 
   if (!input || input.trim().length < 2) {
     return NextResponse.json({ predictions: [] });
   }
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-
   if (!token) {
     return NextResponse.json({ predictions: [] });
   }
 
   try {
-    const url = new URL(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(input.trim())}.json`
-    );
+    const url = new URL("https://api.mapbox.com/search/searchbox/v1/suggest");
+    url.searchParams.set("q", input.trim());
     url.searchParams.set("access_token", token);
+    if (sessionToken) url.searchParams.set("session_token", sessionToken);
     url.searchParams.set("country", "gb");
-    url.searchParams.set("limit", "5");
-    url.searchParams.set("types", "address,poi,postcode,locality,place");
-    url.searchParams.set("autocomplete", "true");
+    url.searchParams.set("language", "en");
+    url.searchParams.set("limit", "6");
+    url.searchParams.set("proximity", PROXIMITY);
+    // Address-level only — every selectable result has a house number, so saved
+    // pickup/delivery points are precise. (Mapbox needs a number + street; a bare
+    // postcode or street name alone returns nothing, hence the UX nudges.)
+    url.searchParams.set("types", "address");
 
     const res = await fetch(url.toString());
-    if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
+    if (!res.ok) throw new Error(`Mapbox suggest error ${res.status}`);
 
-    const data: { features: MapboxFeature[] } = await res.json();
+    const data: { suggestions?: SearchBoxSuggestion[] } = await res.json();
 
-    const predictions = data.features.map((f) => {
-      const mainText = f.properties?.address
-        ? `${f.properties.address} ${f.text}`
-        : f.text;
-
-      const contextParts: string[] = [];
-      f.context?.forEach((c) => {
-        if (
-          c.id.startsWith("locality") ||
-          c.id.startsWith("place") ||
-          c.id.startsWith("postcode") ||
-          c.id.startsWith("region")
-        ) {
-          contextParts.push(c.text);
-        }
-      });
-
-      const secondaryText =
-        contextParts.length > 0
-          ? contextParts.join(", ")
-          : f.place_name.split(",").slice(1).join(",").trim();
-
-      // Extract postcode from context
-      const postcodeCtx = f.context?.find((c) => c.id.startsWith("postcode"));
-      const postcode = postcodeCtx?.text ?? extractPostcode(f.place_name);
-
-      // Extract city from context (first locality or place)
-      const cityCtx = f.context?.find(
-        (c) => c.id.startsWith("locality") || c.id.startsWith("place")
-      );
-      const city = cityCtx?.text ?? "";
-
+    const predictions = (data.suggestions ?? []).map((s) => {
+      const mainText = s.name_preferred || s.name;
+      const secondaryText = stripCountry(s.place_formatted);
       return {
-        place_id: `mapbox_${f.id}`,
-        description: f.place_name,
+        place_id: s.mapbox_id, // used to /retrieve precise coordinates on select
+        description: stripCountry(s.full_address) || mainText,
         structured_formatting: { main_text: mainText, secondary_text: secondaryText },
-        geometry: { location: { lat: f.center[1], lng: f.center[0] } },
-        postcode,
-        city,
+        postcode: s.context?.postcode?.name ?? "",
+        city: s.context?.place?.name ?? s.context?.locality?.name ?? "",
       };
     });
 
     return NextResponse.json({ predictions, status: "OK" });
   } catch (err) {
-    console.error("Mapbox autocomplete error:", err);
+    console.error("Mapbox suggest error:", err);
     return NextResponse.json({ predictions: [] });
   }
-}
-
-function extractPostcode(address: string): string {
-  const match = address.match(/([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2})/i);
-  return match ? match[1].toUpperCase() : "";
 }

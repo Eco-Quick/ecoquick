@@ -62,13 +62,7 @@ export default function LoginPage() {
     if (role === "driver") {
       router.push("/driver");
     } else {
-      // Check verification status — redirect unverified customers to /verify
-      const verificationStatus = data.user?.user_metadata?.verification_status;
-      if (verificationStatus === "verified") {
-        router.push("/dashboard");
-      } else {
-        router.push("/verify");
-      }
+      router.push("/dashboard");
     }
   };
 

@@ -5,10 +5,14 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Public routes that don't need auth — skip Supabase round-trip for faster load
+  // Public routes that don't need auth — skip Supabase round-trip for faster load.
+  // `/book/*` is included so a logged-out visitor can enter the booking wizard; the
+  // page itself mints an anonymous session client-side (see useBookingAuth), and the
+  // payment/convert API routes enforce real auth server-side.
   const publicRoutes = ["/", "/about", "/business", "/help", "/login", "/signup"];
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
+    pathname.startsWith("/book") ||
     (pathname.startsWith("/help") && !pathname.startsWith("/help/customer"));
 
   if (isPublicRoute && !request.cookies.getAll().some(c => c.name.startsWith("sb-"))) {
@@ -48,9 +52,13 @@ export async function middleware(request: NextRequest) {
   }
 
   const role = user?.user_metadata?.role as string | undefined;
+  // Anonymous (guest) users have a session but no real account. Treat them like
+  // logged-out visitors everywhere except the booking funnel.
+  const isAnonymous = user?.is_anonymous === true;
 
-  // Redirect logged-in users away from auth pages
-  if (user && (pathname === "/login" || pathname === "/signup")) {
+  // Redirect logged-in users away from auth pages (guests excluded — they may
+  // still want to sign in / sign up explicitly).
+  if (user && !isAnonymous && (pathname === "/login" || pathname === "/signup")) {
     const dest = role === "admin" ? "/admin" : role === "driver" ? "/driver" : "/dashboard";
     return NextResponse.redirect(new URL(dest, request.url));
   }
@@ -61,24 +69,30 @@ export async function middleware(request: NextRequest) {
   const isPublicLanding =
     publicLandingRoutes.includes(pathname) ||
     (pathname.startsWith("/help") && !pathname.startsWith("/help/customer"));
-  if (user && isPublicLanding) {
+  if (user && !isAnonymous && isPublicLanding) {
     const dest = role === "admin" ? "/admin" : role === "driver" ? "/driver" : "/dashboard";
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
-  // Protect customer routes
-  const customerRoutes = [
+  // `/book/*` is edge-public (handled above) so guests can enter and the page mints
+  // the anonymous session. `/verify` is only reached after account creation, so it
+  // still requires a session at the edge.
+  if (pathname.startsWith("/verify") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Permanent-only customer routes — guests must finish creating an account first.
+  const permanentCustomerRoutes = [
     "/dashboard",
     "/orders",
-    "/book",
     "/account",
     "/impact",
     "/notifications",
     "/order",
     "/help/customer",
   ];
-  const isCustomerRoute = customerRoutes.some((r) => pathname.startsWith(r));
-  if (isCustomerRoute && !user) {
+  const isPermanentCustomerRoute = permanentCustomerRoutes.some((r) => pathname.startsWith(r));
+  if (isPermanentCustomerRoute && (!user || isAnonymous)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

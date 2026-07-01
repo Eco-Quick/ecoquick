@@ -43,6 +43,17 @@ export default function VerifyPage() {
     setLoading(false);
   }
 
+  // Return the user where they came from (e.g. back to checkout to pay) if a target
+  // was stashed before sending them here; otherwise their default area.
+  function goAfterVerify() {
+    let next: string | null = null;
+    try {
+      next = sessionStorage.getItem("postVerifyReturn");
+      if (next) sessionStorage.removeItem("postVerifyReturn");
+    } catch {}
+    router.push(next || (user ? "/dashboard" : "/driver"));
+  }
+
   async function initiateVerification() {
     setInitiating(true);
     setError(null);
@@ -148,7 +159,7 @@ export default function VerifyPage() {
                 Your identity has been confirmed. You can now book deliveries and accept jobs.
               </p>
               <button
-                onClick={() => router.push(user ? "/dashboard" : "/driver")}
+                onClick={goAfterVerify}
                 className="rounded-xl bg-[#3e0074] px-8 py-3 text-[13px] font-bold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98] dark:bg-[#5b21b6]"
               >
                 Continue
@@ -342,7 +353,7 @@ export default function VerifyPage() {
               {/* Do it later */}
               {status === "unverified" && (
                 <button
-                  onClick={() => router.push("/dashboard")}
+                  onClick={goAfterVerify}
                   className="mt-6 w-full py-3 text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                 >
                   Do it later

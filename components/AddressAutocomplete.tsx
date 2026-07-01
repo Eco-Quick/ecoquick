@@ -19,77 +19,92 @@ interface AddressAutocompleteProps {
   className?: string;
 }
 
-// Matches full or partial UK postcodes: "KT2 6DF", "SW1A 1AA", "EC1A", "KT2"
+// Full UK postcode, e.g. "KT2 6DF" — used only to tailor the empty-state hint.
 const UK_POSTCODE_REGEX = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
-// Partial postcode for early detection (outward code only)
-const UK_POSTCODE_PARTIAL = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d?$/i;
 
-function isLikelyPostcode(input: string): boolean {
-  const trimmed = input.trim();
-  return UK_POSTCODE_REGEX.test(trimmed);
+function newSessionToken(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
 }
 
 export default function AddressAutocomplete({
   value,
   onChange,
   onSelect,
-  placeholder = "Enter address or postcode",
+  placeholder = "e.g. 12 Acre Road, Kingston",
   className = "",
 }: AddressAutocompleteProps) {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
-  const [source, setSource] = useState<"mapbox" | "postcode" | null>(null);
+  // "os" = full door list from a postcode (Ordnance Survey); "mapbox" = free-text.
+  const [source, setSource] = useState<"os" | "mapbox">("mapbox");
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // One Search Box session = N suggest calls + 1 retrieve. Reset after each retrieve.
+  const sessionRef = useRef<string>("");
+  // Ignore stale suggest responses if the input changed while a request was in flight.
+  const reqIdRef = useRef(0);
+
+  if (!sessionRef.current) sessionRef.current = newSessionToken();
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (value.length < 2) {
+    if (value.trim().length < 2) {
       setPredictions([]);
       setOpen(false);
       return;
     }
 
-    const usePostcode = isLikelyPostcode(value);
-
     debounceRef.current = setTimeout(async () => {
+      const reqId = ++reqIdRef.current;
       setLoading(true);
       try {
-        let data: { predictions?: Prediction[] } = {};
+        const query = value.trim();
+        let preds: Prediction[] = [];
+        let src: "os" | "mapbox" = "mapbox";
 
-        if (usePostcode) {
-          // Try getAddress.io first for postcodes
-          const postcodeRes = await fetch(`/api/places/postcode?postcode=${encodeURIComponent(value.trim())}`);
-          data = await postcodeRes.json();
-          if ((data.predictions ?? []).length > 0) {
-            setSource("postcode");
-          } else {
-            // Fallback to Mapbox if getAddress.io fails or returns nothing
-            const mapboxRes = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(value)}`);
-            data = await mapboxRes.json();
-            setSource("mapbox");
+        // A full postcode → ask Ordnance Survey for every door at that postcode.
+        if (UK_POSTCODE_REGEX.test(query)) {
+          const r = await fetch(`/api/places/postcode?postcode=${encodeURIComponent(query)}`);
+          const d: { predictions?: Prediction[] } = await r.json();
+          if ((d.predictions ?? []).length > 0) {
+            preds = d.predictions ?? [];
+            src = "os";
           }
-        } else {
-          const res = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(value)}`);
-          data = await res.json();
-          setSource("mapbox");
         }
 
-        setPredictions(data.predictions ?? []);
-        setOpen((data.predictions ?? []).length > 0);
+        // Free-text (or no OS key / no OS match) → Mapbox Search Box suggest.
+        if (preds.length === 0) {
+          const r = await fetch(
+            `/api/places/autocomplete?input=${encodeURIComponent(value)}&session_token=${encodeURIComponent(sessionRef.current)}`
+          );
+          const d: { predictions?: Prediction[] } = await r.json();
+          preds = d.predictions ?? [];
+          src = "mapbox";
+        }
+
+        if (reqId !== reqIdRef.current) return; // a newer query superseded this one
+        setSource(src);
+        setPredictions(preds);
+        setOpen(preds.length > 0);
         setHighlighted(-1);
       } catch {
-        setPredictions([]);
-        setOpen(false);
+        if (reqId === reqIdRef.current) {
+          setPredictions([]);
+          setOpen(false);
+        }
       } finally {
-        setLoading(false);
+        if (reqId === reqIdRef.current) setLoading(false);
       }
-    }, usePostcode ? 500 : 300); // Slightly longer debounce for postcode to avoid hitting API on partial input
+    }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -120,17 +135,47 @@ export default function AddressAutocomplete({
       setHighlighted((h) => (h > 0 ? h - 1 : predictions.length - 1));
     } else if (e.key === "Enter" && highlighted >= 0) {
       e.preventDefault();
-      select(predictions[highlighted]);
+      void select(predictions[highlighted]);
     } else if (e.key === "Escape") {
       setOpen(false);
     }
   }
 
-  function select(p: Prediction) {
+  async function select(p: Prediction) {
     onChange(p.description);
-    onSelect(p);
     setOpen(false);
     setHighlighted(-1);
+
+    // OS Places results already include precise coordinates — use them directly.
+    if (p.geometry) {
+      onSelect(p);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Mapbox suggestion: resolve precise coordinates + authoritative postcode/city.
+      const res = await fetch(
+        `/api/places/retrieve?id=${encodeURIComponent(p.place_id)}&session_token=${encodeURIComponent(sessionRef.current)}`
+      );
+      const data: { result?: Prediction } = await res.json();
+      const r = data.result;
+      onSelect({
+        ...p,
+        description: r?.description || p.description,
+        postcode: r?.postcode || p.postcode,
+        city: r?.city || p.city,
+        geometry: r?.geometry ?? p.geometry,
+      });
+      if (r?.description) onChange(r.description);
+    } catch {
+      // Fall back to suggest-level data (no precise coordinates).
+      onSelect(p);
+    } finally {
+      setLoading(false);
+      // Selection closes the Search Box session — start a fresh one for the next search.
+      sessionRef.current = newSessionToken();
+    }
   }
 
   return (
@@ -166,10 +211,10 @@ export default function AddressAutocomplete({
           className="absolute z-50 mt-1 w-full overflow-hidden border border-primary/20 bg-white dark:bg-[#0c0b14] shadow-[0_8px_24px_rgba(62,0,116,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
           style={{ maxHeight: "320px", overflowY: "auto" }}
         >
-          {source === "postcode" && (
+          {source === "os" && (
             <div className="border-b border-slate-100 dark:border-zinc-800 bg-primary/5 dark:bg-primary/10 px-4 py-2">
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60 dark:text-zinc-400">
-                {predictions.length} address{predictions.length !== 1 ? "es" : ""} found at {value.trim().toUpperCase()}
+                {predictions.length} address{predictions.length !== 1 ? "es" : ""} at {value.trim().toUpperCase()}
               </span>
             </div>
           )}
@@ -177,13 +222,13 @@ export default function AddressAutocomplete({
             <button
               key={p.place_id}
               type="button"
-              onMouseDown={() => select(p)}
+              onMouseDown={() => void select(p)}
               className={`flex w-full items-start gap-3 border-b border-slate-100 dark:border-zinc-800 px-4 py-3 text-left last:border-b-0 transition-colors ${
                 i === highlighted ? "bg-primary/5" : "hover:bg-primary/5"
               }`}
             >
               <span className="material-symbols-outlined mt-0.5 shrink-0 text-sm text-accent">
-                {source === "postcode" ? "home" : "location_on"}
+                {source === "os" ? "home" : "location_on"}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold uppercase tracking-wide text-primary">
@@ -196,16 +241,16 @@ export default function AddressAutocomplete({
             </button>
           ))}
           <div className="bg-slate-50 dark:bg-[#050507] px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            {source === "postcode" ? "UK Postcode Lookup" : "Powered by Mapbox"}
+            {source === "os" ? "UK addresses · Ordnance Survey" : "Powered by Mapbox"}
           </div>
         </div>
       )}
 
-      {open && !loading && predictions.length === 0 && value.length >= 2 && (
+      {open && !loading && predictions.length === 0 && value.trim().length >= 2 && (
         <div className="absolute z-50 mt-1 w-full border border-primary/20 bg-white dark:bg-[#0c0b14] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 shadow-lg">
-          {isLikelyPostcode(value)
-            ? "No addresses found for this postcode"
-            : "No addresses found — try a postcode (e.g. KT2 6DF)"}
+          {UK_POSTCODE_REGEX.test(value.trim())
+            ? "Add a house number + street to find the exact address — e.g. 12 Acre Road"
+            : "Keep typing your house number and street name — e.g. 12 Acre Road"}
         </div>
       )}
     </div>
