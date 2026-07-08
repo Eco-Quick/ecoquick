@@ -20,7 +20,7 @@ const WORKFLOW_STEPS = [
   {
     k: "03",
     title: "Delivered",
-    body: "Instant photo confirmation and digital signature.",
+    body: "Instant Confirmation",
     image: "delivered.webp",
   },
 ] as const;

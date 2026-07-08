@@ -61,7 +61,7 @@ export default function AboutPage() {
               {[
                 { title: "Customer Focus", body: "Your satisfaction is our priority. We go above and beyond to ensure every delivery exceeds expectations.", variant: "white" },
                 { title: "Speed & Reliability", body: "Precision is the heartbeat of our operation, measured in milliseconds.", variant: "purple" },
-                { title: "Sustainability", body: "Committed to a 100% carbon-neutral future, without compromise.", variant: "purple" },
+                { title: "Operational Excellence", body: "Every parcel is handled with precision, accountability, and uncompromising quality.", variant: "purple" },
                 { title: "Community", body: "Empowering local commerce and providing dignified driver roles.", variant: "white" },
               ].map((value) => (
                 <div

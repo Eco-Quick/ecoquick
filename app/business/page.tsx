@@ -383,10 +383,10 @@ export default function BusinessPage() {
                 Get started
               </Link>
               <a
-                href="tel:+447393080529"
+                href="tel:+448944840002"
                 className="rounded-full border border-white/30 px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 active:scale-[0.97]"
               >
-                +44 7393 080529
+                +44 8944 840002
               </a>
             </div>
           </div>

@@ -16,10 +16,10 @@ export function LandingFooter() {
           <div className="space-y-1 font-secondary text-sm text-zinc-600 dark:text-zinc-400">
             <p>Kingston upon Thames, London</p>
             <a
-              href="mailto:hello@ecoquickdelivery.co.uk"
+              href="mailto:info@ecoquickdelivery.co.uk"
               className="hover:text-zinc-900 transition-colors dark:hover:text-zinc-200"
             >
-              hello@ecoquickdelivery.co.uk
+              info@ecoquickdelivery.co.uk
             </a>
           </div>
         </div>
@@ -43,7 +43,15 @@ export function LandingFooter() {
           </a>
           <a
             className="hover:text-zinc-900 dark:hover:text-zinc-200"
-            href="https://wa.me/447393080529"
+            href="https://www.tiktok.com/@ecoquick.delivery?_r=1&_t=ZN-97mXcHW4uYw"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            TikTok
+          </a>
+          <a
+            className="hover:text-zinc-900 dark:hover:text-zinc-200"
+            href="https://wa.me/448944840002"
             target="_blank"
             rel="noopener noreferrer"
           >

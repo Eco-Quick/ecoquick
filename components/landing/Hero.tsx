@@ -35,7 +35,7 @@ export function HeroSection() {
 
         {/* Feature chips */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-500">
-          {["Live tracking", "Quick delivery", "Zero emissions"].map((label, i) => (
+          {["Live tracking", "Quick delivery", "Safe & reliable"].map((label, i) => (
             <span key={label} className="contents">
               {i > 0 && <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>}
               <span className="inline-flex items-center gap-1.5">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
-const WHATSAPP_NUMBER = "447393080529";
+const WHATSAPP_NUMBER = "448944840002";
 const DEFAULT_MESSAGE = "Hi EcoQuick! I need help with my delivery.";
 
 // Don't show on these pages

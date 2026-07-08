@@ -247,8 +247,8 @@ export default function CustomerHelpPage() {
         {/* Contact strip */}
         <section className="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: "chat", label: "WhatsApp", sub: "Chat with us instantly", href: "https://wa.me/447393080529?text=Hi%20EcoQuick!%20I%20need%20help." },
-            { icon: "call", label: "Call support", sub: "Mon–Fri, 9am–6pm GMT", href: "tel:+447393080529" },
+            { icon: "chat", label: "WhatsApp", sub: "Chat with us instantly", href: "https://wa.me/448944840002?text=Hi%20EcoQuick!%20I%20need%20help." },
+            { icon: "call", label: "Call support", sub: "Mon–Fri, 9am–6pm GMT", href: "tel:+448944840002" },
             { icon: "mail", label: "Email us", sub: "Reply within 24 hours", href: "mailto:hello@ecoquick.delivery?subject=Support Request" },
           ].map((c) => (
             <a

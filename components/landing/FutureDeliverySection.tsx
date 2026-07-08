@@ -95,7 +95,7 @@ export function FutureDeliverySection() {
             { top: "Real-Time", bottom: "Live GPS tracking" },
             { top: "Verified", bottom: "ID-checked drivers" },
             { top: "Secure", bottom: "PIN-verified delivery" },
-            { top: "Green", bottom: "Carbon neutral fleet" },
+            { top: "Reliable", bottom: "Your parcels, our priority" },
           ].map((m) => (
             <div
               key={m.top}
