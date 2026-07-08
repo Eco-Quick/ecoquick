@@ -51,7 +51,7 @@ export function LandingFooter() {
           </a>
           <a
             className="hover:text-zinc-900 dark:hover:text-zinc-200"
-            href="https://wa.me/448944840002"
+            href="https://wa.me/447417366028"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -369,24 +369,26 @@ export default function BusinessPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-6 py-12 md:px-10 md:py-16">
-          <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
-            <h2 className="text-3xl font-bold md:text-5xl">Ready to transform?</h2>
-            <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
-              Onboarding deploys your fleet within 24 hours.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <section className="px-6 py-10 md:px-10 md:py-12">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-3xl bg-[#3e0074] px-8 py-10 text-center text-white md:flex-row md:justify-between md:gap-10 md:px-12 md:py-9 md:text-left dark:bg-[#5b21b6]">
+            <div>
+              <h2 className="text-2xl font-bold md:text-3xl">Ready to transform?</h2>
+              <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-white/70">
+                Get your business up and running with us in under 24 hours.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col items-center gap-3 sm:flex-row">
               <Link
                 href="/signup"
-                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
+                className="rounded-full bg-white px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97]"
               >
                 Get started
               </Link>
               <a
-                href="tel:+448944840002"
-                className="rounded-full border border-white/30 px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 active:scale-[0.97]"
+                href="tel:+447417366028"
+                className="rounded-full border border-white/30 px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 active:scale-[0.97]"
               >
-                +44 8944 840002
+                +44 7417 366028
               </a>
             </div>
           </div>

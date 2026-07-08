@@ -198,7 +198,7 @@ export default function HelpPage() {
                 title: "WhatsApp Chat",
                 body: "Chat instantly with our support team on WhatsApp. Available during business hours.",
                 cta: "Chat on WhatsApp",
-                href: "https://wa.me/448944840002?text=Hi%20EcoQuick!%20I%20need%20help.",
+                href: "https://wa.me/447417366028?text=Hi%20EcoQuick!%20I%20need%20help.",
                 icon: (
                   <svg
                     aria-hidden="true"
@@ -214,7 +214,7 @@ export default function HelpPage() {
                 title: "Call support",
                 body: "Speak directly with a representative. Available Mon–Fri, 9am–6pm GMT.",
                 cta: "Call now",
-                href: "tel:+448944840002",
+                href: "tel:+447417366028",
                 icon: (
                   <svg
                     aria-hidden="true"

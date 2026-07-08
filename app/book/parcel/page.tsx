@@ -17,10 +17,10 @@ const CATEGORIES = [
 ];
 
 const SIZES = [
-  { value: "envelope", label: "Envelope", desc: "Up to 0.5 kg", icon: "mail" },
-  { value: "small", label: "Small", desc: "Up to 2 kg", icon: "package_2" },
-  { value: "medium", label: "Medium", desc: "Up to 10 kg", icon: "deployed_code" },
-  { value: "large", label: "Large", desc: "Up to 25 kg", icon: "pallet" },
+  { value: "envelope", label: "Envelope", desc: "Documents", icon: "mail" },
+  { value: "small", label: "Small", desc: "Shoebox", icon: "package_2" },
+  { value: "medium", label: "Medium", desc: "Carry-on", icon: "deployed_code" },
+  { value: "large", label: "Large", desc: "Bulky items", icon: "pallet" },
 ];
 
 export default function BookParcelPage() {

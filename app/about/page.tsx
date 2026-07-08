@@ -327,20 +327,20 @@ export default function AboutPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-6 py-12 md:px-10 md:py-16">
-          <div className="mx-auto max-w-5xl rounded-3xl bg-[#3e0074] px-8 py-12 text-center text-white md:px-16 md:py-16 dark:bg-[#5b21b6]">
-            <h2 className="text-3xl font-bold md:text-5xl">Send a parcel today</h2>
-            <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
-              Fast, carbon-neutral delivery across Kingston and South West London. Book in under two minutes.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <Link
-                href="/book/type"
-                className="rounded-full bg-white px-10 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555]"
-              >
-                Send a Parcel
-              </Link>
+        <section className="px-6 py-10 md:px-10 md:py-12">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-3xl bg-[#3e0074] px-8 py-10 text-center text-white md:flex-row md:justify-between md:gap-8 md:px-12 md:py-9 md:text-left dark:bg-[#5b21b6]">
+            <div>
+              <h2 className="text-2xl font-bold md:text-3xl">Send a parcel today</h2>
+              <p className="mt-2 max-w-md text-[14px] leading-relaxed text-white/70">
+                Fast and local delivery across Kingston and South West London — book your delivery in few minutes.
+              </p>
             </div>
+            <Link
+              href="/book/type"
+              className="shrink-0 rounded-full bg-white px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.18em] text-[#3e0074] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] dark:bg-[#0c0b14] dark:text-[#c084fc] dark:border dark:border-[#302555]"
+            >
+              Send a Parcel
+            </Link>
           </div>
         </section>
 

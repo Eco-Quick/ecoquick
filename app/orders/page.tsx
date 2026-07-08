@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CustomerTopBar } from "@/components/layout/CustomerTopBar";
@@ -18,7 +18,16 @@ type Order = {
   created_at: string;
 };
 
-type FilterKey = "all" | "delivered" | "in_transit" | "cancelled" | "recent";
+type FilterKey = "all" | "delivered" | "in_transit" | "cancelled";
+type DateRange = "all" | "7d" | "30d" | "90d";
+
+const RANGE_DAYS: Record<DateRange, number | null> = { all: null, "7d": 7, "30d": 30, "90d": 90 };
+const RANGE_LABEL: Record<DateRange, string> = {
+  all: "All time",
+  "7d": "Last 7 days",
+  "30d": "Last 30 days",
+  "90d": "Last 90 days",
+};
 
 function statusClass(status: string) {
   const map: Record<string, string> = {
@@ -46,15 +55,18 @@ function formatTime(iso: string) {
   return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-function applyFilter(orders: Order[], filter: FilterKey): Order[] {
-  if (filter === "delivered") return orders.filter((o) => o.status === "delivered");
-  if (filter === "in_transit") return orders.filter((o) => o.status === "in_transit" || o.status === "picked_up");
-  if (filter === "cancelled") return orders.filter((o) => o.status === "cancelled");
-  if (filter === "recent") {
-    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    return orders.filter((o) => new Date(o.created_at).getTime() >= cutoff);
+function applyFilters(orders: Order[], filter: FilterKey, range: DateRange): Order[] {
+  let out = orders;
+  if (filter === "delivered") out = out.filter((o) => o.status === "delivered");
+  else if (filter === "in_transit") out = out.filter((o) => o.status === "in_transit" || o.status === "picked_up");
+  else if (filter === "cancelled") out = out.filter((o) => o.status === "cancelled");
+
+  const days = RANGE_DAYS[range];
+  if (days != null) {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    out = out.filter((o) => new Date(o.created_at).getTime() >= cutoff);
   }
-  return orders;
+  return out;
 }
 
 export default function OrderHistoryPage() {
@@ -64,6 +76,26 @@ export default function OrderHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [dateRange, setDateRange] = useState<DateRange>("all");
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const rangeRef = useRef<HTMLDivElement>(null);
+
+  // Close the date-range dropdown on outside click or Escape
+  useEffect(() => {
+    if (!rangeOpen) return;
+    function onDown(e: MouseEvent) {
+      if (rangeRef.current && !rangeRef.current.contains(e.target as Node)) setRangeOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setRangeOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [rangeOpen]);
 
   useEffect(() => {
     if (!user) return;
@@ -89,14 +121,13 @@ export default function OrderHistoryPage() {
   const displayMeta = (type: string) =>
     type === "instant" ? "Instant Delivery" : "Scheduled Delivery";
 
-  const filteredOrders = applyFilter(orders, activeFilter);
+  const filteredOrders = applyFilters(orders, activeFilter, dateRange);
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: "all", label: "All orders" },
     { key: "delivered", label: "Delivered" },
     { key: "in_transit", label: "In transit" },
     { key: "cancelled", label: "Cancelled" },
-    { key: "recent", label: "Last 30 days" },
   ];
 
   return (
@@ -117,31 +148,78 @@ export default function OrderHistoryPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 {orders.length} total order{orders.length !== 1 ? "s" : ""}
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                100% carbon neutral
-              </span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur dark:border-[#221d38] dark:bg-[#0c0b14]/80 dark:text-zinc-400">
-            {filters.map((f, i) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1 rounded-full border border-slate-200 bg-white/80 px-1 py-1 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur dark:border-[#221d38] dark:bg-[#0c0b14]/80 dark:text-zinc-400">
+              {filters.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setActiveFilter(f.key)}
+                  className={[
+                    "rounded-full px-4 py-1.5 transition-colors active:scale-95",
+                    activeFilter === f.key
+                      ? "bg-primary text-white shadow-sm"
+                      : "hover:bg-slate-50 dark:hover:bg-[#1e1538]",
+                  ].join(" ")}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Date-range dropdown */}
+            <div ref={rangeRef} className="relative">
               <button
-                key={f.key}
-                onClick={() => setActiveFilter(f.key)}
+                type="button"
+                onClick={() => setRangeOpen((o) => !o)}
+                aria-haspopup="listbox"
+                aria-expanded={rangeOpen}
                 className={[
-                  "rounded-full px-4 py-1.5 transition-colors active:scale-95",
-                  activeFilter === f.key
-                    ? "bg-primary text-white shadow-sm"
-                    : "hover:bg-slate-50 dark:hover:bg-[#1e1538]",
-                  i === filters.length - 1 ? "inline-flex items-center gap-1" : "",
+                  "inline-flex items-center gap-1.5 rounded-full border px-4 py-[7px] text-[11px] font-semibold shadow-sm backdrop-blur transition-colors active:scale-95",
+                  dateRange !== "all"
+                    ? "border-primary/30 bg-primary/5 text-primary dark:border-[#c084fc]/30 dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                    : "border-slate-200 bg-white/80 text-slate-600 hover:bg-slate-50 dark:border-[#221d38] dark:bg-[#0c0b14]/80 dark:text-zinc-400 dark:hover:bg-[#1e1538]",
                 ].join(" ")}
               >
-                {f.label}
-                {i === filters.length - 1 && (
-                  <span className="material-symbols-outlined text-xs">expand_more</span>
-                )}
+                {RANGE_LABEL[dateRange]}
+                <span className={`material-symbols-outlined text-sm transition-transform ${rangeOpen ? "rotate-180" : ""}`}>
+                  expand_more
+                </span>
               </button>
-            ))}
+
+              {rangeOpen && (
+                <ul
+                  role="listbox"
+                  className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-2xl border border-slate-200 bg-white py-1 text-[12px] font-semibold text-slate-600 shadow-lg dark:border-[#221d38] dark:bg-[#0c0b14] dark:text-zinc-300"
+                >
+                  {(Object.keys(RANGE_LABEL) as DateRange[]).map((key) => (
+                    <li key={key}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={dateRange === key}
+                        onClick={() => {
+                          setDateRange(key);
+                          setRangeOpen(false);
+                        }}
+                        className={[
+                          "flex w-full items-center justify-between px-4 py-2 text-left transition-colors",
+                          dateRange === key
+                            ? "bg-primary/5 text-primary dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                            : "hover:bg-slate-50 dark:hover:bg-[#1e1538]",
+                        ].join(" ")}
+                      >
+                        {RANGE_LABEL[key]}
+                        {dateRange === key && (
+                          <span className="material-symbols-outlined text-sm">check</span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
 

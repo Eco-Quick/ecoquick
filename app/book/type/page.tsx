@@ -77,7 +77,7 @@ export default function BookTypePage() {
                 Instant
               </h3>
               <p className="mb-4 font-secondary text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-                Electric courier dispatched immediately. Direct point-to-point within 60 minutes.
+                Courier dispatched immediately. Direct point-to-point within 60 minutes.
               </p>
               <div className="mt-auto flex items-center gap-2 text-[12px] font-semibold text-emerald-600">
                 <span className="relative flex h-2 w-2">

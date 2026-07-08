@@ -158,14 +158,19 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className={`${inputClass} pl-11 pr-16`}
+                    className={`${inputClass} pl-11 pr-11`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-semibold text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
                   >
-                    {showPassword ? "Hide" : "Show"}
+                    <span className="material-symbols-outlined text-xl">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
                   </button>
                 </div>
               </div>

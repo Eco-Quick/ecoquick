@@ -316,7 +316,9 @@ export default function BookConfirmPage() {
                 <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">
                   {isInstant ? "Instant Delivery" : "Scheduled Delivery"}
                 </p>
-                <p className="text-[12px] text-emerald-600">Carbon neutral</p>
+                <p className="text-[12px] text-zinc-400">
+                  {isInstant ? "Delivered within 60 minutes" : "Delivered at your chosen time"}
+                </p>
               </div>
             </div>
 

@@ -92,6 +92,8 @@ function SignupPageContent() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [licenseExpiry, setLicenseExpiry] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
@@ -370,15 +372,29 @@ function SignupPageContent() {
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                       <label className={labelClass}>Password</label>
-                      <input
-                        name="password"
-                        type="password"
-                        placeholder="Min. 8 chars, letters + numbers"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete="new-password"
-                        className={`${inputClass} ${errors.password ? errorInputClass : ""}`}
-                      />
+                      <div className="relative">
+                        <input
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Min. 8 chars, letters + numbers"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          autoComplete="new-password"
+                          className={`${inputClass} pr-11 ${errors.password ? errorInputClass : ""}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          title={showPassword ? "Hide password" : "Show password"}
+                          aria-pressed={showPassword}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                        >
+                          <span className="material-symbols-outlined text-xl">
+                            {showPassword ? "visibility_off" : "visibility"}
+                          </span>
+                        </button>
+                      </div>
                       {password && (
                         <div className="mt-2">
                           <div className="flex gap-1">
@@ -406,15 +422,29 @@ function SignupPageContent() {
                     </div>
                     <div>
                       <label className={labelClass}>Confirm password</label>
-                      <input
-                        name="confirmPassword"
-                        type="password"
-                        placeholder="Re-enter password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        autoComplete="new-password"
-                        className={`${inputClass} ${errors.confirmPassword ? errorInputClass : ""}`}
-                      />
+                      <div className="relative">
+                        <input
+                          name="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Re-enter password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          autoComplete="new-password"
+                          className={`${inputClass} pr-11 ${errors.confirmPassword ? errorInputClass : ""}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword((prev) => !prev)}
+                          aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                          title={showConfirmPassword ? "Hide password" : "Show password"}
+                          aria-pressed={showConfirmPassword}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                        >
+                          <span className="material-symbols-outlined text-xl">
+                            {showConfirmPassword ? "visibility_off" : "visibility"}
+                          </span>
+                        </button>
+                      </div>
                       {fieldError("confirmPassword")}
                     </div>
                   </div>

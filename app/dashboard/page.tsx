@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Stats = {
   active: number;
-  co2kg: number;
+  totalOrders: number;
   totalSpent: number;
   completed: number;
 };
@@ -26,15 +26,14 @@ export default function CustomerDashboardPage() {
     const supabase = createClient();
     supabase
       .from("delivery_orders")
-      .select("status, weight, total_price")
+      .select("status, total_price")
       .eq("customer_id", user.id)
       .then(({ data }) => {
         if (!data) return;
         const active = data.filter((o) => ["pending", "confirmed", "assigned", "picked_up", "in_transit"].includes(o.status ?? "")).length;
         const delivered = data.filter((o) => o.status === "delivered");
-        const co2kg = parseFloat(delivered.reduce((sum, o) => sum + (o.weight ?? 0) * 0.15, 0).toFixed(1));
         const totalSpent = parseFloat(data.reduce((sum, o) => sum + (o.total_price ?? 0), 0).toFixed(2));
-        setStats({ active, co2kg, totalSpent, completed: delivered.length });
+        setStats({ active, totalOrders: data.length, totalSpent, completed: delivered.length });
       });
   }, [user]);
 
@@ -55,7 +54,7 @@ export default function CustomerDashboardPage() {
               Hey, {firstName}
             </h1>
             <p className="mt-1 font-secondary text-sm text-zinc-500 dark:text-zinc-400">
-              {isNewUser ? "Welcome to EcoQuick! Book your first delivery." : "Manage your deliveries and track impact."}
+              {isNewUser ? "Welcome to EcoQuick! Book your first delivery." : "Manage your deliveries and track orders."}
             </p>
           </div>
           <button
@@ -74,7 +73,7 @@ export default function CustomerDashboardPage() {
               <div>
                 <h2 className="text-xl font-bold md:text-2xl">Send your first parcel</h2>
                 <p className="mt-2 max-w-md font-secondary text-sm leading-relaxed text-white/70">
-                  Fast, carbon-neutral delivery across London. Book in under 2 minutes
+                  Fast, reliable delivery across London. Book in under 2 minutes
                   and track your parcel in real-time.
                 </p>
               </div>
@@ -105,15 +104,15 @@ export default function CustomerDashboardPage() {
 
           <div className="rounded-2xl bg-[#3e0074] p-6 text-white dark:bg-[#5b21b6]">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-white/60">CO₂ Offset</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-white/60">Total orders</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-                <span className="material-symbols-outlined text-base text-emerald-300">eco</span>
+                <span className="material-symbols-outlined text-base text-white/80">inventory_2</span>
               </div>
             </div>
             <p className="mt-3 text-3xl font-bold">
-              {stats ? `${stats.co2kg} kg` : "—"}
+              {stats ? stats.totalOrders : "—"}
             </p>
-            <p className="mt-0.5 text-[12px] text-white/50">carbon saved</p>
+            <p className="mt-0.5 text-[12px] text-white/50">all-time</p>
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-[#0c0b14]">
@@ -146,23 +145,22 @@ export default function CustomerDashboardPage() {
         {/* Quick actions + Impact */}
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Quick actions */}
-          <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
+          <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14]">
             <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
               <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Quick Actions</h2>
             </div>
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div className="flex flex-1 flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
               {[
                 { label: "Book a delivery", desc: "Send a parcel now", icon: "add_circle", href: "/book/type" },
                 { label: "View orders", desc: "Track & manage", icon: "list_alt", href: "/orders" },
-                { label: "Impact report", desc: "Your carbon savings", icon: "eco", href: "/impact" },
               ].map((action) => (
                 <button
                   key={action.label}
                   onClick={() => router.push(action.href)}
-                  className="group flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                  className="group flex w-full flex-1 items-center gap-4 px-6 py-5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3e0074]/10 text-[#3e0074] dark:bg-[#c084fc]/10 dark:text-[#c084fc]">
-                    <span className="material-symbols-outlined text-lg">{action.icon}</span>
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#3e0074]/10 text-[#3e0074] transition-transform group-hover:scale-105 dark:bg-[#c084fc]/10 dark:text-[#c084fc]">
+                    <span className="material-symbols-outlined text-xl">{action.icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">{action.label}</p>
@@ -176,55 +174,57 @@ export default function CustomerDashboardPage() {
             </div>
           </div>
 
-          {/* Impact card */}
+          {/* Activity card */}
           <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-[#0c0b14] lg:col-span-2">
             <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Your Impact</h2>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">Your Activity</h2>
             </div>
             <div className="p-6">
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-xl bg-emerald-50 p-5 dark:bg-emerald-900/10">
+                <div className="rounded-xl bg-[#3e0074]/[0.06] p-5 dark:bg-[#c084fc]/[0.08]">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg text-emerald-600">eco</span>
-                    <p className="text-[11px] font-semibold uppercase text-emerald-600">CO₂ Saved</p>
+                    <span className="material-symbols-outlined text-lg text-[#3e0074] dark:text-[#c084fc]">receipt_long</span>
+                    <p className="text-[11px] font-semibold uppercase text-[#3e0074] dark:text-[#c084fc]">Avg. order</p>
                   </div>
-                  <p className="mt-3 text-2xl font-bold text-emerald-700 dark:text-emerald-400">
-                    {stats ? `${stats.co2kg} kg` : "0 kg"}
+                  <p className="mt-3 text-2xl font-bold text-[#3e0074] dark:text-[#c084fc]">
+                    {stats && stats.totalOrders > 0
+                      ? `£${(stats.totalSpent / stats.totalOrders).toFixed(2)}`
+                      : "£0.00"}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-emerald-600/60">carbon offset</p>
+                  <p className="mt-0.5 text-[12px] text-[#3e0074]/60 dark:text-[#c084fc]/60">per delivery</p>
                 </div>
                 <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg text-zinc-500">forest</span>
-                    <p className="text-[11px] font-semibold uppercase text-zinc-500">Trees</p>
+                    <span className="material-symbols-outlined text-lg text-zinc-500">payments</span>
+                    <p className="text-[11px] font-semibold uppercase text-zinc-500">Total spent</p>
                   </div>
                   <p className="mt-3 text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">
-                    {stats ? Math.round(stats.co2kg / 22) : 0}
+                    {stats ? `£${stats.totalSpent.toFixed(2)}` : "£0.00"}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-zinc-400">equivalent saplings</p>
+                  <p className="mt-0.5 text-[12px] text-zinc-400">across all orders</p>
                 </div>
                 <div className="rounded-xl bg-zinc-50 p-5 dark:bg-[#050507]">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg text-zinc-500">electric_bike</span>
-                    <p className="text-[11px] font-semibold uppercase text-zinc-500">Green Trips</p>
+                    <span className="material-symbols-outlined text-lg text-zinc-500">local_shipping</span>
+                    <p className="text-[11px] font-semibold uppercase text-zinc-500">Deliveries</p>
                   </div>
                   <p className="mt-3 text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">
                     {stats?.completed ?? 0}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-zinc-400">zero-emission deliveries</p>
+                  <p className="mt-0.5 text-[12px] text-zinc-400">completed</p>
                 </div>
               </div>
 
               <div className="mt-6 flex items-center justify-between rounded-xl border border-zinc-100 px-5 py-4 dark:border-zinc-800">
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">100% electric fleet</p>
-                  <p className="text-[12px] text-zinc-400">Every delivery is carbon-neutral</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-[#ede9f8]">Real-time tracking</p>
+                  <p className="text-[12px] text-zinc-400">Live updates on every order</p>
                 </div>
                 <button
-                  onClick={() => router.push("/impact")}
+                  onClick={() => router.push("/orders")}
                   className="rounded-lg border border-zinc-200 px-4 py-2 text-[12px] font-semibold text-zinc-600 transition-all hover:border-[#3e0074]/30 hover:text-[#3e0074] active:scale-[0.98] dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-[#c084fc]/30 dark:hover:text-[#c084fc]"
                 >
-                  Full Report
+                  View orders
                 </button>
               </div>
             </div>
