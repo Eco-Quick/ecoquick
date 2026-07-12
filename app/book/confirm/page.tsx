@@ -26,10 +26,10 @@ function haversineDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: 
 }
 
 const DISTANCE_BANDS = [
-  { upTo: 1, price: 3.20, label: "0–1 mile" },
-  { upTo: 3, price: 4.90, label: "1–3 miles" },
-  { upTo: 6, price: 7.10, label: "3–6 miles" },
-  { upTo: 8, price: 9.60, label: "6–8 miles" },
+  { upTo: 1, price: 4.99, label: "0–1 mile" },
+  { upTo: 3, price: 5.99, label: "1–3 miles" },
+  { upTo: 6, price: 8.49, label: "3–6 miles" },
+  { upTo: 8, price: 10.99, label: "6–8 miles" },
 ] as const;
 
 function calculatePrice(distanceMiles: number) {
