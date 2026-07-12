@@ -51,11 +51,19 @@ export default function AddressAutocomplete({
   const sessionRef = useRef<string>("");
   // Ignore stale suggest responses if the input changed while a request was in flight.
   const reqIdRef = useRef(0);
+  // Set right before an onChange caused by selecting a prediction, so the search
+  // effect below doesn't treat it as new typing and re-open the dropdown.
+  const suppressNextSearchRef = useRef(false);
 
   if (!sessionRef.current) sessionRef.current = newSessionToken();
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (suppressNextSearchRef.current) {
+      suppressNextSearchRef.current = false;
+      return;
+    }
 
     if (value.trim().length < 2) {
       setPredictions([]);
@@ -142,9 +150,11 @@ export default function AddressAutocomplete({
   }
 
   async function select(p: Prediction) {
+    suppressNextSearchRef.current = true;
     onChange(p.description);
     setOpen(false);
     setHighlighted(-1);
+    setPredictions([]);
 
     // OS Places results already include precise coordinates — use them directly.
     if (p.geometry) {
@@ -167,7 +177,10 @@ export default function AddressAutocomplete({
         city: r?.city || p.city,
         geometry: r?.geometry ?? p.geometry,
       });
-      if (r?.description) onChange(r.description);
+      if (r?.description) {
+        suppressNextSearchRef.current = true;
+        onChange(r.description);
+      }
     } catch {
       // Fall back to suggest-level data (no precise coordinates).
       onSelect(p);
