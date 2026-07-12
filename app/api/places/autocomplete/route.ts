@@ -53,10 +53,10 @@ export async function GET(request: NextRequest) {
     url.searchParams.set("language", "en");
     url.searchParams.set("limit", "6");
     url.searchParams.set("proximity", PROXIMITY);
-    // Address-level only — every selectable result has a house number, so saved
-    // pickup/delivery points are precise. (Mapbox needs a number + street; a bare
-    // postcode or street name alone returns nothing, hence the UX nudges.)
-    url.searchParams.set("types", "address");
+    // Address first, but also allow street/postcode/place so a bare postcode or
+    // street name still returns results (address-only returns nothing without a
+    // house number). Precise coords come from /retrieve on select.
+    url.searchParams.set("types", "address,street,postcode,place,locality,neighborhood");
 
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(`Mapbox suggest error ${res.status}`);

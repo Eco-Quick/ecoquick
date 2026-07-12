@@ -59,7 +59,9 @@ export default function LoginPage() {
     // Small delay to ensure localStorage write completes before navigation
     await new Promise((r) => setTimeout(r, 50));
 
-    if (role === "driver") {
+    if (role === "admin") {
+      router.push("/admin");
+    } else if (role === "driver") {
       router.push("/driver");
     } else {
       router.push("/dashboard");
