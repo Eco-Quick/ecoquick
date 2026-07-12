@@ -28,6 +28,7 @@ export default function BookParcelPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     packageCategory: "",
+    categoryDetails: "",
     packageSize: "",
     weight: "",
     totalItems: "1",
@@ -46,6 +47,7 @@ export default function BookParcelPage() {
         if (!hasRoute) { router.replace("/book/route"); return; }
         setForm((f) => ({
           packageCategory: parsed.packageCategory ?? f.packageCategory,
+          categoryDetails: parsed.categoryDetails ?? f.categoryDetails,
           packageSize: parsed.packageSize ?? f.packageSize,
           weight: parsed.weight != null ? String(parsed.weight) : f.weight,
           totalItems: parsed.totalItems != null ? String(parsed.totalItems) : f.totalItems,
@@ -59,6 +61,7 @@ export default function BookParcelPage() {
   function validate() {
     const next: Partial<Record<keyof typeof form, string>> = {};
     if (!form.packageCategory.trim()) next.packageCategory = "Required";
+    if (form.packageCategory === "other" && !form.categoryDetails.trim()) next.categoryDetails = "Please describe what you're sending";
     if (!form.packageSize.trim()) next.packageSize = "Required";
     const w = parseFloat(form.weight);
     if (!form.weight.trim()) next.weight = "Required";
@@ -78,6 +81,7 @@ export default function BookParcelPage() {
       sessionStorage.setItem("deliveryRequest", JSON.stringify({
         ...data,
         packageCategory: form.packageCategory,
+        categoryDetails: form.packageCategory === "other" ? form.categoryDetails : "",
         packageSize: form.packageSize,
         weight: parseFloat(form.weight) || 0,
         totalItems: parseInt(form.totalItems) || 1,
@@ -140,6 +144,22 @@ export default function BookParcelPage() {
                   ))}
                 </div>
                 {errors.packageCategory && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.packageCategory}</p>}
+
+                {form.packageCategory === "other" && (
+                  <div className="mt-3">
+                    <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                      What are you sending? *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="E.g. a framed painting, a musical instrument..."
+                      className={inputClass(!!errors.categoryDetails)}
+                      value={form.categoryDetails}
+                      onChange={(e) => setForm((f) => ({ ...f, categoryDetails: e.target.value }))}
+                    />
+                    {errors.categoryDetails && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.categoryDetails}</p>}
+                  </div>
+                )}
               </div>
 
               {/* Size — card selection */}

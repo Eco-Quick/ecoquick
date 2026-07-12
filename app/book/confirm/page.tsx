@@ -52,7 +52,7 @@ type DeliveryRequest = {
   dropoffAddress: string; dropoffPostcode: string; dropoffCity: string;
   dropoffLat: number | null; dropoffLng: number | null;
   recipientName: string; recipientPhone: string;
-  packageCategory: string; packageSize: string;
+  packageCategory: string; categoryDetails: string; packageSize: string;
   weight: number; totalItems: number; handlingInstructions: string;
 };
 
@@ -233,7 +233,10 @@ export default function BookConfirmPage() {
           package_size: order.packageSize ?? "medium",
           weight: order.weight ?? 0,
           total_items: order.totalItems ?? 1,
-          driver_instructions: order.handlingInstructions ?? "",
+          driver_instructions: [
+            order.packageCategory === "other" && order.categoryDetails ? `Item: ${order.categoryDetails}` : null,
+            order.handlingInstructions || null,
+          ].filter(Boolean).join(" — "),
           pickup_lat: order.pickupLat ?? null,
           pickup_lng: order.pickupLng ?? null,
           delivery_lat: order.dropoffLat ?? null,
@@ -355,7 +358,7 @@ export default function BookConfirmPage() {
                   {order.weight} kg
                 </span>
                 <span className="rounded-lg bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                  {order.packageCategory}
+                  {order.packageCategory === "other" && order.categoryDetails ? order.categoryDetails : order.packageCategory}
                 </span>
               </div>
               {order.handlingInstructions && (
