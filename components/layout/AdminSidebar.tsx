@@ -11,7 +11,10 @@ export function AdminSidebar({ adminEmail }: { adminEmail: string }) {
 
   const handleSignOut = async () => {
     const supabase = createClient();
-    await supabase.auth.signOut();
+    await Promise.all([
+      supabase.auth.signOut(),
+      fetch("/api/auth/clear-admin-mfa", { method: "POST" }),
+    ]);
     router.push("/");
   };
 

@@ -9,7 +9,10 @@ export default function LogoutPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.signOut().then(() => {
+    Promise.all([
+      supabase.auth.signOut(),
+      fetch("/api/auth/clear-admin-mfa", { method: "POST" }),
+    ]).then(() => {
       router.replace("/login");
     });
   }, [router]);

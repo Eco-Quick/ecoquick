@@ -57,7 +57,7 @@ app/
 - **Booking wizard pages** (`/book/*`): call `useBookingAuth()` (from `hooks/useBookingAuth.ts`) instead — it NEVER redirects; if there's no session it silently mints a **Supabase anonymous session** (`signInAnonymously()`) so a guest can build an order without signing up. Returns `{ id, isAnonymous, name, email }`. See **Guest Booking** below. Requires **Anonymous Sign-Ins enabled** in the Supabase dashboard.
 - **Supabase client**: always use `createClient()` from `lib/supabase/client.ts` (wraps `createBrowserClient` from `@supabase/ssr`).
 - **Driver pages**: auth handled inline in `app/driver/layout.tsx`.
-- **Admin pages**: server components only. Call `await requireAdmin()` from `lib/admin-auth.ts` at the top of any admin server component or API route. It redirects unauthenticated users to `/login`, non-admins to their own area. Admin API routes additionally re-check `user_metadata.role === "admin"` before using the service client. Admin role is set via Supabase `user_metadata.role = "admin"` — there is no hardcoded credential.
+- **Admin pages**: server components only. Call `await requireAdmin()` from `lib/admin-auth.ts` at the top of any admin server component or API route. It redirects unauthenticated users to `/login`, non-admins to their own area. Admin API routes additionally re-check `app_metadata.role === "admin"` before using the service client. Admin role is set via Supabase `app_metadata.role = "admin"` (**not** `user_metadata`) — there is no hardcoded credential. `app_metadata` is deliberately used instead of `user_metadata` because only the service-role key can write it; a user can edit their own `user_metadata` via the client SDK, so storing the admin flag there would let a compromised account grant itself admin access. Set it via `supabase.auth.admin.updateUserById(id, { app_metadata: { role: "admin" } })` from a trusted context (SQL Editor's `auth.users.raw_app_meta_data`, or a script using the service-role key) — never via the regular client `updateUser()` call, which can only touch `user_metadata`.
 
 ### Navigation config
 `lib/nav-config.ts` is the single source of truth for all customer + admin nav structures: `CUSTOMER_TOP_NAV`, `CUSTOMER_SIDEBAR_NAV`, `CUSTOMER_MOBILE_NAV`, `ADMIN_SIDEBAR_NAV`. Each item has `href`, `label`, `icon`, and a `match(pathname)` function. Do not hardcode nav items in layout components.
@@ -159,6 +159,19 @@ Server-rendered admin area under `/admin/*`. All pages are React Server Componen
 - `/admin/drivers` + `/admin/drivers/[id]` — list with online/active filters, profile + recent jobs, suspend/unsuspend
 - `/admin/customers` + `/admin/customers/[id]` — paginated list (50/page) via `auth.admin.listUsers` excluding drivers/admins, profile + lifetime stats, suspend/unsuspend
 - `/admin/verifications` — pending ID-verification queue with document preview, approve/reject
+- `/admin/activity` — live feed (latest 100) of login attempts, signups, and orders placed, read from `security_events`
+
+### Activity tracking & WhatsApp alerts
+
+`public.security_events` (`event_type` — `login_attempt` | `signup` | `order_placed`, `success`, `email`, `user_id`, `metadata` jsonb, `created_at`) — RLS enabled with **no policies**; only the service-role client can read/write it (explicit `grant ... to service_role` was required — new tables don't get service_role access automatically in this project).
+
+`POST /api/track/event` — service-role insert into `security_events`, then fires a WhatsApp alert via `sendWhatsAppAlert()` (`lib/notify/whatsapp.ts`, CallMeBot API — free/personal, needs `CALLMEBOT_PHONE` + `CALLMEBOT_API_KEY` env vars; no-ops with a console warning if unset). Called from:
+- `app/login/page.tsx` — after every `signInWithPassword()` attempt (success or fail)
+- `app/signup/page.tsx` — after a successful `signUp()`
+- `app/api/auth/convert-guest/route.ts` — inserts directly (server-side already) after a successful guest→permanent conversion, also counts as a signup
+- `app/book/confirm/page.tsx` — after the `delivery_orders` insert succeeds, before payment intent creation
+
+Admin 2FA (`/verify-admin`) attempts are deliberately **not** tracked here — that's the admin's own access to this dashboard, not customer-facing activity.
 
 **API routes**
 - `POST /api/admin/verify-user` — approve/reject pending verification (existing)
@@ -166,6 +179,13 @@ Server-rendered admin area under `/admin/*`. All pages are React Server Componen
 - `POST /api/admin/suspend-user` — Supabase Auth `ban_duration` + `user_metadata.suspended` flag (blocks own account)
 
 **Auth gate**: every admin server component must call `await requireAdmin()` from `lib/admin-auth.ts` (the admin layout already does so). API routes re-check `user_metadata.role === "admin"` before using the service client. Suspension uses `auth.admin.updateUserById({ ban_duration })` — "876000h" to suspend, "none" to lift.
+
+**Mandatory email 2FA**: after password sign-in, admins are sent to `/verify-admin` (not `/admin` directly) and must enter a 6-digit code before reaching any `/admin/*` page. `/verify-admin` deliberately lives **outside** `app/admin/` — nesting it under `/admin` puts it inside `app/admin/layout.tsx`, whose `requireAdmin()` enforces this same check and would redirect the verify page to itself (infinite redirect loop; hit this exact bug once already). Enforced twice — at the edge in `middleware.ts` and again in `requireAdmin()` — via an `admin_mfa_verified` httpOnly cookie (8h lifetime, cleared on sign-out by `POST /api/auth/clear-admin-mfa`).
+- `POST /api/auth/send-admin-code` — sends the code via Supabase Auth's built-in `signInWithOtp({ shouldCreateUser: false })` (no separate email service; role-checked server-side before sending)
+- `POST /api/auth/verify-admin-code` — calls `verifyOtp({ type: "email" })`, then sets the cookie
+- `components/admin/AdminCodeVerifyForm.tsx` — the code-entry UI, triggers send-admin-code on mount
+
+**Manual prerequisite (Supabase dashboard)**: by default Supabase's Magic Link email template only shows a clickable link, not a visible code. Go to **Authentication → Email Templates → Magic Link** and make sure the body includes `{{ .Token }}` so the admin actually sees a 6-digit code to type in.
 
 ---
 

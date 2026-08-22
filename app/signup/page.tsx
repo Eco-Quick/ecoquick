@@ -233,6 +233,18 @@ function SignupPageContent() {
 
     setLoading(false);
 
+    fetch("/api/track/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_type: "signup",
+        success: true,
+        email: cleanEmail,
+        user_id: data.user?.id,
+        metadata: { role: profile },
+      }),
+    }).catch(() => {});
+
     // No session means Supabase requires email confirmation
     if (!data.session) {
       setConfirmEmail(cleanEmail);

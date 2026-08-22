@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendWhatsAppAlert } from "@/lib/notify/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,15 @@ export async function POST(request: NextRequest) {
       console.error("convert-guest update error:", error);
       return NextResponse.json({ error: "Could not create your account. Please try again." }, { status: 500 });
     }
+
+    await service.from("security_events").insert({
+      event_type: "signup",
+      success: true,
+      email,
+      user_id: user.id,
+      metadata: { role: "customer", via: "guest_conversion" },
+    });
+    sendWhatsAppAlert(`EcoQuick: new signup — ${email} (customer, guest conversion)`).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

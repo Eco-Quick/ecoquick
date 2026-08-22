@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminUser = {
@@ -19,9 +20,17 @@ export async function requireAdmin(): Promise<AdminUser> {
     redirect("/login");
   }
 
-  const role = user.user_metadata?.role as string | undefined;
+  // app_metadata (not user_metadata) — only the service role can write it.
+  const role = user.app_metadata?.role as string | undefined;
   if (role !== "admin") {
     redirect(role === "driver" ? "/driver" : "/dashboard");
+  }
+
+  // Defense in depth — middleware already gates this, but every admin
+  // server component re-checks the one-time-code cookie directly too.
+  const cookieStore = await cookies();
+  if (!cookieStore.get("admin_mfa_verified")) {
+    redirect("/verify-admin");
   }
 
   return {

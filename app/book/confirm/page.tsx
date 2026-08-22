@@ -252,6 +252,18 @@ export default function BookConfirmPage() {
 
       if (err) throw err;
 
+      fetch("/api/track/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_type: "order_placed",
+          success: true,
+          email: user.email,
+          user_id: user.id,
+          metadata: { order_id: data.id, total_price: pricing.total },
+        }),
+      }).catch(() => {});
+
       const piRes = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

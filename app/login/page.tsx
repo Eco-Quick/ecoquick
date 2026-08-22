@@ -33,13 +33,25 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    const cleanEmail = email.trim().toLowerCase();
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       password,
     });
 
     setLoading(false);
+
+    fetch("/api/track/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_type: "login_attempt",
+        success: !error,
+        email: cleanEmail,
+        user_id: data.user?.id,
+      }),
+    }).catch(() => {});
 
     if (error) {
       setError(error.message);
@@ -55,12 +67,12 @@ export default function LoginPage() {
       }
     } catch {}
 
-    const role = data.user?.user_metadata?.role;
+    const role = data.user?.app_metadata?.role;
     // Small delay to ensure localStorage write completes before navigation
     await new Promise((r) => setTimeout(r, 50));
 
     if (role === "admin") {
-      router.push("/admin");
+      router.push("/verify-admin");
     } else if (role === "driver") {
       router.push("/driver");
     } else {

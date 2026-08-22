@@ -34,7 +34,7 @@ export default async function AdminCustomersPage({
 
   const customers = users
     .filter((u) => !driverIds.has(u.id))
-    .filter((u) => u.user_metadata?.role !== "admin")
+    .filter((u) => u.app_metadata?.role !== "admin")
     .filter((u) => {
       if (!query) return true;
       const hay = `${u.email ?? ""} ${(u.user_metadata?.full_name as string) ?? ""}`.toLowerCase();

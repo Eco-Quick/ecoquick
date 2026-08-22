@@ -51,7 +51,9 @@ export async function middleware(request: NextRequest) {
     user = sessionUser;
   }
 
-  const role = user?.user_metadata?.role as string | undefined;
+  // app_metadata (not user_metadata) — only the service role can write it,
+  // so a user can't grant themselves admin by editing their own profile.
+  const role = user?.app_metadata?.role as string | undefined;
   // Anonymous (guest) users have a session but no real account. Treat them like
   // logged-out visitors everywhere except the booking funnel.
   const isAnonymous = user?.is_anonymous === true;
@@ -104,6 +106,18 @@ export async function middleware(request: NextRequest) {
   // Protect admin routes (layout enforces the admin role check)
   if (pathname.startsWith("/admin") && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Admins must complete a one-time email code each session before reaching
+  // any admin page. /verify-admin lives outside /admin/* specifically so it
+  // isn't wrapped by app/admin/layout.tsx's requireAdmin() (which enforces
+  // this same check) — nesting it under /admin caused a redirect loop.
+  if (
+    pathname.startsWith("/admin") &&
+    role === "admin" &&
+    !request.cookies.get("admin_mfa_verified")
+  ) {
+    return NextResponse.redirect(new URL("/verify-admin", request.url));
   }
 
   return supabaseResponse;

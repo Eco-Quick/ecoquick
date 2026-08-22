@@ -102,6 +102,12 @@ export const ADMIN_SIDEBAR_NAV: NavItem[] = [
     icon: "verified_user",
     match: (p) => p.startsWith("/admin/verifications"),
   },
+  {
+    label: "Activity",
+    href: "/admin/activity",
+    icon: "monitoring",
+    match: (p) => p.startsWith("/admin/activity"),
+  },
 ];
 
 export const CUSTOMER_MOBILE_NAV: NavItem[] = [

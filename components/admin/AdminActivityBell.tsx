@@ -5,14 +5,24 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-type Activity = {
-  key: string; // unique dedupe key
-  orderId: string;
-  code: string; // EQ-XXXXXX
-  kind: "new" | "status";
-  status: string;
-  at: number;
-};
+type Activity =
+  | {
+      key: string; // unique dedupe key
+      kind: "new" | "status";
+      orderId: string;
+      code: string; // EQ-XXXXXX
+      status: string;
+      at: number;
+    }
+  | {
+      key: string;
+      kind: "signup";
+      userId: string;
+      fullName: string;
+      userType: string;
+      signupEvent: "signup" | "guest_converted";
+      at: number;
+    };
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
@@ -36,6 +46,12 @@ const STATUS_TONE: Record<string, string> = {
 
 const orderCode = (id: string) => `EQ-${id.slice(0, 6).toUpperCase()}`;
 const label = (s: string) => STATUS_LABEL[s] ?? s;
+
+function signupLabel(a: Extract<Activity, { kind: "signup" }>) {
+  const who = a.fullName || (a.userType === "driver" ? "A new driver" : "A new customer");
+  if (a.signupEvent === "guest_converted") return `${who} created an account`;
+  return `${who} signed up${a.userType ? ` (${a.userType})` : ""}`;
+}
 
 function timeAgo(ts: number) {
   const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
@@ -110,6 +126,29 @@ export function AdminActivityBell() {
         (data ?? []).forEach((o) => seen.add(`${o.id}:${o.status}`));
       });
 
+    // Seed with the most recent signups (no toast for these)
+    supabase
+      .from("admin_signup_events")
+      .select("id, user_id, full_name, user_type, event, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        (data ?? []).forEach((s) =>
+          push(
+            {
+              key: `seed-signup-${s.id}`,
+              kind: "signup",
+              userId: s.user_id,
+              fullName: s.full_name ?? "",
+              userType: s.user_type ?? "customer",
+              signupEvent: s.event === "guest_converted" ? "guest_converted" : "signup",
+              at: new Date(s.created_at).getTime(),
+            },
+            false
+          )
+        );
+      });
+
     const channel = supabase
       .channel("admin-activity")
       .on(
@@ -130,6 +169,28 @@ export function AdminActivityBell() {
           const o = payload.new as { id: string; status: string };
           push(
             { key: `${o.id}:${o.status}`, orderId: o.id, code: orderCode(o.id), kind: "status", status: o.status, at: Date.now() },
+            true
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "admin_signup_events" },
+        (payload) => {
+          const s = payload.new as {
+            id: string; user_id: string; full_name: string | null; user_type: string | null;
+            event: string;
+          };
+          push(
+            {
+              key: `signup-${s.id}`,
+              kind: "signup",
+              userId: s.user_id,
+              fullName: s.full_name ?? "",
+              userType: s.user_type ?? "customer",
+              signupEvent: s.event === "guest_converted" ? "guest_converted" : "signup",
+              at: Date.now(),
+            },
             true
           );
         }
@@ -182,34 +243,56 @@ export function AdminActivityBell() {
               {items.length === 0 ? (
                 <p className="px-4 py-8 text-center text-[12px] text-slate-400">No recent activity.</p>
               ) : (
-                items.map((a) => (
-                  <Link
-                    key={a.key}
-                    href={`/admin/orders/${a.orderId}`}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 border-b border-slate-50 px-4 py-3 transition-colors last:border-0 hover:bg-slate-50 dark:border-zinc-900 dark:hover:bg-zinc-800/50"
-                  >
-                    <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                        a.kind === "new" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-500 dark:bg-zinc-800"
-                      }`}
+                items.map((a) =>
+                  a.kind === "signup" ? (
+                    <Link
+                      key={a.key}
+                      href={`/admin/customers/${a.userId}`}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 border-b border-slate-50 px-4 py-3 transition-colors last:border-0 hover:bg-slate-50 dark:border-zinc-900 dark:hover:bg-zinc-800/50"
                     >
-                      <span className="material-symbols-outlined text-base">
-                        {a.kind === "new" ? "add_circle" : "local_shipping"}
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                        <span className="material-symbols-outlined text-base">person_add</span>
                       </span>
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-slate-900 dark:text-[#ede9f8]">
-                        {a.kind === "new" ? "New order booked" : "Order updated"}{" "}
-                        <span className="font-mono text-[12px] text-slate-400">{a.code}</span>
-                      </p>
-                      <p className={`text-[11px] font-medium ${STATUS_TONE[a.status] ?? "text-slate-500"}`}>
-                        {label(a.status)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-[10px] text-slate-400">{timeAgo(a.at)}</span>
-                  </Link>
-                ))
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-semibold text-slate-900 dark:text-[#ede9f8]">
+                          {signupLabel(a)}
+                        </p>
+                        <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                          {a.signupEvent === "guest_converted" ? "Guest → account" : "New account"}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-slate-400">{timeAgo(a.at)}</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      key={a.key}
+                      href={`/admin/orders/${a.orderId}`}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 border-b border-slate-50 px-4 py-3 transition-colors last:border-0 hover:bg-slate-50 dark:border-zinc-900 dark:hover:bg-zinc-800/50"
+                    >
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                          a.kind === "new" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-500 dark:bg-zinc-800"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          {a.kind === "new" ? "add_circle" : "local_shipping"}
+                        </span>
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-semibold text-slate-900 dark:text-[#ede9f8]">
+                          {a.kind === "new" ? "New order booked" : "Order updated"}{" "}
+                          <span className="font-mono text-[12px] text-slate-400">{a.code}</span>
+                        </p>
+                        <p className={`text-[11px] font-medium ${STATUS_TONE[a.status] ?? "text-slate-500"}`}>
+                          {label(a.status)}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-slate-400">{timeAgo(a.at)}</span>
+                    </Link>
+                  )
+                )
               )}
             </div>
             <Link
@@ -225,31 +308,49 @@ export function AdminActivityBell() {
 
       {/* Toasts */}
       <div className="pointer-events-none fixed right-4 top-20 z-50 flex w-[320px] max-w-[calc(100vw-2rem)] flex-col gap-2">
-        {toasts.map((a) => (
-          <Link
-            key={a.key}
-            href={`/admin/orders/${a.orderId}`}
-            className="pointer-events-auto flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-lg transition-transform hover:-translate-y-0.5 dark:border-zinc-800 dark:bg-[#0c0b14]"
-          >
-            <span
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                a.kind === "new" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-500 dark:bg-zinc-800"
-              }`}
+        {toasts.map((a) =>
+          a.kind === "signup" ? (
+            <Link
+              key={a.key}
+              href={`/admin/customers/${a.userId}`}
+              className="pointer-events-auto flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-lg transition-transform hover:-translate-y-0.5 dark:border-zinc-800 dark:bg-[#0c0b14]"
             >
-              <span className="material-symbols-outlined text-lg">
-                {a.kind === "new" ? "add_circle" : "local_shipping"}
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                <span className="material-symbols-outlined text-lg">person_add</span>
               </span>
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-bold text-slate-900 dark:text-[#ede9f8]">
-                {a.kind === "new" ? "New order booked" : `Order ${label(a.status).toLowerCase()}`}
-              </p>
-              <p className="text-[11px] text-slate-400">
-                <span className="font-mono">{a.code}</span> · tap to view
-              </p>
-            </div>
-          </Link>
-        ))}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-bold text-slate-900 dark:text-[#ede9f8]">
+                  {signupLabel(a)}
+                </p>
+                <p className="text-[11px] text-slate-400">tap to view</p>
+              </div>
+            </Link>
+          ) : (
+            <Link
+              key={a.key}
+              href={`/admin/orders/${a.orderId}`}
+              className="pointer-events-auto flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-lg transition-transform hover:-translate-y-0.5 dark:border-zinc-800 dark:bg-[#0c0b14]"
+            >
+              <span
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                  a.kind === "new" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-500 dark:bg-zinc-800"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">
+                  {a.kind === "new" ? "add_circle" : "local_shipping"}
+                </span>
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-bold text-slate-900 dark:text-[#ede9f8]">
+                  {a.kind === "new" ? "New order booked" : `Order ${label(a.status).toLowerCase()}`}
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  <span className="font-mono">{a.code}</span> · tap to view
+                </p>
+              </div>
+            </Link>
+          )
+        )}
       </div>
     </>
   );
