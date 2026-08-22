@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       metadata: { role: "customer", via: "guest_conversion" },
     });
-    sendWhatsAppAlert(`EcoQuick: new signup — ${email} (customer, guest conversion)`).catch(() => {});
+    await sendWhatsAppAlert(`EcoQuick: new signup — ${email} (customer, guest conversion)`);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

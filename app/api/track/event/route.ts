@@ -50,8 +50,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
   }
 
-  // Fire-and-forget: don't block the response on the WhatsApp call.
-  sendWhatsAppAlert(ALERT_MESSAGES[body.event_type](body)).catch(() => {});
+  // Awaited (not fire-and-forget): serverless functions can be frozen right
+  // after the response is sent, which would kill an unawaited background call.
+  await sendWhatsAppAlert(ALERT_MESSAGES[body.event_type](body));
 
   return NextResponse.json({ success: true });
 }
