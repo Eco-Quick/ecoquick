@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { CancelOrderButton } from "./CancelOrderButton";
 import { AdjustPriceButton } from "./AdjustPriceButton";
+import { AssignDriverSelect } from "./AssignDriverSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -116,7 +117,14 @@ export default async function AdminOrderDetailPage({
     driverPhone = (dp as { full_name?: string; phone?: string } | null)?.phone ?? null;
   }
 
+  const { data: driverOptions } = await service
+    .from("driver_profiles")
+    .select("id, full_name, is_online, vehicle_type")
+    .order("is_online", { ascending: false })
+    .order("full_name", { ascending: true });
+
   const isCancellable = !["delivered", "cancelled"].includes(o.status);
+  const isAssignable = !["picked_up", "in_transit", "delivered", "cancelled"].includes(o.status);
 
   return (
     <div>
@@ -251,8 +259,14 @@ export default async function AdminOrderDetailPage({
                 </Link>
               </>
             ) : (
-              <p className="text-sm text-slate-400">Unassigned.</p>
+              <p className="text-sm text-slate-400">Unassigned{isAssignable ? "" : " — not assignable at this stage"}.</p>
             )}
+            <AssignDriverSelect
+              orderId={o.id}
+              currentDriverId={o.driver_id}
+              drivers={driverOptions ?? []}
+              disabled={!isAssignable}
+            />
           </Card>
 
           <Card title="Pricing">
