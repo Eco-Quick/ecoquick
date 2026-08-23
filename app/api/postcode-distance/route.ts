@@ -20,6 +20,16 @@ type PostcodesIoResult = {
   result: { postcode: string; latitude: number; longitude: number } | null;
 };
 
+// UK postcodes are outward-code + single-space + 3-character inward code.
+// Users type spacing inconsistently (no space, double space, misplaced
+// space) — strip all whitespace and re-insert it in the correct place so
+// postcodes.io (which is strict about format) can still resolve it.
+function normalizePostcode(raw: string): string {
+  const compact = raw.replace(/\s+/g, "").toUpperCase();
+  if (compact.length < 5) return compact;
+  return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
+}
+
 export async function POST(request: Request) {
   let body: { pickupPostcode?: string; dropoffPostcode?: string };
   try {
@@ -28,8 +38,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const pickup = (body.pickupPostcode ?? "").trim().toUpperCase();
-  const dropoff = (body.dropoffPostcode ?? "").trim().toUpperCase();
+  const pickup = normalizePostcode(body.pickupPostcode ?? "");
+  const dropoff = normalizePostcode(body.dropoffPostcode ?? "");
 
   if (!pickup || !dropoff) {
     return NextResponse.json({ error: "Both postcodes are required" }, { status: 400 });
