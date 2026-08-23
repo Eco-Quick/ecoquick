@@ -103,6 +103,12 @@ export const ADMIN_SIDEBAR_NAV: NavItem[] = [
     match: (p) => p.startsWith("/admin/verifications"),
   },
   {
+    label: "Pricing",
+    href: "/admin/pricing",
+    icon: "payments",
+    match: (p) => p.startsWith("/admin/pricing"),
+  },
+  {
     label: "Activity",
     href: "/admin/activity",
     icon: "monitoring",

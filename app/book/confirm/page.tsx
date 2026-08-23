@@ -13,18 +13,20 @@ import { createClient } from "@/lib/supabase/client";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s\-()]{7,20}$/;
 
-const DISTANCE_BANDS = [
+type PricingBand = { upTo: number; price: number; label: string };
+
+// Used until the live bands load from /api/pricing-bands (or if that fetch
+// fails) — kept in sync with the seed values in the pricing_bands migration.
+const DEFAULT_BANDS: PricingBand[] = [
   { upTo: 1, price: 4.99, label: "0–1 mile" },
   { upTo: 3, price: 5.99, label: "1–3 miles" },
   { upTo: 6, price: 8.49, label: "3–6 miles" },
   { upTo: 8, price: 10.99, label: "6–8 miles" },
-] as const;
+];
 
-function calculatePrice(distanceMiles: number) {
+function calculatePrice(distanceMiles: number, bands: PricingBand[]) {
   const rounded = Math.round(distanceMiles * 10) / 10;
-  const band =
-    DISTANCE_BANDS.find((b) => distanceMiles <= b.upTo) ??
-    DISTANCE_BANDS[DISTANCE_BANDS.length - 1];
+  const band = bands.find((b) => distanceMiles <= b.upTo) ?? bands[bands.length - 1];
   return {
     distanceMiles: rounded,
     bandLabel: band.label,
@@ -135,7 +137,26 @@ export default function BookConfirmPage() {
   }, [order.pickupPostcode, order.dropoffPostcode]);
 
   const distanceMiles = distance?.miles ?? 2; // Default 2 miles until resolved / if lookup fails
-  const pricing = calculatePrice(distanceMiles);
+
+  const [bands, setBands] = useState<PricingBand[]>(DEFAULT_BANDS);
+  useEffect(() => {
+    fetch("/api/pricing-bands")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.bands?.length) {
+          setBands(
+            data.bands.map((b: { up_to_miles: number; price: number; label: string }) => ({
+              upTo: b.up_to_miles,
+              price: b.price,
+              label: b.label,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const pricing = calculatePrice(distanceMiles, bands);
 
   // Fleet is bikes/cycles and cars only — anything beyond what those can
   // carry still goes through (never turn an order away), but gets flagged
