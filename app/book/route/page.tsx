@@ -7,7 +7,6 @@ import { BookingStepper } from "../../../components/book/BookingStepper";
 import { BookingTopBar } from "@/components/layout/BookingTopBar";
 import { useBookingAuth } from "@/hooks/useBookingAuth";
 import { BookingAuthError } from "@/components/book/BookingAuthError";
-import AddressAutocomplete from "@/components/AddressAutocomplete";
 
 export default function BookRoutePage() {
   const { user, error: authError } = useBookingAuth();
@@ -16,15 +15,11 @@ export default function BookRoutePage() {
     pickupAddress: "",
     pickupPostcode: "",
     pickupCity: "",
-    pickupLat: null as number | null,
-    pickupLng: null as number | null,
     senderName: "",
     senderPhone: "",
     dropoffAddress: "",
     dropoffPostcode: "",
     dropoffCity: "",
-    dropoffLat: null as number | null,
-    dropoffLng: null as number | null,
     recipientName: "",
     recipientPhone: "",
   });
@@ -46,15 +41,11 @@ export default function BookRoutePage() {
           pickupAddress: parsed.pickupAddress ?? f.pickupAddress,
           pickupPostcode: parsed.pickupPostcode ?? f.pickupPostcode,
           pickupCity: parsed.pickupCity ?? f.pickupCity,
-          pickupLat: parsed.pickupLat ?? f.pickupLat,
-          pickupLng: parsed.pickupLng ?? f.pickupLng,
           senderName: parsed.senderName ?? f.senderName,
           senderPhone: parsed.senderPhone ?? f.senderPhone,
           dropoffAddress: parsed.dropoffAddress ?? f.dropoffAddress,
           dropoffPostcode: parsed.dropoffPostcode ?? f.dropoffPostcode,
           dropoffCity: parsed.dropoffCity ?? f.dropoffCity,
-          dropoffLat: parsed.dropoffLat ?? f.dropoffLat,
-          dropoffLng: parsed.dropoffLng ?? f.dropoffLng,
           recipientName: parsed.recipientName ?? f.recipientName,
           recipientPhone: parsed.recipientPhone ?? f.recipientPhone,
         }));
@@ -199,28 +190,18 @@ export default function BookRoutePage() {
               </div>
               <div className="space-y-4 p-6">
                 <div>
-                  <label className={labelClass}>Address</label>
-                  <AddressAutocomplete
-                    value={form.pickupAddress}
-                    onChange={(val) => setForm((f) => ({ ...f, pickupAddress: val }))}
-                    onSelect={(p) =>
-                      setForm((f) => ({
-                        ...f,
-                        pickupAddress: p.description,
-                        pickupPostcode: p.postcode || f.pickupPostcode,
-                        pickupCity: p.city || f.pickupCity,
-                        pickupLat: p.geometry?.location.lat ?? f.pickupLat,
-                        pickupLng: p.geometry?.location.lng ?? f.pickupLng,
-                      }))
-                    }
-                    placeholder="e.g. 12 Acre Road, Kingston"
+                  <label className={labelClass}>Full address</label>
+                  <input
                     className={inputClass(!!errors.pickupAddress)}
+                    placeholder="e.g. 12 Acre Road, Kingston upon Thames"
+                    value={form.pickupAddress}
+                    onChange={set("pickupAddress")}
                   />
                   {errors.pickupAddress ? (
                     <p className={errorClass}>{errors.pickupAddress}</p>
                   ) : (
                     <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
-                      Start with the house number for an exact match (e.g. 12 Acre Road).
+                      Enter the full address, including house/flat number, so the driver can find it.
                     </p>
                   )}
                 </div>
@@ -261,28 +242,18 @@ export default function BookRoutePage() {
               </div>
               <div className="space-y-4 p-6">
                 <div>
-                  <label className={labelClass}>Address</label>
-                  <AddressAutocomplete
-                    value={form.dropoffAddress}
-                    onChange={(val) => setForm((f) => ({ ...f, dropoffAddress: val }))}
-                    onSelect={(p) =>
-                      setForm((f) => ({
-                        ...f,
-                        dropoffAddress: p.description,
-                        dropoffPostcode: p.postcode || f.dropoffPostcode,
-                        dropoffCity: p.city || f.dropoffCity,
-                        dropoffLat: p.geometry?.location.lat ?? f.dropoffLat,
-                        dropoffLng: p.geometry?.location.lng ?? f.dropoffLng,
-                      }))
-                    }
-                    placeholder="e.g. 12 Acre Road, Kingston"
+                  <label className={labelClass}>Full address</label>
+                  <input
                     className={inputClass(!!errors.dropoffAddress)}
+                    placeholder="e.g. 12 Acre Road, Kingston upon Thames"
+                    value={form.dropoffAddress}
+                    onChange={set("dropoffAddress")}
                   />
                   {errors.dropoffAddress ? (
                     <p className={errorClass}>{errors.dropoffAddress}</p>
                   ) : (
                     <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
-                      Start with the house number for an exact match (e.g. 12 Acre Road).
+                      Enter the full address, including house/flat number, so the driver can find it.
                     </p>
                   )}
                 </div>

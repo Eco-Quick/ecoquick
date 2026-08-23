@@ -96,21 +96,13 @@ The funnel is designed for a fast new-user experience — there is **no signup w
 
 **Pattern per step**: read sessionStorage on mount (preserves state on back-nav) → controlled inputs → merge updated fields on Continue → navigate forward. Clear the key after successful Supabase INSERT.
 
-### Address autocomplete (route step)
-`components/AddressAutocomplete.tsx` powers the pickup/delivery address fields with a **hybrid** of two providers, chosen per keystroke:
+### Address entry (route step)
 
-**Postcode path → Ordnance Survey Places API** (precise door list):
-- When the input is a **full UK postcode**, `GET /api/places/postcode` calls OS Places `/postcode` (AddressBase/PAF) and returns **every delivery-point address** at that postcode, each already carrying precise coordinates (so no retrieve step).
-- Requires `OS_PLACES_API_KEY` (OS Data Hub, free monthly allowance). **Without the key the route returns `NO_KEY` and the component falls back to Mapbox** — nothing breaks.
+**Removed** (2026-08-22): the Mapbox/OS-Places autocomplete hybrid (`components/AddressAutocomplete.tsx`, `app/api/places/*`) was dropped — Mapbox wasn't reliably resolving addresses. `app/book/route/page.tsx` now uses a plain manual `<input>` for the address field (customer types the full address themselves), with Postcode and City kept as separate plain inputs as before. No coordinates are captured anymore.
 
-**Free-text path → Mapbox Search Box API**:
-- `GET /api/places/autocomplete` → Search Box **`/suggest`** (typeahead, `types=address` only, Kingston `proximity` bias; returns a `mapbox_id` as `place_id`, **no coordinates**).
-- `GET /api/places/retrieve` → Search Box **`/retrieve/{id}`** on select (precise coords — prefers the rooftop **routable point** — plus postcode/city). Uses a **session token** (1 session = N suggests + 1 retrieve) for correct billing.
-- Mapbox needs a **number + street** (a bare street/postcode returns nothing), so placeholder/helper text nudge "start with the house number (e.g. 12 Acre Road)".
+This means `pickup_lat/pickup_lng/delivery_lat/delivery_lng` are always `null` on new orders, and the distance-banded pricing in `app/book/confirm/page.tsx` always falls back to its hardcoded 2-mile default (`calculatePrice(2)` — the "1–3 miles" band) since it has no coordinates to compute real distance. Pricing is effectively flat-rate now, not distance-based, until/unless geocoding is reintroduced.
 
-**Selection**: OS predictions arrive with `geometry`, so `select()` skips the Mapbox retrieve and uses them directly; Mapbox suggestions (no geometry) trigger `/retrieve`. The `onSelect` contract is `{ description, postcode, city, geometry.location.{lat,lng} }` — `app/book/route/page.tsx` maps these to `pickup*/dropoff*`. Keep this shape stable.
-
-Env: `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (required), `OS_PLACES_API_KEY` (optional — enables the postcode→door list). `GETADDRESS_API_KEY` is **no longer used** (dead key; postcodes.io only returned centroids) — safe to remove.
+`NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` is still used elsewhere (live driver-location tracking maps on `/order/track` and `/driver/track`, and the coverage map on `/about`) — this removal only affects the booking address fields.
 
 ---
 
