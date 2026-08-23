@@ -206,7 +206,7 @@ export default function BookParcelPage() {
                       type="number"
                       step="0.1"
                       placeholder="0.0"
-                      className={inputClass(!!errors.weight)}
+                      className={`${inputClass(!!errors.weight)} pr-10 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                       value={form.weight}
                       onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))}
                     />
