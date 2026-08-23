@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { CancelOrderButton } from "./CancelOrderButton";
+import { AdjustPriceButton } from "./AdjustPriceButton";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,8 @@ type Order = {
   in_transit_at: string | null;
   delivered_at: string | null;
   needs_van: boolean | null;
+  price_adjustment_reason: string | null;
+  price_adjusted_at: string | null;
 };
 
 function formatStatus(s: string) {
@@ -274,6 +277,13 @@ export default async function AdminOrderDetailPage({
             <p className="mt-2 text-[10px] uppercase tracking-widest text-slate-400">
               Driver earnings: £{(Number(o.total_price) * 0.8).toFixed(2)}
             </p>
+            {o.price_adjusted_at && (
+              <p className="mt-2 text-[10px] leading-relaxed text-amber-600 dark:text-amber-400">
+                Manually adjusted {formatDateTime(o.price_adjusted_at)}
+                {o.price_adjustment_reason ? ` — ${o.price_adjustment_reason}` : ""}
+              </p>
+            )}
+            <AdjustPriceButton orderId={o.id} currentTotal={Number(o.total_price)} />
           </Card>
         </aside>
       </div>
