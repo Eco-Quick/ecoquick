@@ -13,18 +13,6 @@ import { createClient } from "@/lib/supabase/client";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s\-()]{7,20}$/;
 
-// Haversine distance in miles between two lat/lng points
-function haversineDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 3958.8; // Earth radius in miles
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 const DISTANCE_BANDS = [
   { upTo: 1, price: 4.99, label: "0–1 mile" },
   { upTo: 3, price: 5.99, label: "1–3 miles" },
@@ -102,10 +90,50 @@ export default function BookConfirmPage() {
     setHydrated(true);
   }, []);
 
-  // Calculate distance and price
-  const distanceMiles = (order.pickupLat && order.pickupLng && order.dropoffLat && order.dropoffLng)
-    ? haversineDistanceMiles(order.pickupLat, order.pickupLng, order.dropoffLat, order.dropoffLng)
-    : 2; // Default 2 miles if no coordinates
+  // Real distance from postcode centroids (postcodes.io — free, keyless).
+  // Falls back to the 2-mile default if the lookup fails for any reason.
+  const [distance, setDistance] = useState<{
+    miles: number;
+    pickupLat: number | null;
+    pickupLng: number | null;
+    dropoffLat: number | null;
+    dropoffLng: number | null;
+  } | null>(null);
+  const [distanceLoading, setDistanceLoading] = useState(false);
+
+  useEffect(() => {
+    if (!order.pickupPostcode || !order.dropoffPostcode) return;
+    let cancelled = false;
+    setDistanceLoading(true);
+    fetch("/api/postcode-distance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pickupPostcode: order.pickupPostcode,
+        dropoffPostcode: order.dropoffPostcode,
+      }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setDistance({
+          miles: data.distanceMiles,
+          pickupLat: data.pickupLat,
+          pickupLng: data.pickupLng,
+          dropoffLat: data.dropoffLat,
+          dropoffLng: data.dropoffLng,
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setDistanceLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [order.pickupPostcode, order.dropoffPostcode]);
+
+  const distanceMiles = distance?.miles ?? 2; // Default 2 miles until resolved / if lookup fails
   const pricing = calculatePrice(distanceMiles);
 
   function generateVerificationCode() {
@@ -237,10 +265,10 @@ export default function BookConfirmPage() {
             order.packageCategory === "other" && order.categoryDetails ? `Item: ${order.categoryDetails}` : null,
             order.handlingInstructions || null,
           ].filter(Boolean).join(" — "),
-          pickup_lat: order.pickupLat ?? null,
-          pickup_lng: order.pickupLng ?? null,
-          delivery_lat: order.dropoffLat ?? null,
-          delivery_lng: order.dropoffLng ?? null,
+          pickup_lat: distance?.pickupLat ?? null,
+          pickup_lng: distance?.pickupLng ?? null,
+          delivery_lat: distance?.dropoffLat ?? null,
+          delivery_lng: distance?.dropoffLng ?? null,
           base_price: pricing.total,
           size_fee: 0,
           scheduling_fee: 0,
@@ -400,7 +428,10 @@ export default function BookConfirmPage() {
                     <span>£{pricing.total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-[12px] text-zinc-400">
-                    <span>Distance: {pricing.distanceMiles} miles</span>
+                    <span>
+                      Distance: {pricing.distanceMiles} miles
+                      {distanceLoading && " (calculating…)"}
+                    </span>
                   </div>
                   <div className="flex justify-between border-t border-zinc-100 pt-3 text-base font-bold text-zinc-900 dark:border-zinc-800 dark:text-[#ede9f8]">
                     <span>Total</span>
