@@ -50,8 +50,10 @@ function StatusPill({ success }: { success: boolean | null }) {
 }
 
 function eventDetail(e: SecurityEvent): string | null {
-  if (e.event_type === "order_placed" && e.metadata?.total_price) {
-    return `£${e.metadata.total_price}`;
+  if (e.event_type === "order_placed") {
+    const price = e.metadata?.total_price ? `£${e.metadata.total_price}` : null;
+    const van = e.metadata?.needs_van ? "🚐 Van needed" : null;
+    return [price, van].filter(Boolean).join(" · ") || null;
   }
   if (e.event_type === "signup" && e.metadata?.role) {
     return String(e.metadata.role) + (e.metadata.via ? ` · ${e.metadata.via}` : "");

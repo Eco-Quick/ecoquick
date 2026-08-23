@@ -11,9 +11,11 @@ const ALERT_MESSAGES: Record<EventType, (body: EventBody) => string> = {
       : `EcoQuick: FAILED login attempt for ${b.email ?? "unknown"}`,
   signup: (b) => `EcoQuick: new signup — ${b.email ?? "unknown"} (${b.metadata?.role ?? "customer"})`,
   order_placed: (b) =>
-    `EcoQuick: new order placed by ${b.email ?? "a customer"}${
-      b.metadata?.total_price ? ` — £${b.metadata.total_price}` : ""
-    }`,
+    b.metadata?.needs_van
+      ? `EcoQuick: 🚐 VAN NEEDED — ${b.email ?? "a customer"} booked an order too large for bike/car. Contact them to arrange (order ${b.metadata?.order_id ?? "?"}).`
+      : `EcoQuick: new order placed by ${b.email ?? "a customer"}${
+          b.metadata?.total_price ? ` — £${b.metadata.total_price}` : ""
+        }`,
 };
 
 type EventBody = {

@@ -33,6 +33,7 @@ export default function BookParcelPage() {
     weight: "",
     totalItems: "1",
     handlingInstructions: "",
+    needsVanRequest: false,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function BookParcelPage() {
           weight: parsed.weight != null ? String(parsed.weight) : f.weight,
           totalItems: parsed.totalItems != null ? String(parsed.totalItems) : f.totalItems,
           handlingInstructions: parsed.handlingInstructions ?? f.handlingInstructions,
+          needsVanRequest: parsed.needsVanRequest ?? f.needsVanRequest,
         }));
       }
     } catch {}
@@ -86,6 +88,7 @@ export default function BookParcelPage() {
         weight: parseFloat(form.weight) || 0,
         totalItems: parseInt(form.totalItems) || 1,
         handlingInstructions: form.handlingInstructions,
+        needsVanRequest: form.needsVanRequest,
       }));
     } catch {}
     router.push("/book/confirm");
@@ -224,6 +227,38 @@ export default function BookParcelPage() {
                   />
                   {errors.totalItems && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.totalItems}</p>}
                 </div>
+              </div>
+
+              {/* Van request */}
+              <div>
+                <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                  Do you need a van for this delivery?
+                </label>
+                <p className="mb-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+                  We currently run bikes and cars. If your item needs a van, let us know and our team will arrange it.
+                </p>
+                <div className="flex gap-2">
+                  {([false, true] as const).map((val) => (
+                    <button
+                      key={String(val)}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, needsVanRequest: val }))}
+                      className={`rounded-xl border px-6 py-2.5 text-[12px] font-semibold transition-all ${
+                        form.needsVanRequest === val
+                          ? "border-[#3e0074] bg-[#3e0074]/[0.06] text-[#3e0074] dark:border-[#c084fc] dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
+                          : "border-zinc-200 text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+                      }`}
+                    >
+                      {val ? "Yes" : "No"}
+                    </button>
+                  ))}
+                </div>
+                {form.needsVanRequest && (
+                  <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                    <span className="material-symbols-outlined text-sm">local_shipping</span>
+                    Got it — our team will contact you to arrange this instead of taking payment automatically.
+                  </p>
+                )}
               </div>
 
               {/* Instructions */}

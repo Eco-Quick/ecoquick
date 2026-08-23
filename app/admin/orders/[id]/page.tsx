@@ -38,6 +38,7 @@ type Order = {
   picked_up_at: string | null;
   in_transit_at: string | null;
   delivered_at: string | null;
+  needs_van: boolean | null;
 };
 
 function formatStatus(s: string) {
@@ -146,6 +147,12 @@ export default async function AdminOrderDetailPage({
             {o.payment_status && (
               <span className="rounded bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
                 {o.payment_status}
+              </span>
+            )}
+            {o.needs_van && (
+              <span className="flex items-center gap-1 rounded bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                <span className="material-symbols-outlined text-sm">local_shipping</span>
+                Needs van — contact customer
               </span>
             )}
           </div>

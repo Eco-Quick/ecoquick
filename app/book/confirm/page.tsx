@@ -42,6 +42,7 @@ type DeliveryRequest = {
   recipientName: string; recipientPhone: string;
   packageCategory: string; categoryDetails: string; packageSize: string;
   weight: number; totalItems: number; handlingInstructions: string;
+  needsVanRequest: boolean;
 };
 
 export default function BookConfirmPage() {
@@ -51,7 +52,7 @@ export default function BookConfirmPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
-  const [step, setStep] = useState<"review" | "account" | "payment">("review");
+  const [step, setStep] = useState<"review" | "account" | "payment" | "coordination">("review");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   // Set once a guest finishes creating their account — flips the page out of the
@@ -135,6 +136,17 @@ export default function BookConfirmPage() {
 
   const distanceMiles = distance?.miles ?? 2; // Default 2 miles until resolved / if lookup fails
   const pricing = calculatePrice(distanceMiles);
+
+  // Fleet is bikes/cycles and cars only — anything beyond what those can
+  // carry still goes through (never turn an order away), but gets flagged
+  // for manual van arrangement instead of being silently promised. Triggered
+  // either by the customer explicitly saying so, or by size/weight heuristics
+  // as a safety net for anyone who didn't realize.
+  const VAN_WEIGHT_THRESHOLD_KG = 25;
+  const needsVan =
+    order.needsVanRequest === true ||
+    order.packageSize === "large" ||
+    Number(order.weight ?? 0) > VAN_WEIGHT_THRESHOLD_KG;
 
   function generateVerificationCode() {
     return String(Math.floor(1000 + Math.random() * 9000));
@@ -244,7 +256,8 @@ export default function BookConfirmPage() {
         .insert({
           customer_id: user.id,
           scheduling_type: order.deliveryType ?? "instant",
-          status: "pending_payment",
+          status: needsVan ? "pending" : "pending_payment",
+          needs_van: needsVan,
           payment_status: "pending",
           verification_code: generateVerificationCode(),
           pickup_address: order.pickupAddress ?? "",
@@ -288,9 +301,18 @@ export default function BookConfirmPage() {
           success: true,
           email: user.email,
           user_id: user.id,
-          metadata: { order_id: data.id, total_price: pricing.total },
+          metadata: { order_id: data.id, total_price: pricing.total, needs_van: needsVan },
         }),
       }).catch(() => {});
+
+      sessionStorage.removeItem("deliveryRequest");
+      setOrderId(data.id);
+
+      if (needsVan) {
+        // Skip automated payment entirely — this gets coordinated manually.
+        setStep("coordination");
+        return;
+      }
 
       const piRes = await fetch("/api/create-payment-intent", {
         method: "POST",
@@ -307,8 +329,6 @@ export default function BookConfirmPage() {
         throw new Error(piJson.error ?? "Could not start payment. Please try again.");
       }
 
-      sessionStorage.removeItem("deliveryRequest");
-      setOrderId(data.id);
       setClientSecret(piJson.clientSecret);
       setStep("payment");
     } catch (e: unknown) {
@@ -404,6 +424,14 @@ export default function BookConfirmPage() {
               {order.handlingInstructions && (
                 <p className="mt-3 text-[12px] italic text-zinc-400">&ldquo;{order.handlingInstructions}&rdquo;</p>
               )}
+              {needsVan && !isGuest && (
+                <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/20 dark:text-amber-400">
+                  <span className="material-symbols-outlined text-base">local_shipping</span>
+                  <span>
+                    This delivery needs a van. We&apos;ll contact you shortly to arrange it — no payment is taken now.
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Pricing — locked for guests until they create an account */}
@@ -466,9 +494,13 @@ export default function BookConfirmPage() {
                 className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
               >
                 {loading
-                  ? "Preparing payment…"
+                  ? needsVan
+                    ? "Submitting request…"
+                    : "Preparing payment…"
                   : isGuest
                   ? "Sign up to book your first order"
+                  : needsVan
+                  ? "Request this delivery"
                   : `Continue to payment · £${pricing.total.toFixed(2)}`}
               </button>
             </div>
@@ -588,6 +620,26 @@ export default function BookConfirmPage() {
                 amount={pricing.total}
                 onCancel={cancelPayment}
               />
+            </div>
+          )}
+
+          {step === "coordination" && (
+            <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl border border-zinc-200 bg-white px-8 py-14 text-center shadow-sm dark:border-zinc-800 dark:bg-[#0c0b14]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20">
+                <span className="material-symbols-outlined text-3xl text-amber-600">local_shipping</span>
+              </div>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">We&apos;ve got your request</h1>
+              <p className="max-w-sm font-secondary text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                This delivery needs a van, so our team will contact you shortly at{" "}
+                <strong className="text-zinc-900 dark:text-[#ede9f8]">{order.senderPhone}</strong> to confirm
+                pricing and schedule it. No payment has been taken yet.
+              </p>
+              <Link
+                href="/dashboard"
+                className="mt-2 rounded-xl bg-[#3e0074] px-8 py-3 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] dark:bg-[#5b21b6]"
+              >
+                Back to dashboard
+              </Link>
             </div>
           )}
         </div>
