@@ -15,6 +15,8 @@ interface ActiveOrder {
   delivery_city: string;
   delivery_lat: number | null;
   delivery_lng: number | null;
+  sender_name: string;
+  sender_phone: string;
   recipient_name: string;
   recipient_phone: string;
   product_category: string;
@@ -151,7 +153,7 @@ export default function DriverActiveDeliveryPage() {
     if (!user) return;
     const { data } = await supabase
       .from("delivery_orders")
-      .select("id, status, pickup_address, pickup_city, pickup_lat, pickup_lng, delivery_address, delivery_city, delivery_lat, delivery_lng, recipient_name, recipient_phone, product_category, package_size, weight, total_price, driver_instructions, scheduling_type, verification_code, assigned_at, picked_up_at, in_transit_at")
+      .select("id, status, pickup_address, pickup_city, pickup_lat, pickup_lng, delivery_address, delivery_city, delivery_lat, delivery_lng, sender_name, sender_phone, recipient_name, recipient_phone, product_category, package_size, weight, total_price, driver_instructions, scheduling_type, verification_code, assigned_at, picked_up_at, in_transit_at")
       .eq("driver_id", user.id)
       .in("status", ["assigned", "picked_up", "in_transit"])
       .order("assigned_at", { ascending: false })
@@ -272,6 +274,27 @@ export default function DriverActiveDeliveryPage() {
               </div>
             </div>
 
+            {/* Sender */}
+            <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20">
+                    <span className="material-symbols-outlined text-lg text-emerald-600">person</span>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-zinc-400">Sender (pickup)</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{order.sender_name}</p>
+                  </div>
+                </div>
+                <a
+                  href={`tel:${order.sender_phone}`}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
+                >
+                  <span className="material-symbols-outlined text-lg">call</span>
+                </a>
+              </div>
+            </div>
+
             {/* Recipient */}
             <div className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-[#0c0b14]">
               <div className="flex items-center justify-between">
@@ -280,7 +303,7 @@ export default function DriverActiveDeliveryPage() {
                     <span className="material-symbols-outlined text-lg text-zinc-500">person</span>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold text-zinc-400">Recipient</p>
+                    <p className="text-[11px] font-semibold text-zinc-400">Recipient (dropoff)</p>
                     <p className="text-sm font-bold text-zinc-900 dark:text-[#ede9f8]">{order.recipient_name}</p>
                   </div>
                 </div>

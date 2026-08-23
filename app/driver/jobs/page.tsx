@@ -60,7 +60,11 @@ export default function DriverJobsPage() {
       });
       if (!res.ok) {
         const body = await res.json();
-        if (body.error === "verification_required") { router.push("/verify"); return; }
+        if (body.error === "verification_required") {
+          setError("Verify your identity before accepting jobs — redirecting you now…");
+          setTimeout(() => router.push("/verify"), 1200);
+          return;
+        }
         if (body.error === "age_restricted") {
           setError("You must be 18+ with a verified ID to deliver this item.");
           setAccepting(null);
