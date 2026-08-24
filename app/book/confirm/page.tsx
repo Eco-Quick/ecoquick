@@ -24,13 +24,19 @@ const DEFAULT_BANDS: PricingBand[] = [
   { upTo: 8, price: 10.99, label: "6–8 miles" },
 ];
 
-function calculatePrice(distanceMiles: number, bands: PricingBand[]) {
+type Surcharge = { enabled: boolean; amount: number; reason: string | null };
+
+function calculatePrice(distanceMiles: number, bands: PricingBand[], surcharge: Surcharge | null) {
   const rounded = Math.round(distanceMiles * 10) / 10;
   const band = bands.find((b) => distanceMiles <= b.upTo) ?? bands[bands.length - 1];
+  const surchargeAmount = surcharge?.enabled ? Number(surcharge.amount) : 0;
   return {
     distanceMiles: rounded,
     bandLabel: band.label,
-    total: band.price,
+    basePrice: band.price,
+    surchargeAmount,
+    surchargeReason: surcharge?.reason ?? null,
+    total: band.price + surchargeAmount,
   };
 }
 
@@ -139,6 +145,7 @@ export default function BookConfirmPage() {
   const distanceMiles = distance?.miles ?? 2; // Default 2 miles until resolved / if lookup fails
 
   const [bands, setBands] = useState<PricingBand[]>(DEFAULT_BANDS);
+  const [surcharge, setSurcharge] = useState<Surcharge | null>(null);
   useEffect(() => {
     fetch("/api/pricing-bands")
       .then((r) => (r.ok ? r.json() : null))
@@ -152,11 +159,14 @@ export default function BookConfirmPage() {
             }))
           );
         }
+        if (data?.surcharge) {
+          setSurcharge(data.surcharge);
+        }
       })
       .catch(() => {});
   }, []);
 
-  const pricing = calculatePrice(distanceMiles, bands);
+  const pricing = calculatePrice(distanceMiles, bands, surcharge);
 
   // Fleet is bikes/cycles and cars only — anything beyond what those can
   // carry still goes through (never turn an order away), but gets flagged
@@ -303,10 +313,11 @@ export default function BookConfirmPage() {
           pickup_lng: distance?.pickupLng ?? null,
           delivery_lat: distance?.dropoffLat ?? null,
           delivery_lng: distance?.dropoffLng ?? null,
-          base_price: pricing.total,
+          base_price: pricing.basePrice,
           size_fee: 0,
           scheduling_fee: 0,
           discount_amount: 0,
+          surcharge_amount: pricing.surchargeAmount,
           total_price: pricing.total,
         })
         .select("id")
@@ -474,8 +485,14 @@ export default function BookConfirmPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
                     <span>Delivery fee ({pricing.bandLabel})</span>
-                    <span>£{pricing.total.toFixed(2)}</span>
+                    <span>£{pricing.basePrice.toFixed(2)}</span>
                   </div>
+                  {pricing.surchargeAmount > 0 && (
+                    <div className="flex justify-between text-amber-600 dark:text-amber-400">
+                      <span>{pricing.surchargeReason || "Surcharge"}</span>
+                      <span>+£{pricing.surchargeAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-[12px] text-zinc-400">
                     <span>
                       Distance: {pricing.distanceMiles} miles

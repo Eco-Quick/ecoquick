@@ -1,14 +1,15 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { PricingBandsEditor } from "./PricingBandsEditor";
+import { SurchargeToggle } from "./SurchargeToggle";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPricingPage() {
   const service = createServiceClient();
-  const { data: bands } = await service
-    .from("pricing_bands")
-    .select("id, label, up_to_miles, price")
-    .order("sort_order", { ascending: true });
+  const [bandsRes, surchargeRes] = await Promise.all([
+    service.from("pricing_bands").select("id, label, up_to_miles, price").order("sort_order", { ascending: true }),
+    service.from("pricing_surcharge").select("id, enabled, amount, reason, updated_at").limit(1).maybeSingle(),
+  ]);
 
   return (
     <div>
@@ -26,7 +27,10 @@ export default async function AdminPricingPage() {
         </p>
       </div>
 
-      <PricingBandsEditor bands={bands ?? []} />
+      <div className="space-y-6">
+        {surchargeRes.data && <SurchargeToggle surcharge={surchargeRes.data} />}
+        <PricingBandsEditor bands={bandsRes.data ?? []} />
+      </div>
     </div>
   );
 }
