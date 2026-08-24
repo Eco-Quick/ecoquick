@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PageTransition } from "@/components/PageTransition";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -90,6 +91,7 @@ export default function RootLayout({
       </head>
       <body className={`${raleway.variable} ${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
+          <PageViewTracker />
           <PageTransition>
             {children}
           </PageTransition>

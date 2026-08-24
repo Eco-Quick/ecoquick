@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logError } from "@/lib/error-log";
 
 // Straight-line distance between two UK postcodes, computed from free/keyless
 // postcodes.io centroid lookups — no Mapbox, no API key. Used to restore
@@ -79,7 +80,9 @@ export async function POST(request: Request) {
       dropoffLng: dropoffResult.longitude,
     });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error("[postcode-distance] lookup errored:", err);
+    await logError("postcode-distance", message, { pickup, dropoff });
     return NextResponse.json({ error: "Lookup errored" }, { status: 500 });
   }
 }

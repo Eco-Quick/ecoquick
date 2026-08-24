@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { logError } from "@/lib/error-log";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Payment intent creation error:", error);
     const message = error instanceof Error ? error.message : "Payment processing failed";
+    await logError("create-payment-intent", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

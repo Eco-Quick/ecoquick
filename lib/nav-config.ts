@@ -114,6 +114,12 @@ export const ADMIN_SIDEBAR_NAV: NavItem[] = [
     icon: "monitoring",
     match: (p) => p.startsWith("/admin/activity"),
   },
+  {
+    label: "System",
+    href: "/admin/system",
+    icon: "dns",
+    match: (p) => p.startsWith("/admin/system"),
+  },
 ];
 
 export const CUSTOMER_MOBILE_NAV: NavItem[] = [
