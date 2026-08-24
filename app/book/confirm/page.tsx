@@ -107,6 +107,7 @@ export default function BookConfirmPage() {
     pickupLng: number | null;
     dropoffLat: number | null;
     dropoffLng: number | null;
+    outOfRadius: boolean;
   } | null>(null);
   const [distanceLoading, setDistanceLoading] = useState(false);
 
@@ -131,6 +132,7 @@ export default function BookConfirmPage() {
           pickupLng: data.pickupLng,
           dropoffLat: data.dropoffLat,
           dropoffLng: data.dropoffLng,
+          outOfRadius: !!data.outOfRadius,
         });
       })
       .catch(() => {})
@@ -178,6 +180,14 @@ export default function BookConfirmPage() {
     order.needsVanRequest === true ||
     order.packageSize === "large" ||
     Number(order.weight ?? 0) > VAN_WEIGHT_THRESHOLD_KG;
+
+  // Service area is currently an 8-mile radius of Kingston upon Thames.
+  // Beyond that we still capture the order (never turn a lead away) but
+  // route it to manual coordination instead of auto-confirming/charging —
+  // also doubles as a demand signal for where to expand next.
+  const outOfRadius = distance?.outOfRadius === true;
+
+  const needsCoordination = needsVan || outOfRadius;
 
   function generateVerificationCode() {
     return String(Math.floor(1000 + Math.random() * 9000));
@@ -287,8 +297,9 @@ export default function BookConfirmPage() {
         .insert({
           customer_id: user.id,
           scheduling_type: order.deliveryType ?? "instant",
-          status: needsVan ? "pending" : "pending_payment",
+          status: needsCoordination ? "pending" : "pending_payment",
           needs_van: needsVan,
+          out_of_radius: outOfRadius,
           payment_status: "pending",
           verification_code: generateVerificationCode(),
           pickup_address: order.pickupAddress ?? "",
@@ -333,14 +344,14 @@ export default function BookConfirmPage() {
           success: true,
           email: user.email,
           user_id: user.id,
-          metadata: { order_id: data.id, total_price: pricing.total, needs_van: needsVan },
+          metadata: { order_id: data.id, total_price: pricing.total, needs_van: needsVan, out_of_radius: outOfRadius },
         }),
       }).catch(() => {});
 
       sessionStorage.removeItem("deliveryRequest");
       setOrderId(data.id);
 
-      if (needsVan) {
+      if (needsCoordination) {
         // Skip automated payment entirely — this gets coordinated manually.
         setStep("coordination");
         return;
@@ -464,6 +475,15 @@ export default function BookConfirmPage() {
                   </span>
                 </div>
               )}
+              {outOfRadius && !isGuest && (
+                <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/20 dark:text-amber-400">
+                  <span className="material-symbols-outlined text-base">location_off</span>
+                  <span>
+                    We currently operate within an 8-mile radius of Kingston upon Thames, but we&apos;re expanding
+                    soon. Our team will contact you to see if any adjustments can be made — no payment is taken now.
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Pricing — locked for guests until they create an account */}
@@ -532,12 +552,12 @@ export default function BookConfirmPage() {
                 className="rounded-xl bg-[#3e0074] px-10 py-4 text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(63,0,117,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(63,0,117,0.4)] active:scale-[0.98] disabled:opacity-60 dark:bg-[#5b21b6]"
               >
                 {loading
-                  ? needsVan
+                  ? needsCoordination
                     ? "Submitting request…"
                     : "Preparing payment…"
                   : isGuest
                   ? "Sign up to book your first order"
-                  : needsVan
+                  : needsCoordination
                   ? "Request this delivery"
                   : `Continue to payment · £${pricing.total.toFixed(2)}`}
               </button>
@@ -668,7 +688,12 @@ export default function BookConfirmPage() {
               </div>
               <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#ede9f8]">We&apos;ve got your request</h1>
               <p className="max-w-sm font-secondary text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
-                This delivery needs a van, so our team will contact you shortly at{" "}
+                {needsVan && outOfRadius
+                  ? "This delivery needs a van and is outside our usual 8-mile Kingston upon Thames radius, so"
+                  : needsVan
+                  ? "This delivery needs a van, so"
+                  : "This delivery is outside our current 8-mile Kingston upon Thames radius, so"}{" "}
+                our team will contact you shortly at{" "}
                 <strong className="text-zinc-900 dark:text-[#ede9f8]">{order.senderPhone}</strong> to confirm
                 pricing and schedule it. No payment has been taken yet.
               </p>

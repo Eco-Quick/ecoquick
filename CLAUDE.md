@@ -165,6 +165,15 @@ Server-rendered admin area under `/admin/*`. All pages are React Server Componen
 
 Admin 2FA (`/verify-admin`) attempts are deliberately **not** tracked here — that's the admin's own access to this dashboard, not customer-facing activity.
 
+### Manual coordination orders (van / out-of-radius)
+
+Two conditions route a booking to manual coordination instead of automated Stripe payment — the order is still captured (never turned away), but `status` is set to `pending` (not `pending_payment`), no payment intent is created, and the customer sees a "we'll contact you" screen instead of a payment form. Computed in `app/book/confirm/page.tsx` as `needsCoordination = needsVan || outOfRadius`:
+
+- **`needs_van`** — fleet is bikes/cycles and cars only. Triggered by the customer explicitly answering "Yes" to the parcel step's "Do you need a van?" question, or automatically if `package_size === "large"` or weight > 25kg (safety net).
+- **`out_of_radius`** — service area is an 8-mile radius of Kingston upon Thames (`HUB_LAT`/`HUB_LNG` in `app/api/postcode-distance/route.ts`, KT1 1EU). Triggered if pickup **or** dropoff is beyond that from the hub (not the pickup↔dropoff distance — a different check from the pricing distance). Deliberately not blocked at checkout — captured as a demand signal for where to expand next.
+
+Both flags are booleans on `delivery_orders`, both fire a distinct WhatsApp alert (`app/api/track/event/route.ts`), and both show as amber badges on `/admin/orders`, `/admin/orders/[id]`, and `/admin/activity`. An order can have both flags at once (shown combined in the customer-facing copy and the alert).
+
 **API routes**
 - `POST /api/admin/verify-user` — approve/reject pending verification (existing)
 - `POST /api/admin/cancel-order` — set status='cancelled', free driver slot, notify both parties

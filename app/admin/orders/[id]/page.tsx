@@ -41,6 +41,7 @@ type Order = {
   in_transit_at: string | null;
   delivered_at: string | null;
   needs_van: boolean | null;
+  out_of_radius: boolean | null;
   price_adjustment_reason: string | null;
   price_adjusted_at: string | null;
 };
@@ -164,6 +165,12 @@ export default async function AdminOrderDetailPage({
               <span className="flex items-center gap-1 rounded bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
                 <span className="material-symbols-outlined text-sm">local_shipping</span>
                 Needs van — contact customer
+              </span>
+            )}
+            {o.out_of_radius && (
+              <span className="flex items-center gap-1 rounded bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                <span className="material-symbols-outlined text-sm">location_off</span>
+                Out of radius — contact customer
               </span>
             )}
           </div>

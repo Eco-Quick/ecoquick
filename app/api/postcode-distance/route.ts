@@ -21,6 +21,13 @@ type PostcodesIoResult = {
   result: { postcode: string; latitude: number; longitude: number } | null;
 };
 
+// Kingston upon Thames town centre (KT1 1EU) — the service hub. Anything
+// with pickup or dropoff beyond this radius is flagged for manual
+// coordination instead of being auto-confirmed/charged.
+const HUB_LAT = 51.40772;
+const HUB_LNG = -0.305917;
+const SERVICE_RADIUS_MILES = 8;
+
 // UK postcodes are outward-code + single-space + 3-character inward code.
 // Users type spacing inconsistently (no space, double space, misplaced
 // space) — strip all whitespace and re-insert it in the correct place so
@@ -72,12 +79,19 @@ export async function POST(request: Request) {
       dropoffResult.longitude
     );
 
+    const pickupDistanceFromHub = haversineDistanceMiles(HUB_LAT, HUB_LNG, pickupResult.latitude, pickupResult.longitude);
+    const dropoffDistanceFromHub = haversineDistanceMiles(HUB_LAT, HUB_LNG, dropoffResult.latitude, dropoffResult.longitude);
+    const outOfRadius = pickupDistanceFromHub > SERVICE_RADIUS_MILES || dropoffDistanceFromHub > SERVICE_RADIUS_MILES;
+
     return NextResponse.json({
       distanceMiles,
       pickupLat: pickupResult.latitude,
       pickupLng: pickupResult.longitude,
       dropoffLat: dropoffResult.latitude,
       dropoffLng: dropoffResult.longitude,
+      pickupDistanceFromHub,
+      dropoffDistanceFromHub,
+      outOfRadius,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

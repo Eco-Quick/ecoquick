@@ -53,7 +53,8 @@ function eventDetail(e: SecurityEvent): string | null {
   if (e.event_type === "order_placed") {
     const price = e.metadata?.total_price ? `£${e.metadata.total_price}` : null;
     const van = e.metadata?.needs_van ? "🚐 Van needed" : null;
-    return [price, van].filter(Boolean).join(" · ") || null;
+    const outOfRadius = e.metadata?.out_of_radius ? "📍 Out of radius" : null;
+    return [price, van, outOfRadius].filter(Boolean).join(" · ") || null;
   }
   if (e.event_type === "signup" && e.metadata?.role) {
     return String(e.metadata.role) + (e.metadata.via ? ` · ${e.metadata.via}` : "");

@@ -15,6 +15,7 @@ type OrderRow = {
   customer_id: string | null;
   driver_id: string | null;
   needs_van: boolean | null;
+  out_of_radius: boolean | null;
 };
 
 const ACTIVE_STATUSES = ["confirmed", "assigned", "picked_up", "in_transit"];
@@ -56,7 +57,7 @@ export default async function AdminOrdersPage({
   let req = service
     .from("delivery_orders")
     .select(
-      "id, status, scheduling_type, total_price, created_at, pickup_city, delivery_city, delivery_address, customer_id, driver_id, needs_van"
+      "id, status, scheduling_type, total_price, created_at, pickup_city, delivery_city, delivery_address, customer_id, driver_id, needs_van, out_of_radius"
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -189,6 +190,12 @@ export default async function AdminOrdersPage({
                             Van needed
                           </span>
                         )}
+                        {order.out_of_radius && (
+                          <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                            <span className="material-symbols-outlined text-[12px]">location_off</span>
+                            Out of radius
+                          </span>
+                        )}
                       </p>
                     </div>
                     <div className="col-span-2">
@@ -248,6 +255,12 @@ export default async function AdminOrdersPage({
                   <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
                     <span className="material-symbols-outlined text-[12px]">local_shipping</span>
                     Van needed
+                  </span>
+                )}
+                {order.out_of_radius && (
+                  <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                    <span className="material-symbols-outlined text-[12px]">location_off</span>
+                    Out of radius
                   </span>
                 )}
                 <p className="mt-1 font-bold text-primary">

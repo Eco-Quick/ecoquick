@@ -10,12 +10,22 @@ const ALERT_MESSAGES: Record<EventType, (body: EventBody) => string> = {
       ? `EcoQuick: login by ${b.email ?? "unknown"}`
       : `EcoQuick: FAILED login attempt for ${b.email ?? "unknown"}`,
   signup: (b) => `EcoQuick: new signup — ${b.email ?? "unknown"} (${b.metadata?.role ?? "customer"})`,
-  order_placed: (b) =>
-    b.metadata?.needs_van
-      ? `EcoQuick: 🚐 VAN NEEDED — ${b.email ?? "a customer"} booked an order too large for bike/car. Contact them to arrange (order ${b.metadata?.order_id ?? "?"}).`
-      : `EcoQuick: new order placed by ${b.email ?? "a customer"}${
-          b.metadata?.total_price ? ` — £${b.metadata.total_price}` : ""
-        }`,
+  order_placed: (b) => {
+    const van = b.metadata?.needs_van;
+    const outOfRadius = b.metadata?.out_of_radius;
+    if (van && outOfRadius) {
+      return `EcoQuick: 🚐📍 VAN + OUT OF RADIUS — ${b.email ?? "a customer"} booked an order needing a van and outside the 8-mile Kingston radius. Contact them to arrange (order ${b.metadata?.order_id ?? "?"}).`;
+    }
+    if (van) {
+      return `EcoQuick: 🚐 VAN NEEDED — ${b.email ?? "a customer"} booked an order too large for bike/car. Contact them to arrange (order ${b.metadata?.order_id ?? "?"}).`;
+    }
+    if (outOfRadius) {
+      return `EcoQuick: 📍 OUT OF RADIUS — ${b.email ?? "a customer"} booked outside the 8-mile Kingston upon Thames radius. Contact them to see if it can be arranged (order ${b.metadata?.order_id ?? "?"}).`;
+    }
+    return `EcoQuick: new order placed by ${b.email ?? "a customer"}${
+      b.metadata?.total_price ? ` — £${b.metadata.total_price}` : ""
+    }`;
+  },
 };
 
 type EventBody = {
