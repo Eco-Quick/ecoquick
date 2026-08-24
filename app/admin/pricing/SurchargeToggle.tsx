@@ -51,7 +51,7 @@ export function SurchargeToggle({ surcharge }: { surcharge: Surcharge }) {
         <div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-primary">Surcharge</h2>
           <p className="mt-1 text-[12px] text-slate-500 dark:text-zinc-400">
-            Flat amount added on top of every new booking — e.g. for bad weather.
+            Flat amount added on top of every new booking.
           </p>
         </div>
         <button
@@ -95,7 +95,7 @@ export function SurchargeToggle({ surcharge }: { surcharge: Surcharge }) {
           </label>
           <input
             type="text"
-            placeholder="e.g. Bad weather surcharge"
+            placeholder="e.g. Surcharge"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 dark:border-zinc-700 dark:bg-[#050507] dark:text-[#ede9f8]"
