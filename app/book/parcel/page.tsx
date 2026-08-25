@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookingStepper } from "../../../components/book/BookingStepper";
@@ -38,6 +38,10 @@ export default function BookParcelPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  // Fires once per visit so admin has visibility even if the customer never
+  // finishes the booking — otherwise a "needs van" signal only exists once
+  // the order is actually submitted, and abandoned interest is invisible.
+  const vanInterestTracked = useRef(false);
 
   useEffect(() => {
     try {
@@ -230,11 +234,12 @@ export default function BookParcelPage() {
               </div>
 
               {/* Van request */}
-              <div>
-                <label className="mb-1.5 block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+              <div className="rounded-xl border-2 border-[#3e0074]/20 bg-[#3e0074]/[0.04] p-4 dark:border-[#c084fc]/30 dark:bg-[#c084fc]/[0.06]">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[12px] font-bold text-[#3e0074] dark:text-[#c084fc]">
+                  <span className="material-symbols-outlined text-base">local_shipping</span>
                   Do you need a van for this delivery?
                 </label>
-                <p className="mb-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+                <p className="mb-3 text-[11px] text-zinc-500 dark:text-zinc-400">
                   We currently run bikes and cars. If your item needs a van, let us know and our team will arrange it.
                 </p>
                 <div className="flex gap-2">
@@ -242,11 +247,34 @@ export default function BookParcelPage() {
                     <button
                       key={String(val)}
                       type="button"
-                      onClick={() => setForm((f) => ({ ...f, needsVanRequest: val }))}
+                      onClick={() => {
+                        setForm((f) => ({ ...f, needsVanRequest: val }));
+                        if (val && !vanInterestTracked.current) {
+                          vanInterestTracked.current = true;
+                          let sender: { senderName?: string; senderPhone?: string } = {};
+                          try {
+                            const saved = sessionStorage.getItem("deliveryRequest");
+                            if (saved) sender = JSON.parse(saved);
+                          } catch {}
+                          fetch("/api/track/event", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              event_type: "van_interest",
+                              email: user?.email ?? null,
+                              user_id: user?.id,
+                              metadata: {
+                                sender_name: sender.senderName ?? null,
+                                sender_phone: sender.senderPhone ?? null,
+                              },
+                            }),
+                          }).catch(() => {});
+                        }
+                      }}
                       className={`rounded-xl border px-6 py-2.5 text-[12px] font-semibold transition-all ${
                         form.needsVanRequest === val
-                          ? "border-[#3e0074] bg-[#3e0074]/[0.06] text-[#3e0074] dark:border-[#c084fc] dark:bg-[#c084fc]/10 dark:text-[#c084fc]"
-                          : "border-zinc-200 text-zinc-500 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600"
+                          ? "border-[#3e0074] bg-[#3e0074] text-white dark:border-[#c084fc] dark:bg-[#c084fc] dark:text-[#1a0b2e]"
+                          : "border-[#3e0074]/30 bg-white text-[#3e0074] hover:border-[#3e0074] dark:border-[#c084fc]/40 dark:bg-transparent dark:text-[#c084fc] dark:hover:border-[#c084fc]"
                       }`}
                     >
                       {val ? "Yes" : "No"}

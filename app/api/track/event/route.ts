@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendWhatsAppAlert } from "@/lib/notify/whatsapp";
 
-type EventType = "login_attempt" | "signup" | "order_placed";
+type EventType = "login_attempt" | "signup" | "order_placed" | "van_interest";
 
 const ALERT_MESSAGES: Record<EventType, (body: EventBody) => string> = {
   login_attempt: (b) =>
@@ -26,6 +26,12 @@ const ALERT_MESSAGES: Record<EventType, (body: EventBody) => string> = {
       b.metadata?.total_price ? ` — £${b.metadata.total_price}` : ""
     }`;
   },
+  van_interest: (b) => {
+    const name = b.metadata?.sender_name;
+    const phone = b.metadata?.sender_phone;
+    const who = [name, phone].filter(Boolean).join(" · ") || b.email || "a customer";
+    return `EcoQuick: 🚐 Van interest — ${who} is filling out a delivery that needs a van (not submitted yet). May still complete it or drop off — check /admin/activity, or reach out now if you want to catch them early.`;
+  },
 };
 
 type EventBody = {
@@ -44,7 +50,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (!body.event_type || !["login_attempt", "signup", "order_placed"].includes(body.event_type)) {
+  if (!body.event_type || !["login_attempt", "signup", "order_placed", "van_interest"].includes(body.event_type)) {
     return NextResponse.json({ error: "Invalid event_type" }, { status: 400 });
   }
 

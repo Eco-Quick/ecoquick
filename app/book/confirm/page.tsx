@@ -72,6 +72,7 @@ export default function BookConfirmPage() {
   const [acctEmail, setAcctEmail] = useState("");
   const [acctPhone, setAcctPhone] = useState("");
   const [acctPassword, setAcctPassword] = useState("");
+  const [showAcctPassword, setShowAcctPassword] = useState(false);
   const [acctError, setAcctError] = useState<string | null>(null);
   const [acctLoading, setAcctLoading] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
@@ -612,14 +613,28 @@ export default function BookConfirmPage() {
 
                 <div>
                   <label className="mb-1.5 block text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Password</label>
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="Min. 8 chars, letters + numbers"
-                    value={acctPassword}
-                    onChange={(e) => setAcctPassword(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showAcctPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="Min. 8 chars, letters + numbers"
+                      value={acctPassword}
+                      onChange={(e) => setAcctPassword(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3.5 pr-11 text-base text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-[#3e0074] focus:outline-none focus:ring-2 focus:ring-[#3e0074]/10 dark:border-zinc-700 dark:bg-[#0c0b14] dark:text-[#ede9f8]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAcctPassword((prev) => !prev)}
+                      aria-label={showAcctPassword ? "Hide password" : "Show password"}
+                      title={showAcctPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showAcctPassword}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    >
+                      <span className="material-symbols-outlined text-xl">
+                        {showAcctPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 {acctError && (

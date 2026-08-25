@@ -2,7 +2,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
 
-type EventType = "login_attempt" | "signup" | "order_placed";
+type EventType = "login_attempt" | "signup" | "order_placed" | "van_interest";
 
 type SecurityEvent = {
   id: string;
@@ -28,6 +28,7 @@ const EVENT_META: Record<EventType, { label: string; icon: string }> = {
   login_attempt: { label: "Login attempt", icon: "login" },
   signup: { label: "New signup", icon: "person_add" },
   order_placed: { label: "Order placed", icon: "local_shipping" },
+  van_interest: { label: "Van interest (not submitted)", icon: "pending_actions" },
 };
 
 function StatusPill({ success }: { success: boolean | null }) {
@@ -58,6 +59,10 @@ function eventDetail(e: SecurityEvent): string | null {
   }
   if (e.event_type === "signup" && e.metadata?.role) {
     return String(e.metadata.role) + (e.metadata.via ? ` · ${e.metadata.via}` : "");
+  }
+  if (e.event_type === "van_interest") {
+    const parts = [e.metadata?.sender_name, e.metadata?.sender_phone].filter(Boolean);
+    return parts.length ? parts.join(" · ") : null;
   }
   return null;
 }
