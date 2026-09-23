@@ -16,10 +16,16 @@ export async function sendWhatsAppAlert(text: string): Promise<void> {
 
   try {
     const res = await fetch(url);
-    if (!res.ok) {
-      const body = await res.text();
-      console.error("[whatsapp] CallMeBot request failed:", res.status, body);
-      await logError("whatsapp-alert", `CallMeBot returned ${res.status}: ${body}`);
+    const body = await res.text();
+
+    // CallMeBot returns non-error-looking HTTP statuses (e.g. 208) even when
+    // the message was NOT actually delivered — e.g. the bot being paused.
+    // A real success always contains "Message queued"; anything else is a
+    // silent failure unless we check the body ourselves.
+    const delivered = res.ok && body.includes("Message queued");
+    if (!delivered) {
+      console.error("[whatsapp] CallMeBot did not deliver:", res.status, body);
+      await logError("whatsapp-alert", `CallMeBot returned ${res.status} (not delivered): ${body.slice(0, 500)}`);
     }
   } catch (err) {
     console.error("[whatsapp] CallMeBot request errored:", err);
